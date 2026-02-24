@@ -2,10 +2,25 @@
 
 ## Ambientes
 
-| Ambiente | Container Proxmox | Branch | URL |
-|----------|------------------|--------|-----|
-| Produção | `backoffice-main` | `main` | _a definir_ |
-| Desenvolvimento | `backoffice-dev` | `development` | _a definir_ |
+| Ambiente | Container Proxmox | Branch | URL | IP (interno) |
+|----------|------------------|--------|-----|--------------|
+| Produção | `backoffice-main` | `main` | https://backoffice.erencio.com | `192.168.1.90` |
+| Desenvolvimento | `backoffice-dev` | `development` | https://backoffice--dev.erencio.com | `192.168.1.92` |
+
+---
+
+## Infraestrutura — Cloudflare Tunnel
+
+O acesso externo (SSH e HTTP) é feito via **Cloudflare Tunnel**, sem expor portas
+diretamente na internet. Cada container tem uma rota configurada no painel Cloudflare:
+
+| Domínio | Caminho | Serviço interno |
+|---------|---------|-----------------|
+| `backoffice.erencio.com` | `^/ssh` | `ssh://192.168.1.90:22` |
+| `backoffice--dev.erencio.com` | `^/ssh` | `ssh://192.168.1.92:22` |
+
+> O GitHub Actions acessa os containers via SSH através do Cloudflare Tunnel,
+> usando os hostnames acima como `PROD_SSH_HOST` e `DEV_SSH_HOST`.
 
 ---
 
@@ -15,16 +30,28 @@
 
 Configure estes secrets em **Settings → Secrets and variables → Actions** no repositório:
 
-| Secret | Descrição |
-|--------|-----------|
-| `PROD_SSH_HOST` | IP ou hostname do container `backoffice-main` no Proxmox |
-| `PROD_SSH_USER` | Usuário SSH (ex: `ubuntu` ou `root`) |
-| `PROD_SSH_KEY` | Chave SSH privada (ED25519 recomendado) |
-| `DEV_SSH_HOST` | IP ou hostname do container `backoffice-dev` no Proxmox |
-| `DEV_SSH_USER` | Usuário SSH |
-| `DEV_SSH_KEY` | Chave SSH privada |
+### Secrets
+
+| Secret | Valor | Descrição |
+|--------|-------|-----------|
+| `PROD_SSH_HOST` | `backoffice.erencio.com/ssh` | Hostname do tunnel Cloudflare → produção |
+| `PROD_SSH_USER` | `root` | Usuário SSH no container `backoffice-main` |
+| `PROD_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice-main` |
+| `DEV_SSH_HOST` | `backoffice--dev.erencio.com/ssh` | Hostname do tunnel Cloudflare → desenvolvimento |
+| `DEV_SSH_USER` | `root` | Usuário SSH no container `backoffice-dev` |
+| `DEV_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice-dev` |
+
+> ⚠️ **As chaves SSH privadas nunca devem ser commitadas no repositório.** Elas existem
+> apenas como GitHub Secrets.
 
 > O `GITHUB_TOKEN` é gerado automaticamente pelo GitHub Actions — não precisa ser configurado manualmente. Ele é usado para publicar imagens no GHCR.
+
+### Variables (não são secrets)
+
+| Variable | Valor |
+|----------|-------|
+| `PROD_SERVER_URL` | `https://backoffice.erencio.com` |
+| `DEV_SERVER_URL` | `https://backoffice--dev.erencio.com` |
 
 ### Preparar os Containers Proxmox
 
@@ -46,7 +73,7 @@ Em cada container, você precisa ter:
 
 ```bash
 # Produção (/opt/backoffice/.env em backoffice-main)
-SERVER_URL=https://seu-dominio.com
+SERVER_URL=https://backoffice.erencio.com
 APP_SECRET=<string_aleatoria_longa>
 PG_DATABASE_PASSWORD=<senha_segura>
 
@@ -55,6 +82,17 @@ IS_MULTIWORKSPACE_ENABLED=true
 
 # Tag da imagem — atualizada automaticamente pelo CI/CD
 TAG=ghcr.io/marneierencio/backoffice:latest
+```
+
+```bash
+# Desenvolvimento (/opt/backoffice/.env em backoffice-dev)
+SERVER_URL=https://backoffice--dev.erencio.com
+APP_SECRET=<string_aleatoria_diferente>
+PG_DATABASE_PASSWORD=<senha_segura>
+
+IS_MULTIWORKSPACE_ENABLED=true
+
+TAG=ghcr.io/marneierencio/backoffice:development
 ```
 
 ---
@@ -83,8 +121,9 @@ Mesmo fluxo, mas com a tag `development` e apontando para `backoffice-dev`.
 ## Deploy Manual (Emergência)
 
 ```bash
-# Conectar ao container de produção
-ssh $PROD_SSH_USER@$PROD_SSH_HOST
+# Conectar ao container de produção via Cloudflare Tunnel
+# (requer cloudflared instalado localmente)
+ssh root@backoffice.erencio.com
 
 # Dentro do container, no diretório /opt/backoffice/
 cd /opt/backoffice

@@ -6,20 +6,28 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 
 ```
 ┌─────────────────────────────────────────────────┐
-│              Proxmox (Self-Hosted)               │
+│         Internet (Cloudflare Tunnel)             │
 │                                                  │
-│  ┌─────────────────────┐  ┌───────────────────┐ │
-│  │  backoffice-main    │  │  backoffice-dev   │ │
-│  │  (Produção)         │  │  (Desenvolvimento)│ │
-│  │  branch: main       │  │  branch: develop. │ │
-│  │                     │  │                   │ │
-│  │  ┌───────────────┐  │  │  ┌─────────────┐ │ │
-│  │  │  twenty-server│  │  │  │twenty-server│ │ │
-│  │  │  twenty-worker│  │  │  │twenty-worker│ │ │
-│  │  │  postgres     │  │  │  │postgres     │ │ │
-│  │  │  redis        │  │  │  │redis        │ │ │
-│  │  └───────────────┘  │  │  └─────────────┘ │ │
-│  └─────────────────────┘  └───────────────────┘ │
+│  backoffice.erencio.com                          │
+│  backoffice--dev.erencio.com                     │
+└──────────────────┬──────────────────────────────┘
+                   │
+┌──────────────────┴──────────────────────────────┐
+│                Proxmox (Self-Hosted)             │
+│                                                  │
+│  ┌──────────────────────┐  ┌──────────────────┐ │
+│  │  backoffice-main     │  │  backoffice-dev  │ │
+│  │  192.168.1.90        │  │  192.168.1.92    │ │
+│  │  (Produção)          │  │  (Desenvolv.)    │ │
+│  │  branch: main        │  │  branch: dev.    │ │
+│  │                      │  │                  │ │
+│  │  ┌────────────────┐  │  │  ┌────────────┐ │ │
+│  │  │  twenty-server │  │  │  │twenty-serv │ │ │
+│  │  │  twenty-worker │  │  │  │twenty-work │ │ │
+│  │  │  postgres      │  │  │  │postgres    │ │ │
+│  │  │  redis         │  │  │  │redis       │ │ │
+│  │  └────────────────┘  │  │  └────────────┘ │ │
+│  └──────────────────────┘  └──────────────────┘ │
 └─────────────────────────────────────────────────┘
 ```
 

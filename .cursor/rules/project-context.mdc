@@ -23,8 +23,8 @@ the same running instance. Do NOT suggest creating separate deployments per clie
 
 | Environment | Branch | Container (Proxmox) | URL |
 |-------------|--------|---------------------|-----|
-| Production | `main` | `backoffice-main` | _configure in docs/DEPLOYMENT.md_ |
-| Development | `development` | `backoffice-dev` | _configure in docs/DEPLOYMENT.md_ |
+| Production | `main` | `backoffice-main` (192.168.1.90) | https://backoffice.erencio.com |
+| Development | `development` | `backoffice-dev` (192.168.1.92) | https://backoffice--dev.erencio.com |
 
 ## Branch Strategy
 
