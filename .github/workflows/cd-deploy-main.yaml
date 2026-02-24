@@ -80,41 +80,84 @@ jobs:
             echo "✓ Backup criado: ${BACKUP_FILE}"
             # Manter apenas os últimos 5 backups
             ls -t /opt/backoffice/backups/*.sql | tail -n +6 | xargs rm -f 2>/dev/null || true
-
+      
+      - name: Instalar cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o /usr/local/bin/cloudflared
+          chmod +x /usr/local/bin/cloudflared
+      
+      - name: Configurar SSH com Cloudflare ProxyCommand
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat >> ~/.ssh/config <<EOF
+          Host backoffice.erencio.com
+            ProxyCommand cloudflared access ssh --hostname %h
+            User root
+            IdentityFile ~/.ssh/id_ed25519
+            StrictHostKeyChecking no
+          EOF
+      
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_SSH_HOST }}
-          username: ${{ secrets.PROD_SSH_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          script: |
+        run: |
+          ssh root@backoffice.erencio.com << 'ENDSSH'
             set -e
             cd /opt/backoffice
 
             # Autenticar no GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | \
               docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
+            
             # Pull nova imagem
             docker pull ghcr.io/${{ github.repository }}:main-${{ github.sha }}
-
+            
             # Atualizar tag no .env
             sed -i "s|^TAG=.*|TAG=ghcr.io/${{ github.repository }}:main-${{ github.sha }}|" .env
 
             # Reiniciar apenas server e worker (preservando db e redis)
             docker compose up -d --no-deps server worker
+          ENDSSH
+      
+      # - name: Deploy via SSH
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.PROD_SSH_HOST }}
+      #     username: ${{ secrets.PROD_SSH_USER }}
+      #     key: ${{ secrets.PROD_SSH_KEY }}
+      #     port: 22
+      #     proxy_host: ${{ secrets.PROD_SSH_HOST }}
+      #     proxy_port: 443
+      #     use_insecure_cipher: false
+      #     script: |
+      #       set -e
+      #       cd /opt/backoffice
 
-            # Aguardar healthcheck
-            echo "Aguardando servidor inicializar..."
-            for i in $(seq 1 24); do
-              if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
-                echo "✓ Servidor saudável após ${i}x5s"
-                exit 0
-              fi
-              echo "Tentativa $i/24..."
-              sleep 5
-            done
+      #       # Autenticar no GHCR
+      #       echo "${{ secrets.GITHUB_TOKEN }}" | \
+      #         docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            echo "✗ Servidor não respondeu após 2 minutos — verificar logs"
-            docker compose logs --tail=50 server
-            exit 1
+      #       # Pull nova imagem
+      #       docker pull ghcr.io/${{ github.repository }}:main-${{ github.sha }}
+
+      #       # Atualizar tag no .env
+      #       sed -i "s|^TAG=.*|TAG=ghcr.io/${{ github.repository }}:main-${{ github.sha }}|" .env
+
+      #       # Reiniciar apenas server e worker (preservando db e redis)
+      #       docker compose up -d --no-deps server worker
+
+      #       # Aguardar healthcheck
+      #       echo "Aguardando servidor inicializar..."
+      #       for i in $(seq 1 24); do
+      #         if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
+      #           echo "✓ Servidor saudável após ${i}x5s"
+      #           exit 0
+      #         fi
+      #         echo "Tentativa $i/24..."
+      #         sleep 5
+      #       done
+
+      #       echo "✗ Servidor não respondeu após 2 minutos — verificar logs"
+      #       docker compose logs --tail=50 server
+      #       exit 1
