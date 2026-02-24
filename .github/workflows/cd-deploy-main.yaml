@@ -1,22 +1,120 @@
-name: CD deploy main
+name: CD Deploy Production (main)
 
 permissions:
   contents: read
+  packages: write
 
 on:
   push:
     branches:
       - main
 
+concurrency:
+  group: cd-deploy-main
+  cancel-in-progress: false  # produção nunca cancela, aguarda a vez
+
 jobs:
-  deploy-main:
-    timeout-minutes: 3
-    runs-on: depot-ubuntu-24.04
+  build-and-push:
+    name: Build & Publish Docker image
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    outputs:
+      image_sha_tag: ghcr.io/${{ github.repository }}:main-${{ github.sha }}
     steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          token: ${{ secrets.TWENTY_INFRA_TOKEN }}
-          repository: twentyhq/twenty-infra
-          event-type: auto-deploy-main
-          client-payload: '{"github": ${{ toJson(github) }}}' # Passes the entire github context to the downstream workflow
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=main-,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/twenty-docker/twenty/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            REACT_APP_SERVER_BASE_URL=${{ vars.PROD_SERVER_URL }}
+
+  deploy:
+    name: Deploy to backoffice-main (produção)
+    needs: build-and-push
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Backup do banco de dados antes do deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/backoffice
+            BACKUP_FILE="backup-pre-deploy-$(date +%Y%m%d-%H%M%S).sql"
+            docker compose exec -T db \
+              pg_dump -U postgres default > "/opt/backoffice/backups/${BACKUP_FILE}" 2>/dev/null || \
+              (mkdir -p /opt/backoffice/backups && \
+               docker compose exec -T db pg_dump -U postgres default > "/opt/backoffice/backups/${BACKUP_FILE}")
+            echo "✓ Backup criado: ${BACKUP_FILE}"
+            # Manter apenas os últimos 5 backups
+            ls -t /opt/backoffice/backups/*.sql | tail -n +6 | xargs rm -f 2>/dev/null || true
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/backoffice
+
+            # Autenticar no GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | \
+              docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull nova imagem
+            docker pull ghcr.io/${{ github.repository }}:main-${{ github.sha }}
+
+            # Atualizar tag no .env
+            sed -i "s|^TAG=.*|TAG=ghcr.io/${{ github.repository }}:main-${{ github.sha }}|" .env
+
+            # Reiniciar apenas server e worker (preservando db e redis)
+            docker compose up -d --no-deps server worker
+
+            # Aguardar healthcheck
+            echo "Aguardando servidor inicializar..."
+            for i in $(seq 1 24); do
+              if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
+                echo "✓ Servidor saudável após ${i}x5s"
+                exit 0
+              fi
+              echo "Tentativa $i/24..."
+              sleep 5
+            done
+
+            echo "✗ Servidor não respondeu após 2 minutos — verificar logs"
+            docker compose logs --tail=50 server
+            exit 1

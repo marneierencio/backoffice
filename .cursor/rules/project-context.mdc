@@ -1,0 +1,71 @@
+---
+description: Erencio.com Backoffice — project identity, deployment strategy, and customization guidelines
+globs: []
+alwaysApply: true
+---
+
+# Erencio.com Backoffice — Project Context
+
+## What This Project Is
+
+This is **Erencio.com Backoffice**, a customized CRM platform built on top of the
+open-source [Twenty CRM](https://github.com/twentyhq/twenty).
+
+- **Our repo:** https://github.com/marneierencio/backoffice
+- **Upstream:** https://github.com/twentyhq/twenty
+- **Documentation:** see `docs/` folder
+
+## Deployment Model
+
+We use **Twenty's native multi-workspace** (`IS_MULTIWORKSPACE_ENABLED=true`).
+One deployment serves all clients — each client gets their own workspace inside
+the same running instance. Do NOT suggest creating separate deployments per client.
+
+| Environment | Branch | Container (Proxmox) | URL |
+|-------------|--------|---------------------|-----|
+| Production | `main` | `backoffice-main` | _configure in docs/DEPLOYMENT.md_ |
+| Development | `development` | `backoffice-dev` | _configure in docs/DEPLOYMENT.md_ |
+
+## Branch Strategy
+
+```
+upstream/twenty (twentyhq/twenty)
+       ↓  periodic sync via upstream-sync.yaml
+main   ←── production, protected, requires PR + CI
+  ↑
+development ←── staging/homologation
+  ↑
+feature/*   ←── all feature work
+```
+
+PRs must target `development`. Only `development` merges into `main` after validation.
+
+## Customization Principles
+
+When modifying this project, always ask:
+
+1. **Can this be done via Workspace Settings / Metadata?** — Prefer configuration
+   over code changes (custom objects, fields, views, automations).
+2. **Is this a one-workspace customization?** — Multi-tenancy means changes affect
+   ALL workspaces unless scoped by workspace ID.
+3. **Does this conflict with upstream Twenty?** — Minimize changes to core Twenty
+   files to reduce merge conflicts during upstream syncs.
+
+## Upstream Sync Process
+
+See `docs/UPSTREAM-SYNC.md` for the full workflow. At a high level:
+
+1. The `upstream-sync.yaml` workflow checks weekly for new Twenty releases.
+2. It creates a branch `upstream-sync/twenty-vX.Y.Z`.
+3. A human reviews and merges into `development` after resolving conflicts.
+4. Changes are validated on `backoffice-dev` before merging to `main`.
+
+## What AI Assistants Should Know
+
+- All code style rules from the other `.cursor/rules/*.mdc` files apply here too.
+- When creating features, consider multi-tenancy: never hardcode workspace IDs.
+- Database migrations must always include `up` AND `down` methods.
+- The `APP_SECRET` and database credentials are managed via GitHub Secrets and
+  `.env` files on the Proxmox containers — never commit secrets.
+- The Docker image is published to GitHub Container Registry (`ghcr.io`) on every
+  successful CI run on `main` or `development`.

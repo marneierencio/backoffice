@@ -1,6 +1,29 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI assistants (GitHub Copilot, Claude, Cursor) when working with code in this repository.
+
+## Project Identity
+
+**Erencio.com Backoffice** is a customized CRM platform built on top of [Twenty](https://github.com/twentyhq/twenty) (open-source CRM). This project:
+
+- **Repository:** https://github.com/marneierencio/backoffice
+- **Upstream:** https://github.com/twentyhq/twenty
+- **Production container:** `backoffice-main` (Proxmox, runs from `main` branch)
+- **Development container:** `backoffice-dev` (Proxmox, runs from `development` branch)
+- **Multi-tenancy:** Uses Twenty's native multi-workspace support (`IS_MULTIWORKSPACE_ENABLED=true`) — one deployment serves all clients
+
+### Key Branches
+| Branch | Purpose | Deploys to |
+|--------|---------|------------|
+| `main` | Production | `backoffice-main` container |
+| `development` | Dev/Staging | `backoffice-dev` container |
+| `feature/*` | Feature work | PR → development |
+| `upstream-sync` | Upstream merges | PR → development |
+
+### Required GitHub Secrets (see docs/DEPLOYMENT.md)
+- `PROD_SSH_HOST`, `PROD_SSH_USER`, `PROD_SSH_KEY` — production Proxmox container
+- `DEV_SSH_HOST`, `DEV_SSH_USER`, `DEV_SSH_KEY` — development Proxmox container
+- `GHCR_TOKEN` — GitHub Container Registry token (or use `GITHUB_TOKEN`)
 
 ## Project Overview
 
@@ -201,3 +224,6 @@ When running in CI, the dev environment is **not** pre-configured. Dependencies 
 - `tsconfig.base.json` - Base TypeScript configuration
 - `package.json` - Root package with workspace definitions
 - `.cursor/rules/` - Detailed development guidelines and best practices
+- `docs/ARCHITECTURE.md` - Architecture overview and deployment diagram
+- `docs/DEPLOYMENT.md` - Deploy guide: secrets, environments, rollback
+- `docs/UPSTREAM-SYNC.md` - Process to sync updates from Twenty upstream

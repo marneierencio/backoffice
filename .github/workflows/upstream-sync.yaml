@@ -1,0 +1,124 @@
+name: Upstream Sync — Twenty CRM
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  schedule:
+    # Toda segunda-feira às 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: 'Tag ou branch do upstream para sincronizar (ex: v1.5.0)'
+        required: false
+        default: ''
+
+jobs:
+  check-and-sync:
+    name: Verificar e sincronizar com twentyhq/twenty
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Adicionar upstream remote
+        run: |
+          git remote add upstream https://github.com/twentyhq/twenty.git || true
+          git fetch upstream --tags
+
+      - name: Determinar referência do upstream
+        id: upstream-ref
+        run: |
+          if [[ -n "${{ github.event.inputs.upstream_ref }}" ]]; then
+            REF="${{ github.event.inputs.upstream_ref }}"
+          else
+            # Pegar a última tag de release estável (v*)
+            REF=$(git tag -l --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          fi
+
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
+          echo "Referência selecionada: ${REF}"
+
+      - name: Verificar se sync já existe
+        id: check-existing
+        run: |
+          BRANCH="upstream-sync/twenty-${{ steps.upstream-ref.outputs.ref }}"
+          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Branch ${BRANCH} já existe — nada a fazer."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configurar git
+        if: steps.check-existing.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Criar branch de sync e fazer merge
+        if: steps.check-existing.outputs.exists == 'false'
+        id: merge
+        run: |
+          BRANCH="${{ steps.check-existing.outputs.branch }}"
+          REF="${{ steps.upstream-ref.outputs.ref }}"
+
+          git checkout -b "${BRANCH}" origin/development
+
+          # Tentar merge (pode haver conflitos)
+          if git merge "upstream/${REF}" --no-edit -m "chore: sync upstream twenty ${REF}"; then
+            echo "merge_status=clean" >> $GITHUB_OUTPUT
+          else
+            # Commit mesmo com conflitos marcados para revisão humana
+            git add -A
+            git commit -m "chore: sync upstream twenty ${REF} [CONFLICTS - revisão necessária]" \
+              --allow-empty || true
+            echo "merge_status=conflicts" >> $GITHUB_OUTPUT
+          fi
+
+          git push origin "${BRANCH}"
+
+      - name: Criar Pull Request
+        if: steps.check-existing.outputs.exists == 'false'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.check-existing.outputs.branch }}
+          base: development
+          title: "chore: sync upstream twenty ${{ steps.upstream-ref.outputs.ref }}"
+          body: |
+            ## Sincronização com upstream Twenty CRM
+
+            **Versão upstream:** `${{ steps.upstream-ref.outputs.ref }}`
+            **Status do merge:** `${{ steps.merge.outputs.merge_status }}`
+
+            ### O que fazer antes de mergear este PR
+
+            - [ ] Revisar os arquivos alterados
+            - [ ] Resolver conflitos marcados (se `merge_status = conflicts`)
+            - [ ] Não sobrescrever arquivos do projeto:
+              - `CLAUDE.md`
+              - `docs/`
+              - `.github/workflows/cd-deploy-*.yaml`
+              - `.github/workflows/upstream-sync.yaml`
+              - `.cursor/rules/project-context.mdc`
+            - [ ] Validar em `backoffice-dev` após merge em `development`
+            - [ ] Verificar [release notes do Twenty](${{ steps.upstream-ref.outputs.ref }})
+
+            ### Links úteis
+            - [Releases do Twenty](https://github.com/twentyhq/twenty/releases)
+            - [Guia de sync](../blob/development/docs/UPSTREAM-SYNC.md)
+
+            ---
+            _PR criado automaticamente pelo workflow `upstream-sync.yaml`_
+          labels: |
+            upstream-sync
+            automated
+          draft: ${{ steps.merge.outputs.merge_status == 'conflicts' }}
