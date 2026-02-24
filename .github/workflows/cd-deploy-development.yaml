@@ -84,13 +84,34 @@ jobs:
 
       - name: Deploy via SSH
         env:
-          IMAGE_TAG: ghcr.io/${{ github.repository }}:development-${{ github.sha }}
+          IMAGE_TAG: ghcr.io/${{ github.repository }}:development
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTOR: ${{ github.actor }}
         run: |
           ssh ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }} bash << ENDSSH
             set -e
+
+            # Criar estrutura de diretórios na primeira execução
+            mkdir -p /opt/backoffice /opt/backoffice/backups
             cd /opt/backoffice
+
+            # Criar .env mínimo se ainda não existir
+            if [ ! -f .env ]; then
+              echo "TAG=${IMAGE_TAG}" > .env
+              echo "SERVER_URL=https://backoffice--dev.erencio.com" >> .env
+              echo "IS_MULTIWORKSPACE_ENABLED=true" >> .env
+              echo "APP_SECRET=\$(openssl rand -hex 32)" >> .env
+              echo "PG_DATABASE_PASSWORD=postgres" >> .env
+              echo ".env criado com valores padrão — revisar manualmente!"
+            fi
+
+            # Criar docker-compose.yml se ainda não existir
+            if [ ! -f docker-compose.yml ]; then
+              echo "ERRO: docker-compose.yml não encontrado em /opt/backoffice/"
+              echo "Copie o arquivo de packages/twenty-docker/docker-compose.yml — veja docs/DEPLOYMENT.md"
+              exit 1
+            fi
+
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${ACTOR} --password-stdin
             docker pull ${IMAGE_TAG}
             sed -i "s|^TAG=.*|TAG=${IMAGE_TAG}|" .env
