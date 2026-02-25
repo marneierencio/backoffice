@@ -137,6 +137,17 @@ jobs:
               docker rm -f \${CONTAINER_ON_3000}
             fi
 
+            # Garantir que docker-compose.yml usa ${TAG} e não imagem hardcoded
+            if grep -q 'twentycrm/twenty' docker-compose.yml; then
+              echo "Corrigindo imagem hardcoded no docker-compose.yml..."
+              sed -i 's|image: twentycrm/twenty:.*|image: ${TAG:-ghcr.io/marneierencio/backoffice:latest}|g' docker-compose.yml
+            fi
+
+            # Garantir ENVIRONMENT=production
+            grep -q '^ENVIRONMENT=' .env && \
+              sed -i 's/^ENVIRONMENT=.*/ENVIRONMENT=production/' .env || \
+              echo 'ENVIRONMENT=production' >> .env
+
             # Subir todos os serviços
             docker compose up -d
 

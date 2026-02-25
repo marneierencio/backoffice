@@ -113,6 +113,17 @@ jobs:
               docker rm -f \${CONTAINER_ON_3000}
             fi
 
+            # Garantir que docker-compose.yml usa ${TAG} e não imagem hardcoded
+            if grep -q 'twentycrm/twenty' docker-compose.yml; then
+              echo "Corrigindo imagem hardcoded no docker-compose.yml..."
+              sed -i 's|image: twentycrm/twenty:.*|image: ${TAG:-ghcr.io/marneierencio/backoffice:development}|g' docker-compose.yml
+            fi
+
+            # Garantir ENVIRONMENT=production
+            grep -q '^ENVIRONMENT=' .env && \
+              sed -i 's/^ENVIRONMENT=.*/ENVIRONMENT=production/' .env || \
+              echo 'ENVIRONMENT=production' >> .env
+
             # Subir todos os serviços
             docker compose up -d
 
@@ -124,25 +135,27 @@ jobs:
                 break
               fi
               echo "Tentativa \$i/12..."
-              sleep 5
+              sleep 10
             done
-
-            # Rodar migrations
-            echo "Executando migrations..."
-            docker compose exec -T twenty-app yarn database:migrate:prod || \
-            docker compose exec -T twenty-app yarn nx run twenty-server:database:migrate:prod || \
-            echo "Migrations já aplicadas ou não necessárias"
 
             # Aguardar app inicializar
             echo "Aguardando servidor inicializar..."
+            HEALTHY=0
             for i in \$(seq 1 12); do
               if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
-                echo "✓ Servidor saudável após \${i}x5s"
+                echo "✓ Servidor saudável após \${i}x10s"
+                HEALTHY=1
                 break
               fi
               echo "Tentativa \$i/12..."
-              sleep 5
+              sleep 10
             done
 
             docker compose ps
+
+            if [ "\${HEALTHY}" = "0" ]; then
+              echo "✗ Servidor não respondeu — verificar logs"
+              docker compose logs --tail=30 twenty-app
+              exit 1
+            fi
           ENDSSH
