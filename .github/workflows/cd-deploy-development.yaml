@@ -69,62 +69,80 @@ jobs:
             -o /usr/local/bin/cloudflared
           chmod +x /usr/local/bin/cloudflared
 
-      - name: Configurar SSH com Cloudflare ProxyCommand
+      - name: Configurar SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           cat >> ~/.ssh/config <<EOF
-          Host backoffice--dev.erencio.com
+          Host ${{ secrets.DEV_SSH_HOST }}
             ProxyCommand cloudflared access ssh --hostname %h
-            User root
+            User ${{ secrets.DEV_SSH_USER }}
             IdentityFile ~/.ssh/id_ed25519
             StrictHostKeyChecking no
           EOF
 
       - name: Deploy via SSH
+        env:
+          IMAGE_TAG: ghcr.io/${{ github.repository }}:development
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
         run: |
-          ssh root@backoffice--dev.erencio.com << 'ENDSSH'
+          ssh ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }} bash << ENDSSH
             set -e
+            mkdir -p /opt/backoffice /opt/backoffice/backups
             cd /opt/backoffice
-            echo "${{ secrets.GITHUB_TOKEN }}" | \
-              docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ github.repository }}:development-${{ github.sha }}
-            sed -i "s|^TAG=.*|TAG=ghcr.io/${{ github.repository }}:development-${{ github.sha }}|" .env
-            docker compose up -d --no-deps server worker
+
+            if [ ! -f docker-compose.yml ]; then
+              echo "ERRO: docker-compose.yml não encontrado em /opt/backoffice/"
+              exit 1
+            fi
+
+            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${ACTOR} --password-stdin
+            docker pull ${IMAGE_TAG}
+            sed -i "s|^TAG=.*|TAG=${IMAGE_TAG}|" .env
+
+            # Parar e remover containers de app (preserva db e redis)
+            docker compose stop twenty-app twenty-worker 2>/dev/null || true
+            docker compose rm -f twenty-app twenty-worker 2>/dev/null || true
+
+            # Remover qualquer container órfão na porta 3000
+            CONTAINER_ON_3000=\$(docker ps -q --filter "publish=3000")
+            if [ -n "\${CONTAINER_ON_3000}" ]; then
+              echo "Removendo container órfão na porta 3000: \${CONTAINER_ON_3000}"
+              docker rm -f \${CONTAINER_ON_3000}
+            fi
+
+            # Subir todos os serviços
+            docker compose up -d
+
+            # Aguardar banco ficar pronto
+            echo "Aguardando banco de dados..."
+            for i in \$(seq 1 12); do
+              if docker compose exec -T twenty-db pg_isready -U twenty -d twenty_db > /dev/null 2>&1; then
+                echo "✓ Banco pronto"
+                break
+              fi
+              echo "Tentativa \$i/12..."
+              sleep 5
+            done
+
+            # Rodar migrations
+            echo "Executando migrations..."
+            docker compose exec -T twenty-app yarn database:migrate:prod || \
+            docker compose exec -T twenty-app yarn nx run twenty-server:database:migrate:prod || \
+            echo "Migrations já aplicadas ou não necessárias"
+
+            # Aguardar app inicializar
+            echo "Aguardando servidor inicializar..."
+            for i in \$(seq 1 12); do
+              if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
+                echo "✓ Servidor saudável após \${i}x5s"
+                break
+              fi
+              echo "Tentativa \$i/12..."
+              sleep 5
+            done
+
+            docker compose ps
           ENDSSH
-    
-      # - name: Deploy via SSH
-      #   uses: appleboy/ssh-action@v1.0.3
-      #   with:
-      #     host: ${{ secrets.DEV_SSH_HOST }}
-      #     username: ${{ secrets.DEV_SSH_USER }}
-      #     key: ${{ secrets.DEV_SSH_KEY }}
-      #     script: |
-      #       set -e
-      #       cd /opt/backoffice
-
-      #       # Pull nova imagem
-      #       echo "${{ secrets.GITHUB_TOKEN }}" | \
-      #         docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      #       docker pull ghcr.io/${{ github.repository }}:dev-${{ github.sha }}
-
-      #       # Atualizar tag no .env
-      #       sed -i "s|^TAG=.*|TAG=ghcr.io/${{ github.repository }}:dev-${{ github.sha }}|" .env
-
-      #       # Reiniciar apenas server e worker (preservando db e redis)
-      #       docker compose up -d --no-deps server worker
-
-      #       # Aguardar healthcheck
-      #       echo "Aguardando servidor inicializar..."
-      #       for i in $(seq 1 12); do
-      #         if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
-      #           echo "✓ Servidor saudável após ${i}x5s"
-      #           break
-      #         fi
-      #         echo "Tentativa $i/12..."
-      #         sleep 5
-      #       done
-
-      #       # Verificar status final
-      #       docker compose ps
