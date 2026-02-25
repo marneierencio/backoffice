@@ -115,7 +115,13 @@ jobs:
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${ACTOR} --password-stdin
             docker pull ${IMAGE_TAG}
             sed -i "s|^TAG=.*|TAG=${IMAGE_TAG}|" .env
-            docker compose up -d --no-deps twenty-app twenty-worker
+
+            # Parar e remover apenas app e worker (preserva db e redis com dados)
+            docker compose stop twenty-app twenty-worker 2>/dev/null || true
+            docker compose rm -f twenty-app twenty-worker 2>/dev/null || true
+
+            # Subir tudo (docker compose não recria db/redis se já estiverem rodando e inalterados)
+            docker compose up -d
             echo "Aguardando servidor inicializar..."
             for i in \$(seq 1 12); do
               if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
