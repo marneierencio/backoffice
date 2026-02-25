@@ -112,14 +112,14 @@ jobs:
               exit 1
             fi
 
-            # Backup antes do deploy (apenas se db estiver rodando)
-            if docker compose ps db 2>/dev/null | grep -q "running"; then
+            # Backup antes do deploy (apenas se twenty-db estiver rodando)
+            if docker compose ps twenty-db 2>/dev/null | grep -q "running"; then
               BACKUP_FILE="backup-\$(date +%Y%m%d-%H%M%S).sql"
-              docker compose exec -T db pg_dump -U postgres default > /opt/backoffice/backups/\${BACKUP_FILE}
+              docker compose exec -T twenty-db pg_dump -U twenty twenty_db > /opt/backoffice/backups/\${BACKUP_FILE}
               echo "✓ Backup salvo: \${BACKUP_FILE}"
               ls -t /opt/backoffice/backups/*.sql 2>/dev/null | tail -n +6 | xargs rm -f || true
             else
-              echo "db não está rodando, pulando backup"
+              echo "twenty-db não está rodando, pulando backup"
             fi
 
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${ACTOR} --password-stdin
@@ -136,7 +136,7 @@ jobs:
               sleep 5
             done
             echo "✗ Servidor não respondeu — verificar logs"
-            docker compose logs --tail=30 server
+            docker compose logs --tail=30 twenty-app
             exit 1
           ENDSSH
           ENDSSH
