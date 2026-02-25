@@ -90,25 +90,11 @@ jobs:
         run: |
           ssh ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }} bash << ENDSSH
             set -e
-
-            # Criar estrutura de diretórios na primeira execução
             mkdir -p /opt/backoffice /opt/backoffice/backups
             cd /opt/backoffice
 
-            # Criar .env mínimo se ainda não existir
-            if [ ! -f .env ]; then
-              echo "TAG=${IMAGE_TAG}" > .env
-              echo "SERVER_URL=https://backoffice--dev.erencio.com" >> .env
-              echo "IS_MULTIWORKSPACE_ENABLED=true" >> .env
-              echo "APP_SECRET=\$(openssl rand -hex 32)" >> .env
-              echo "PG_DATABASE_PASSWORD=postgres" >> .env
-              echo ".env criado com valores padrão — revisar manualmente!"
-            fi
-
-            # Criar docker-compose.yml se ainda não existir
             if [ ! -f docker-compose.yml ]; then
               echo "ERRO: docker-compose.yml não encontrado em /opt/backoffice/"
-              echo "Copie o arquivo de packages/twenty-docker/docker-compose.yml — veja docs/DEPLOYMENT.md"
               exit 1
             fi
 
@@ -116,18 +102,38 @@ jobs:
             docker pull ${IMAGE_TAG}
             sed -i "s|^TAG=.*|TAG=${IMAGE_TAG}|" .env
 
-            # Parar e remover containers do compose (app e worker)
+            # Parar e remover containers de app (preserva db e redis)
             docker compose stop twenty-app twenty-worker 2>/dev/null || true
             docker compose rm -f twenty-app twenty-worker 2>/dev/null || true
 
-            # Forçar remoção de qualquer container que ainda segure a porta 3000
+            # Remover qualquer container órfão na porta 3000
             CONTAINER_ON_3000=\$(docker ps -q --filter "publish=3000")
             if [ -n "\${CONTAINER_ON_3000}" ]; then
               echo "Removendo container órfão na porta 3000: \${CONTAINER_ON_3000}"
               docker rm -f \${CONTAINER_ON_3000}
             fi
 
+            # Subir todos os serviços
             docker compose up -d
+
+            # Aguardar banco ficar pronto
+            echo "Aguardando banco de dados..."
+            for i in \$(seq 1 12); do
+              if docker compose exec -T twenty-db pg_isready -U twenty -d twenty_db > /dev/null 2>&1; then
+                echo "✓ Banco pronto"
+                break
+              fi
+              echo "Tentativa \$i/12..."
+              sleep 5
+            done
+
+            # Rodar migrations
+            echo "Executando migrations..."
+            docker compose exec -T twenty-app yarn database:migrate:prod || \
+            docker compose exec -T twenty-app yarn nx run twenty-server:database:migrate:prod || \
+            echo "Migrations já aplicadas ou não necessárias"
+
+            # Aguardar app inicializar
             echo "Aguardando servidor inicializar..."
             for i in \$(seq 1 12); do
               if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
@@ -137,5 +143,6 @@ jobs:
               echo "Tentativa \$i/12..."
               sleep 5
             done
+
             docker compose ps
           ENDSSH
