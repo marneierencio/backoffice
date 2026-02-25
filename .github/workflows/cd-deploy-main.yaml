@@ -1,4 +1,4 @@
-name: CD Deploy Production (main)
+name: CD Deploy Production
 
 permissions:
   contents: read
@@ -137,18 +137,44 @@ jobs:
               docker rm -f \${CONTAINER_ON_3000}
             fi
 
+            # Subir todos os serviços
             docker compose up -d
+
+            # Aguardar banco ficar pronto
+            echo "Aguardando banco de dados..."
+            for i in \$(seq 1 12); do
+              if docker compose exec -T twenty-db pg_isready -U twenty -d twenty_db > /dev/null 2>&1; then
+                echo "✓ Banco pronto"
+                break
+              fi
+              echo "Tentativa \$i/12..."
+              sleep 5
+            done
+
+            # Rodar migrations
+            echo "Executando migrations..."
+            docker compose exec -T twenty-app yarn database:migrate:prod || \
+            docker compose exec -T twenty-app yarn nx run twenty-server:database:migrate:prod || \
+            echo "Migrations já aplicadas ou não necessárias"
+
+            # Aguardar app inicializar
             echo "Aguardando servidor inicializar..."
+            HEALTHY=0
             for i in \$(seq 1 24); do
               if curl -sf http://localhost:3000/healthz > /dev/null 2>&1; then
                 echo "✓ Servidor saudável após \${i}x5s"
-                exit 0
+                HEALTHY=1
+                break
               fi
               echo "Tentativa \$i/24..."
               sleep 5
             done
-            echo "✗ Servidor não respondeu — verificar logs"
-            docker compose logs --tail=30 twenty-app
-            exit 1
-          ENDSSH
+
+            docker compose ps
+
+            if [ "\${HEALTHY}" = "0" ]; then
+              echo "✗ Servidor não respondeu — verificar logs"
+              docker compose logs --tail=30 twenty-app
+              exit 1
+            fi
           ENDSSH
