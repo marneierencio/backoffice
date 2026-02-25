@@ -116,11 +116,17 @@ jobs:
             docker pull ${IMAGE_TAG}
             sed -i "s|^TAG=.*|TAG=${IMAGE_TAG}|" .env
 
-            # Parar e remover apenas app e worker (preserva db e redis com dados)
+            # Parar e remover containers do compose (app e worker)
             docker compose stop twenty-app twenty-worker 2>/dev/null || true
             docker compose rm -f twenty-app twenty-worker 2>/dev/null || true
 
-            # Subir tudo (docker compose não recria db/redis se já estiverem rodando e inalterados)
+            # Forçar remoção de qualquer container que ainda segure a porta 3000
+            CONTAINER_ON_3000=\$(docker ps -q --filter "publish=3000")
+            if [ -n "\${CONTAINER_ON_3000}" ]; then
+              echo "Removendo container órfão na porta 3000: \${CONTAINER_ON_3000}"
+              docker rm -f \${CONTAINER_ON_3000}
+            fi
+
             docker compose up -d
             echo "Aguardando servidor inicializar..."
             for i in \$(seq 1 12); do
