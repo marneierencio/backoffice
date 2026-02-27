@@ -3,6 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -11,6 +12,8 @@ import {
   Max,
   Min,
 } from 'class-validator';
+
+import { FrontendPolicy } from 'twenty-shared/workspace';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 
@@ -149,4 +152,9 @@ export class UpdateWorkspaceInput {
   @IsBoolean()
   @IsOptional()
   useRecommendedModels?: boolean;
+
+  @Field(() => FrontendPolicy, { nullable: true })
+  @IsEnum(FrontendPolicy)
+  @IsOptional()
+  frontendPolicy?: FrontendPolicy;
 }

@@ -45,6 +45,7 @@ export type CurrentWorkspace = Pick<
 > & {
   defaultRole?: Omit<Role, 'workspaceMembers' | 'agents' | 'apiKeys'> | null;
   workspaceCustomApplication: Pick<Application, 'id'> | null;
+  frontendPolicy?: string | null;
 };
 
 export const currentWorkspaceState = createStateV2<CurrentWorkspace | null>({

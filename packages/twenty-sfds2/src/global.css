@@ -1,0 +1,81 @@
+/* SFDS2 Global Styles */
+
+:root {
+  /* Colors */
+  --color-brand-primary: #0176d3;
+  --color-brand-primary-active: #014486;
+  --color-brand-primary-light: #e8f4ff;
+  --color-neutral-0: #ffffff;
+  --color-neutral-1: #f3f3f3;
+  --color-neutral-2: #e5e5e5;
+  --color-neutral-3: #c9c9c9;
+  --color-neutral-6: #706e6b;
+  --color-neutral-8: #3e3e3c;
+  --color-neutral-9: #2b2826;
+  --color-neutral-10: #181716;
+  --color-success: #2e844a;
+  --color-error: #ba0517;
+  --color-warning: #dd7a01;
+  --color-text-default: #181716;
+  --color-text-label: #3e3e3c;
+  --color-text-placeholder: #706e6b;
+  --color-border-default: #c9c9c9;
+
+  /* Typography */
+  --font-family-base: 'Salesforce Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-size-base: 0.875rem;
+  --font-size-small: 0.75rem;
+  --font-size-large: 1rem;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Radius */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  color: var(--color-text-default);
+  background-color: var(--color-neutral-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}

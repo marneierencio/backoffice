@@ -1,0 +1,23 @@
+{
+  "name": "twenty-sfds2",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "tags": ["scope:frontend", "scope:sfds2"],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "{projectRoot}/dist",
+        "configFile": "{projectRoot}/vite.config.ts"
+      }
+    },
+    "start": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "twenty-sfds2:build",
+        "port": 3002
+      }
+    }
+  }
+}

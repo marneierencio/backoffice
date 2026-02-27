@@ -31,6 +31,7 @@ import { UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user
 import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/user-workspace.service';
 import { DeletedWorkspaceMemberDTO } from 'src/engine/core-modules/user/dtos/deleted-workspace-member.dto';
 import { UpdateUserEmailInput } from 'src/engine/core-modules/user/dtos/update-user-email.input';
+import { UpdateUserFrontendPreferenceInput } from 'src/engine/core-modules/user/dtos/update-user-frontend-preference.input';
 import { WorkspaceMemberDTO } from 'src/engine/core-modules/user/dtos/workspace-member.dto';
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import {
@@ -509,4 +510,19 @@ export class UserResolver {
 
     return true;
   }
+
+  @Mutation(() => Boolean)
+  @UseGuards(UserAuthGuard, WorkspaceAuthGuard, NoPermissionGuard)
+  async updateUserFrontendPreference(
+    @Args() { frontendPreference }: UpdateUserFrontendPreferenceInput,
+    @AuthUser() user: UserEntity,
+  ) {
+    await this.userRepository.update(
+      { id: user.id },
+      { frontendPreference },
+    );
+
+    return true;
+  }
 }
+

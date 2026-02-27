@@ -4,6 +4,7 @@ import { SettingsPageContainer } from '@/settings/components/SettingsPageContain
 import { DeleteWorkspace } from '@/settings/profile/components/DeleteWorkspace';
 import { NameField } from '@/settings/workspace/components/NameField';
 import { WorkspaceLogoUploader } from '@/settings/workspace/components/WorkspaceLogoUploader';
+import { WorkspaceFrontendPolicySettings } from '@/settings/workspace/components/WorkspaceFrontendPolicySettings';
 import { SubMenuTopBarContainer } from '@/ui/layout/page/components/SubMenuTopBarContainer';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
@@ -31,6 +32,14 @@ export const SettingsWorkspace = () => {
         <Section>
           <H2Title title={t`Name`} description={t`Name of your workspace`} />
           <NameField />
+        </Section>
+
+        <Section>
+          <H2Title
+            title={t`Frontend Interface Policy`}
+            description={t`Control which interface all workspace members must use`}
+          />
+          <WorkspaceFrontendPolicySettings />
         </Section>
 
         <Section>

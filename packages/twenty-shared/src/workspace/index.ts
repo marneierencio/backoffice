@@ -9,3 +9,5 @@
 
 export { WorkspaceActivationStatus } from './types/WorkspaceActivationStatus';
 export { isWorkspaceActiveOrSuspended } from './utils/isWorkspaceActiveOrSuspended';
+export { FrontendPreference } from './types/FrontendPreference';
+export { FrontendPolicy } from './types/FrontendPolicy';

@@ -104,3 +104,24 @@ controlado:
 4. Merges passam por `development` antes de chegar em `main`
 
 Ver [UPSTREAM-SYNC.md](./UPSTREAM-SYNC.md) para detalhes.
+
+
+## Dual-Frontend Architecture
+
+O Backoffice agora suporta dois frontends paralelos:
+
+| Frontend | Pacote | URL | Status |
+|---------|--------|-----|--------|
+| **Twenty** (padrão) | `packages/twenty-front` | `/` | Produção |
+| **SFDS2** | `packages/twenty-sfds2` | `/sfds2` | Beta |
+
+A seleção do frontend é determinada por:
+1. Política da workspace (`workspace.frontendPolicy`)
+2. Preferência do usuário (`user.frontendPreference`)
+3. Default do sistema (Twenty)
+
+**Documentação:**
+- [DUAL-FRONTEND.md](./DUAL-FRONTEND.md) — Visão geral da arquitetura dual-frontend
+- [SFDS2-COMPONENTS.md](./SFDS2-COMPONENTS.md) — Guia de componentes SFDS2
+- [SFDS2-CONTRIBUTING.md](./SFDS2-CONTRIBUTING.md) — Como contribuir para o SFDS2
+- [SFDS2-MIGRATION.md](./SFDS2-MIGRATION.md) — Plano de migração incremental

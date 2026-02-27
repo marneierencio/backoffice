@@ -1,0 +1,5 @@
+export enum FrontendPolicy {
+  ALLOW_USER_CHOICE = 'ALLOW_USER_CHOICE',
+  FORCE_TWENTY = 'FORCE_TWENTY',
+  FORCE_SFDS2 = 'FORCE_SFDS2',
+}

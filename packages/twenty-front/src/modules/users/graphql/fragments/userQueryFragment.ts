@@ -23,6 +23,7 @@ export const USER_QUERY_FRAGMENT = gql`
     canImpersonate
     supportUserHash
     onboardingStatus
+    frontendPreference
     workspaceMember {
       ...WorkspaceMemberQueryFragment
     }
@@ -98,6 +99,7 @@ export const USER_QUERY_FRAGMENT = gql`
       trashRetentionDays
       eventLogRetentionDays
       editableProfileFields
+      frontendPolicy
     }
     availableWorkspaces {
       ...AvailableWorkspacesFragment

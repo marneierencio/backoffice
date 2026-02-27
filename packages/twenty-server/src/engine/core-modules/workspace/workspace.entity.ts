@@ -2,7 +2,7 @@ import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 import { IDField } from '@ptc-org/nestjs-query-graphql';
 import { type Application } from 'cloudflare/resources/zero-trust/access/applications/applications';
-import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
+import { FrontendPolicy, WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
   Check,
   Column,
@@ -56,6 +56,11 @@ import { WebhookEntity } from 'src/engine/metadata-modules/webhook/entities/webh
 
 registerEnumType(WorkspaceActivationStatus, {
   name: 'WorkspaceActivationStatus',
+});
+
+registerEnumType(FrontendPolicy, {
+  name: 'FrontendPolicy',
+  description: 'Workspace frontend policy',
 });
 
 @Check(
@@ -121,6 +126,16 @@ export class WorkspaceEntity {
   @Field()
   @Column({ type: 'integer', default: 90 })
   eventLogRetentionDays: number;
+
+  @Field(() => FrontendPolicy, { nullable: false })
+  @Column({
+    type: 'enum',
+    enumName: 'workspace_frontendPolicy_enum',
+    enum: FrontendPolicy,
+    nullable: false,
+    default: FrontendPolicy.ALLOW_USER_CHOICE,
+  })
+  frontendPolicy: FrontendPolicy;
 
   // Relations
   @OneToMany(() => AppTokenEntity, (appToken) => appToken.workspace, {

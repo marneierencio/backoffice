@@ -2,6 +2,7 @@ import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 import { IDField } from '@ptc-org/nestjs-query-graphql';
 import { APP_LOCALES, SOURCE_LOCALE } from 'twenty-shared/translations';
+import { FrontendPreference } from 'twenty-shared/workspace';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -27,6 +28,11 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 registerEnumType(OnboardingStatus, {
   name: 'OnboardingStatus',
   description: 'Onboarding status',
+});
+
+registerEnumType(FrontendPreference, {
+  name: 'FrontendPreference',
+  description: 'User preferred frontend shell',
 });
 
 @Entity({ name: 'user', schema: 'core' })
@@ -96,6 +102,16 @@ export class UserEntity {
   @Field(() => String, { nullable: false })
   @Column({ nullable: false, default: SOURCE_LOCALE, type: 'varchar' })
   locale: keyof typeof APP_LOCALES;
+
+  @Field(() => FrontendPreference, { nullable: false })
+  @Column({
+    type: 'enum',
+    enumName: 'user_frontendPreference_enum',
+    enum: FrontendPreference,
+    nullable: false,
+    default: FrontendPreference.TWENTY,
+  })
+  frontendPreference: FrontendPreference;
 
   @OneToMany(() => AppTokenEntity, (appToken) => appToken.user, {
     cascade: true,
