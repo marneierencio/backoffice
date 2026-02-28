@@ -1,11 +1,11 @@
-import React from 'react';
-import { createHashRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { Shell } from '@sfds2/components/Layout';
+import { useAuth } from '@sfds2/hooks/useAuth';
 import { DashboardPage } from '@sfds2/pages/DashboardPage';
 import { LoginPage } from '@sfds2/pages/LoginPage';
 import { ProfileSettingsPage } from '@sfds2/pages/ProfileSettingsPage';
-import { useAuth } from '@sfds2/hooks/useAuth';
 import { tokens } from '@sfds2/tokens';
+import React from 'react';
+import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom';
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading, logout } = useAuth();

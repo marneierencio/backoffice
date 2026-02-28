@@ -1,10 +1,9 @@
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
-import { useUpdateWorkspaceFrontendPolicy } from '@/settings/workspace/hooks/useUpdateWorkspaceFrontendPolicy';
-import { type FrontendPolicy } from '@/settings/workspace/hooks/useUpdateWorkspaceFrontendPolicy';
+import { useUpdateWorkspaceFrontendPolicy, type FrontendPolicy } from '@/settings/workspace/hooks/useUpdateWorkspaceFrontendPolicy';
+import { Select } from '@/ui/input/components/Select';
 import { useRecoilValueV2 } from '@/ui/utilities/state/jotai/hooks/useRecoilValueV2';
 import { useLingui } from '@lingui/react/macro';
 import { isDefined } from 'twenty-shared/utils';
-import { Select } from '@/ui/input/components/Select';
 import { Info } from 'twenty-ui/display';
 
 export const WorkspaceFrontendPolicySettings = () => {

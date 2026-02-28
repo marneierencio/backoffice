@@ -1,8 +1,7 @@
-import React from 'react';
-import { tokens } from '@sfds2/tokens';
-import { Card } from '@sfds2/components/Card';
 import { Badge } from '@sfds2/components/Badge';
+import { Card } from '@sfds2/components/Card';
 import { useAuth } from '@sfds2/hooks/useAuth';
+import { tokens } from '@sfds2/tokens';
 
 const StatCard = ({
   label,

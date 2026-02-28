@@ -1,16 +1,16 @@
 import { act, renderHook } from '@testing-library/react';
-import { createElement } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
+import { createElement } from 'react';
 import { RecoilRoot } from 'recoil';
 
 import {
-  type CurrentWorkspace,
-  currentWorkspaceState,
-} from '@/auth/states/currentWorkspaceState';
-import {
-  type CurrentUser,
-  currentUserState,
+    type CurrentUser,
+    currentUserState,
 } from '@/auth/states/currentUserState';
+import {
+    type CurrentWorkspace,
+    currentWorkspaceState,
+} from '@/auth/states/currentWorkspaceState';
 import { useSetRecoilStateV2 } from '@/ui/utilities/state/jotai/hooks/useSetRecoilStateV2';
 import { jotaiStore } from '@/ui/utilities/state/jotai/jotaiStore';
 import { useFrontendShell } from '@/workspace/hooks/useFrontendShell';

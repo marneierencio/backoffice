@@ -1,5 +1,5 @@
-import React from 'react';
 import { tokens } from '@sfds2/tokens';
+import React from 'react';
 
 export type CardVariant = 'default' | 'narrow' | 'highlight';
 

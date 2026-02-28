@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { tokens } from '@sfds2/tokens';
 import { Button } from '@sfds2/components/Button';
 import { Input } from '@sfds2/components/Input';
 import { useAuth } from '@sfds2/hooks/useAuth';
+import { tokens } from '@sfds2/tokens';
+import React, { useState } from 'react';
 
 export const LoginPage = () => {
   const { login } = useAuth();

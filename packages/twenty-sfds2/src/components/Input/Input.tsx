@@ -1,5 +1,5 @@
-import React, { useId } from 'react';
 import { tokens } from '@sfds2/tokens';
+import React, { useId } from 'react';
 
 export type InputProps = {
   id?: string;

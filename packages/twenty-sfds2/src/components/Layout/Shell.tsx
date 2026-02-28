@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { tokens } from '@sfds2/tokens';
+import React, { useState } from 'react';
 
 export type SidebarItem = {
   id: string;

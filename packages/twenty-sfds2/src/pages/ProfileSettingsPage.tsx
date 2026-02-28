@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { tokens } from '@sfds2/tokens';
-import { Card } from '@sfds2/components/Card';
-import { Button } from '@sfds2/components/Button';
 import { Badge } from '@sfds2/components/Badge';
+import { Button } from '@sfds2/components/Button';
+import { Card } from '@sfds2/components/Card';
 import { useAuth } from '@sfds2/hooks/useAuth';
+import { tokens } from '@sfds2/tokens';
+import { useState } from 'react';
 
 export const ProfileSettingsPage = () => {
   const { user, updateFrontendPreference, logout } = useAuth();

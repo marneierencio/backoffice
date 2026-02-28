@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { gql, setAuthToken } from '@sfds2/utils/api';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type AuthUser = {
   id: string;

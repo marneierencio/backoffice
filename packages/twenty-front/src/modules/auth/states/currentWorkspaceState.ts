@@ -1,8 +1,8 @@
 import { createStateV2 } from '@/ui/utilities/state/jotai/utils/createStateV2';
 import {
-  type Application,
-  type Role,
-  type Workspace,
+    type Application,
+    type Role,
+    type Workspace,
 } from '~/generated-metadata/graphql';
 
 export type CurrentWorkspace = Pick<

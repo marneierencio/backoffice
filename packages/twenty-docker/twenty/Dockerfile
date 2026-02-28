@@ -15,6 +15,7 @@ COPY ./packages/twenty-ui/package.json /app/packages/twenty-ui/
 COPY ./packages/twenty-shared/package.json /app/packages/twenty-shared/
 COPY ./packages/twenty-front/package.json /app/packages/twenty-front/
 COPY ./packages/twenty-sdk/package.json /app/packages/twenty-sdk/
+COPY ./packages/twenty-sfds2/package.json /app/packages/twenty-sfds2/
 
 # Install all dependencies
 RUN yarn && yarn cache clean && npx nx reset
@@ -41,7 +42,8 @@ COPY ./packages/twenty-front /app/packages/twenty-front
 COPY ./packages/twenty-ui /app/packages/twenty-ui
 COPY ./packages/twenty-shared /app/packages/twenty-shared
 COPY ./packages/twenty-sdk /app/packages/twenty-sdk
-RUN npx nx build twenty-front
+COPY ./packages/twenty-sfds2 /app/packages/twenty-sfds2
+RUN npx nx build twenty-front && npx nx build twenty-sfds2
 
 
 # Final stage: Run the application
@@ -68,6 +70,7 @@ ENV APP_VERSION=$APP_VERSION
 COPY --chown=1000 --from=twenty-server-build /app /app
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server /app/packages/twenty-server
 COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-front/build /app/packages/twenty-server/dist/front
+COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-sfds2/dist /app/packages/twenty-server/dist/sfds2
 
 # Set metadata and labels
 LABEL org.opencontainers.image.source=https://github.com/twentyhq/twenty

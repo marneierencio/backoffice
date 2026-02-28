@@ -1,16 +1,16 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 import {
-  IsArray,
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  Max,
-  Min,
+    IsArray,
+    IsBoolean,
+    IsEnum,
+    IsInt,
+    IsOptional,
+    IsString,
+    IsUUID,
+    Matches,
+    Max,
+    Min,
 } from 'class-validator';
 
 import { FrontendPolicy } from 'twenty-shared/workspace';

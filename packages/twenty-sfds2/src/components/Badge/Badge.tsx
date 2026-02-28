@@ -1,5 +1,5 @@
-import React from 'react';
 import { tokens } from '@sfds2/tokens';
+import React from 'react';
 
 export type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info' | 'brand';
 export type BadgeSize = 'small' | 'medium';
