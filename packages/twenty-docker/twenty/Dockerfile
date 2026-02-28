@@ -43,6 +43,7 @@ COPY ./packages/twenty-ui /app/packages/twenty-ui
 COPY ./packages/twenty-shared /app/packages/twenty-shared
 COPY ./packages/twenty-sdk /app/packages/twenty-sdk
 COPY ./packages/twenty-sfds2 /app/packages/twenty-sfds2
+RUN echo "[debug] twenty-sfds2 files in image:" && ls -la /app/packages/twenty-sfds2 && test -f /app/packages/twenty-sfds2/index.html
 RUN npx nx build twenty-front && npx nx build twenty-sfds2
 
 

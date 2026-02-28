@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  root: __dirname,
   base: '/sfds2/',
   plugins: [react()],
   resolve: {
