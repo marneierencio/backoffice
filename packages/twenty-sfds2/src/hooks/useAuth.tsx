@@ -35,9 +35,13 @@ const CURRENT_USER_QUERY = `
 `;
 
 const LOGIN_MUTATION = `
-  mutation GenerateJWT($email: String!, $password: String!) {
-    generateJWT(email: $email, password: $password) {
-      token
+  mutation SignIn($email: String!, $password: String!) {
+    signIn(email: $email, password: $password) {
+      tokens {
+        accessOrWorkspaceAgnosticToken {
+          token
+        }
+      }
     }
   }
 `;
@@ -81,16 +85,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [token, fetchCurrentUser]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const result = await gql<{ generateJWT: { token: string } }>(
+    const result = await gql<{
+      signIn: {
+        tokens: {
+          accessOrWorkspaceAgnosticToken: {
+            token: string;
+          };
+        };
+      };
+    }>(
       LOGIN_MUTATION,
       { email, password },
     );
 
-    if (result.errors || !result.data?.generateJWT?.token) {
+    const newToken = result.data?.signIn?.tokens?.accessOrWorkspaceAgnosticToken?.token;
+
+    if (result.errors || !newToken) {
       throw new Error(result.errors?.[0]?.message ?? 'Login failed');
     }
-
-    const newToken = result.data.generateJWT.token;
 
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);

@@ -12,7 +12,7 @@ The system now supports two frontend experiences:
 | **SFDS2** | `packages/twenty-sfds2` | `/sfds2` | Beta |
 
 Both frontends share the same:
-- NestJS backend API (`/api/graphql`)
+- NestJS backend API (`/graphql`)
 - Authentication flow (JWT tokens)
 - Data model (PostgreSQL via TypeORM)
 - Redis cache and BullMQ workers

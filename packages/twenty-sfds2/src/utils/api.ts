@@ -1,5 +1,8 @@
 // Minimal API client for SFDS2 frontend communicating with the Twenty backend
-const API_URL = import.meta.env.VITE_API_URL ?? '/api';
+const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const GRAPHQL_URL =
+  import.meta.env.VITE_GRAPHQL_URL ??
+  (apiBaseUrl ? `${apiBaseUrl}/graphql` : '/graphql');
 
 export type FetchOptions = {
   headers?: Record<string, string>;
@@ -28,7 +31,7 @@ export const gql = async <TData = unknown>(
     headers['Authorization'] = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${API_URL}/graphql`, {
+  const response = await fetch(GRAPHQL_URL, {
     method: 'POST',
     headers,
     body: JSON.stringify({ query, variables }),

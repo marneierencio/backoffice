@@ -121,6 +121,51 @@ npx nx start twenty-server
 npx nx run twenty-server:worker
 ```
 
+### Fast startup flows (SFDS2 login validation)
+
+Before running the commands below, ensure **Docker Desktop is open**.
+
+#### Option A — WSL (recommended)
+
+Run in a WSL terminal:
+
+```bash
+set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start twenty-sfds2
+```
+
+#### Option B — Git Bash on Windows
+
+Run in Git Bash from repository root (`D:/src/Erencio.com/backoffice`):
+
+```bash
+set -e && cd /d/src/Erencio.com/backoffice && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh
+```
+
+Then start in 2 terminals:
+
+Terminal 1 (backend):
+
+```bash
+cd /d/src/Erencio.com/backoffice/packages/twenty-server && npx nest start --watch
+```
+
+If you prefer backend in Docker (instead of local Nest), run:
+
+```bash
+cd /d/src/Erencio.com/backoffice && SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local docker compose -f packages/twenty-docker/docker-compose.yml up -d server
+```
+
+Terminal 2 (SFDS2 frontend):
+
+```bash
+cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start twenty-sfds2
+```
+
+Use this login in SFDS2:
+
+- Email: `tim@apple.dev`
+- Password: `tim@apple.dev`
+
 ## 8) Pre-push validation checklist (recommended)
 
 Run only what is relevant to your change:
@@ -181,6 +226,15 @@ This avoids TypeScript errors on `import.meta.env` during build.
 - **Docker DB not reachable on localhost:5432**
   Check container status and port mapping:
   `docker compose -f packages/twenty-docker/docker-compose.yml ps`
+
+- **`POST /graphql` fails on Windows with connection aborted/empty reply**
+  Prefer IPv4 loopback (`127.0.0.1`) instead of `localhost` for local backend URL.
+  When running backend via Docker, include:
+  `SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local`
+
+- **`npx nx start twenty-server` fails on Windows with `'NODE_ENV' is not recognized`**
+  Use backend fallback command instead:
+  `cd packages/twenty-server && npx nest start --watch`
 
 - **Need a clean restart**
   ```bash
