@@ -16,7 +16,7 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 │                Proxmox (Self-Hosted)                    │
 │                                                         │
 │  ┌──────────────────────┐  ┌──────────────────────────┐ │
-│  │  backoffice-main     │  │  backoffice-dev          │ │
+│  backoffice          │  │  backoffice--dev         │ │
 │  │  192.168.1.90        │  │  192.168.1.92            │ │
 │  │  (Produção)          │  │  (Desenvolvolvimento)    │ │
 │  │  branch: main        │  │  branch: development     │ │
@@ -49,6 +49,7 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 ```
 packages/
 ├── twenty-front/     — Aplicação React (frontend)
+├── twenty-sfds2/     — SFDS2 parallel frontend (Salesforce-like)
 ├── twenty-server/    — API NestJS (backend + GraphQL)
 ├── twenty-ui/        — Componentes UI compartilhados
 ├── twenty-shared/    — Tipos e utilitários comuns

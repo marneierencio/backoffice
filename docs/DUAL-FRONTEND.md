@@ -67,6 +67,14 @@ Possible values: `ALLOW_USER_CHOICE`, `FORCE_TWENTY`, `FORCE_SFDS2`
 
 File: `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts`
 
+Verified:
+- Migration file exists at `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts` and creates the `frontendPreference` and `frontendPolicy` columns.
+- The frontend hook `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts` is implemented and resolves the effective frontend based on workspace policy and user preference; it includes a `redirectToSfds2IfNeeded` helper that performs a client redirect to `/sfds2` when appropriate.
+- The feature-flag key `IS_SFDS2_ENABLED` is defined in `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts` and the feature-flag service/guard exist, but there is no direct client-side check for that flag inside `useFrontendShell`.
+- The server registers and will serve the SFDS2 build when present (`packages/twenty-server/src/app.module.ts` registers `/sfds2`).
+
+Action note: the docs' statement that SFDS2 is "gated by the workspace feature flag `IS_SFDS2_ENABLED`" is correct in intent (the flag exists), but the current client redirect logic relies on `workspace.frontendPolicy` and `user.frontendPreference`; enabling the workspace feature flag is handled by the backend's feature-flag system. If you want the client hook to prevent redirects when the flag is disabled, we should add an explicit check to `useFrontendShell` that queries the workspace's feature flags.
+
 ## API
 
 ### Update User Frontend Preference

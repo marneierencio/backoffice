@@ -8,6 +8,7 @@ import { AuthException } from 'src/engine/core-modules/auth/auth.exception';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
 import { AccessTokenService } from 'src/engine/core-modules/auth/token/services/access-token.service';
 import { getAuthExceptionRestStatus } from 'src/engine/core-modules/auth/utils/get-auth-exception-rest-status.util';
+import { WorkspaceDomainsService } from 'src/engine/core-modules/domain/workspace-domains/services/workspace-domains.service';
 import { ExceptionHandlerService } from 'src/engine/core-modules/exception-handler/exception-handler.service';
 import { ErrorCode } from 'src/engine/core-modules/graphql/utils/graphql-errors.util';
 import { JwtWrapperService } from 'src/engine/core-modules/jwt/services/jwt-wrapper.service';
@@ -16,8 +17,8 @@ import { WorkspaceManyOrAllFlatEntityMapsCacheService } from 'src/engine/metadat
 import { INTERNAL_SERVER_ERROR } from 'src/engine/middlewares/constants/default-error-message.constant';
 import { bindDataToRequestObject } from 'src/engine/utils/bind-data-to-request-object.util';
 import {
-  handleException,
-  handleExceptionAndConvertToGraphQLError,
+    handleException,
+    handleExceptionAndConvertToGraphQLError,
 } from 'src/engine/utils/global-exception-handler.util';
 import { WorkspaceCacheStorageService } from 'src/engine/workspace-cache-storage/workspace-cache-storage.service';
 import { type CustomException } from 'src/utils/custom-exception';
@@ -31,6 +32,7 @@ export class MiddlewareService {
     private readonly dataSourceService: DataSourceService,
     private readonly exceptionHandlerService: ExceptionHandlerService,
     private readonly jwtWrapperService: JwtWrapperService,
+    private readonly workspaceDomainsService: WorkspaceDomainsService,
   ) {}
 
   public isTokenPresent(request: Request): boolean {
@@ -124,6 +126,31 @@ export class MiddlewareService {
       request.locale =
         (request.headers['x-locale'] as keyof typeof APP_LOCALES) ??
         SOURCE_LOCALE;
+
+      // Attempt to resolve workspace by origin so that GraphQL schema
+      // for that workspace is available even for unauthenticated requests
+      // (needed for public mutations like `signIn`).
+      try {
+        const originHeader = (request.headers.origin as string) || '';
+        const host = (request.headers.host as string) || '';
+        const proto = (request.protocol as string) || 'http';
+        const origin = originHeader || `${proto}://${host}`;
+
+        const workspace = await this.workspaceDomainsService.getWorkspaceByOriginOrDefaultWorkspace(
+          origin,
+        );
+
+        if (workspace) {
+          request.workspace = workspace as any;
+          request.workspaceId = workspace.id;
+          const metadataVersion = await this.workspaceStorageCacheService.getMetadataVersion(
+            workspace.id,
+          );
+          request.workspaceMetadataVersion = metadataVersion;
+        }
+      } catch (err) {
+        // ignore - fall back to no workspace
+      }
 
       return;
     }
