@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { TokenModule } from 'src/engine/core-modules/auth/token/token.module';
+import { WorkspaceDomainsModule } from 'src/engine/core-modules/domain/workspace-domains/workspace-domains.module';
 import { JwtModule } from 'src/engine/core-modules/jwt/jwt.module';
 import { DataSourceModule } from 'src/engine/metadata-modules/data-source/data-source.module';
 import { WorkspaceManyOrAllFlatEntityMapsCacheModule } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.module';
@@ -14,6 +15,7 @@ import { WorkspaceCacheStorageModule } from 'src/engine/workspace-cache-storage/
     WorkspaceManyOrAllFlatEntityMapsCacheModule,
     TokenModule,
     JwtModule,
+    WorkspaceDomainsModule,
   ],
   providers: [MiddlewareService],
   exports: [MiddlewareService],
