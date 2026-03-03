@@ -1,8 +1,8 @@
 import {
-    type DynamicModule,
-    type MiddlewareConsumer,
-    Module,
-    RequestMethod,
+  type DynamicModule,
+  type MiddlewareConsumer,
+  Module,
+  RequestMethod,
 } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -90,14 +90,14 @@ export class AppModule {
       );
     } */
 
-    const sfds2Path = join(__dirname, 'sfds2');
+    const edsPath = join(__dirname, 'eds');
 
-    // Register SFDS2 before the main front so its serveRoot takes precedence
-    if (existsSync(sfds2Path)) {
+    // Register EDS before the main front so its serveRoot takes precedence
+    if (existsSync(edsPath)) {
       modules.push(
         ServeStaticModule.forRoot({
-          rootPath: sfds2Path,
-          serveRoot: '/sfds2',
+          rootPath: edsPath,
+          serveRoot: '/eds',
           exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*'],
         }),
       );

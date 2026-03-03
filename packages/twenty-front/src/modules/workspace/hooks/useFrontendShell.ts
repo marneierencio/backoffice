@@ -3,10 +3,10 @@ import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useRecoilValueV2 } from '@/ui/utilities/state/jotai/hooks/useRecoilValueV2';
 
 // Frontend shells available in this application
-export type FrontendShell = 'TWENTY' | 'SFDS2';
+export type FrontendShell = 'TWENTY' | 'EDS';
 
-// URL path prefix for the SFDS2 frontend
-const SFDS2_PATH = '/sfds2';
+// URL path prefix for the EDS frontend
+const EDS_PATH = '/eds';
 
 // Resolve the effective frontend shell based on:
 // 1. Workspace policy (if forced, overrides user preference)
@@ -24,9 +24,9 @@ export const useFrontendShell = (): {
   const workspacePolicy = currentWorkspace?.frontendPolicy ?? null;
   const userPreference = (currentUser?.frontendPreference as FrontendShell | undefined) ?? 'TWENTY';
 
-  if (workspacePolicy === 'FORCE_SFDS2') {
+  if (workspacePolicy === 'FORCE_EDS') {
     return {
-      effectiveFrontend: 'SFDS2',
+      effectiveFrontend: 'EDS',
       isForcedByWorkspace: true,
       userPreference,
       workspacePolicy,
@@ -51,14 +51,14 @@ export const useFrontendShell = (): {
   };
 };
 
-// Redirect to SFDS2 frontend if needed.
+// Redirect to EDS frontend if needed.
 // Returns true if a redirect was triggered (caller should stop rendering).
-export const redirectToSfds2IfNeeded = (effectiveFrontend: FrontendShell): boolean => {
+export const redirectToEdsIfNeeded = (effectiveFrontend: FrontendShell): boolean => {
   if (
-    effectiveFrontend === 'SFDS2' &&
-    !window.location.pathname.startsWith(SFDS2_PATH)
+    effectiveFrontend === 'EDS' &&
+    !window.location.pathname.startsWith(EDS_PATH)
   ) {
-    window.location.href = SFDS2_PATH;
+    window.location.href = EDS_PATH;
     return true;
   }
 

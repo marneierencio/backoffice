@@ -9,7 +9,7 @@ The system now supports two frontend experiences:
 | Shell | Package | URL | Status |
 |-------|---------|-----|--------|
 | **Twenty** (Standard) | `packages/twenty-front` | `/` | Production |
-| **SFDS2** | `packages/twenty-sfds2` | `/sfds2` | Beta |
+| **EDS** | `packages/twenty-eds` | `/eds` | Beta |
 
 Both frontends share the same:
 - NestJS backend API (`/graphql`)
@@ -20,7 +20,7 @@ Both frontends share the same:
 ## Key Design Decisions
 
 ### Why a separate package (not theming)?
-The SFDS2 frontend implements a fundamentally different component architecture inspired by [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/). A pure theme would not allow structural differences in layout, interaction patterns, and accessibility patterns. A separate Vite + React package gives full independence while sharing the API.
+The EDS frontend implements a fundamentally different component architecture inspired by [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/). A pure theme would not allow structural differences in layout, interaction patterns, and accessibility patterns. A separate Vite + React package gives full independence while sharing the API.
 
 ### Bootstrap Resolution Order
 
@@ -29,12 +29,12 @@ When the application loads, the effective frontend is determined in this order:
 ```
 1. Workspace Policy (highest priority)
    ├── FORCE_TWENTY → always load Twenty
-   ├── FORCE_SFDS2  → always load SFDS2
+   ├── FORCE_EDS  → always load EDS
    └── ALLOW_USER_CHOICE → proceed to step 2
 
 2. User Preference (from user.frontendPreference)
    ├── TWENTY → load Twenty
-   └── SFDS2  → load SFDS2
+   └── EDS  → load EDS
 
 3. System Default → TWENTY
 ```
@@ -52,7 +52,7 @@ New column:
 frontendPreference user_frontendPreference_enum NOT NULL DEFAULT 'TWENTY'
 ```
 
-Possible values: `TWENTY`, `SFDS2`
+Possible values: `TWENTY`, `EDS`
 
 ### WorkspaceEntity (`core.workspace`)
 
@@ -61,7 +61,7 @@ New column:
 frontendPolicy workspace_frontendPolicy_enum NOT NULL DEFAULT 'ALLOW_USER_CHOICE'
 ```
 
-Possible values: `ALLOW_USER_CHOICE`, `FORCE_TWENTY`, `FORCE_SFDS2`
+Possible values: `ALLOW_USER_CHOICE`, `FORCE_TWENTY`, `FORCE_EDS`
 
 ### Migration
 
@@ -69,11 +69,11 @@ File: `packages/twenty-server/src/database/typeorm/core/migrations/common/177200
 
 Verified:
 - Migration file exists at `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts` and creates the `frontendPreference` and `frontendPolicy` columns.
-- The frontend hook `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts` is implemented and resolves the effective frontend based on workspace policy and user preference; it includes a `redirectToSfds2IfNeeded` helper that performs a client redirect to `/sfds2` when appropriate.
-- The feature-flag key `IS_SFDS2_ENABLED` is defined in `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts` and the feature-flag service/guard exist, but there is no direct client-side check for that flag inside `useFrontendShell`.
-- The server registers and will serve the SFDS2 build when present (`packages/twenty-server/src/app.module.ts` registers `/sfds2`).
+- The frontend hook `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts` is implemented and resolves the effective frontend based on workspace policy and user preference; it includes a `redirectToEdsIfNeeded` helper that performs a client redirect to `/eds` when appropriate.
+- The feature-flag key `IS_EDS_ENABLED` is defined in `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts` and the feature-flag service/guard exist, but there is no direct client-side check for that flag inside `useFrontendShell`.
+- The server registers and will serve the EDS build when present (`packages/twenty-server/src/app.module.ts` registers `/eds`).
 
-Action note: the docs' statement that SFDS2 is "gated by the workspace feature flag `IS_SFDS2_ENABLED`" is correct in intent (the flag exists), but the current client redirect logic relies on `workspace.frontendPolicy` and `user.frontendPreference`; enabling the workspace feature flag is handled by the backend's feature-flag system. If you want the client hook to prevent redirects when the flag is disabled, we should add an explicit check to `useFrontendShell` that queries the workspace's feature flags.
+Action note: the docs' statement that EDS is "gated by the workspace feature flag `IS_EDS_ENABLED`" is correct in intent (the flag exists), but the current client redirect logic relies on `workspace.frontendPolicy` and `user.frontendPreference`; enabling the workspace feature flag is handled by the backend's feature-flag system. If you want the client hook to prevent redirects when the flag is disabled, we should add an explicit check to `useFrontendShell` that queries the workspace's feature flags.
 
 ## API
 
@@ -98,24 +98,24 @@ mutation UpdateWorkspace($data: UpdateWorkspaceInput!) {
 }
 ```
 
-Where `$data = { frontendPolicy: "FORCE_SFDS2" }`. Requires workspace admin or `WORKSPACE` permission.
+Where `$data = { frontendPolicy: "FORCE_EDS" }`. Requires workspace admin or `WORKSPACE` permission.
 
 ## Feature Flag
 
-The SFDS2 shell is gated by the workspace feature flag `IS_SFDS2_ENABLED`. Even if a user has a preference for SFDS2, the redirect will only happen when this flag is enabled for the workspace.
+The EDS shell is gated by the workspace feature flag `IS_EDS_ENABLED`. Even if a user has a preference for EDS, the redirect will only happen when this flag is enabled for the workspace.
 
 To enable via admin panel:
 1. Go to Admin Panel → Workspace → Feature Flags
-2. Toggle `IS_SFDS2_ENABLED` to `true`
+2. Toggle `IS_EDS_ENABLED` to `true`
 
 ## Component Architecture
 
-See [SFDS2-COMPONENTS.md](./SFDS2-COMPONENTS.md) for detailed component documentation.
+See [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) for detailed component documentation.
 
 ## Migration Plan
 
-See [SFDS2-MIGRATION.md](./SFDS2-MIGRATION.md) for the incremental migration plan.
+See [EDS-MIGRATION.md](./EDS-MIGRATION.md) for the incremental migration plan.
 
 ## Contributing
 
-See [SFDS2-CONTRIBUTING.md](./SFDS2-CONTRIBUTING.md) for contribution guidelines.
+See [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) for contribution guidelines.

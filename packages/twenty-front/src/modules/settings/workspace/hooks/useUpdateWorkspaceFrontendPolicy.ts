@@ -5,7 +5,7 @@ import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { useRecoilValueV2 } from '@/ui/utilities/state/jotai/hooks/useRecoilValueV2';
 
-export type FrontendPolicy = 'ALLOW_USER_CHOICE' | 'FORCE_TWENTY' | 'FORCE_SFDS2';
+export type FrontendPolicy = 'ALLOW_USER_CHOICE' | 'FORCE_TWENTY' | 'FORCE_EDS';
 
 const UPDATE_WORKSPACE_FRONTEND_POLICY = gql`
   mutation UpdateWorkspaceFrontendPolicy($data: UpdateWorkspaceInput!) {

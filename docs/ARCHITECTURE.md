@@ -49,7 +49,7 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 ```
 packages/
 ├── twenty-front/     — Aplicação React (frontend)
-├── twenty-sfds2/     — SFDS2 parallel frontend (Salesforce-like)
+├── twenty-eds/      — EDS parallel frontend (Erencio Design System)
 ├── twenty-server/    — API NestJS (backend + GraphQL)
 ├── twenty-ui/        — Componentes UI compartilhados
 ├── twenty-shared/    — Tipos e utilitários comuns
@@ -114,7 +114,7 @@ O Backoffice agora suporta dois frontends paralelos:
 | Frontend | Pacote | URL | Status |
 |---------|--------|-----|--------|
 | **Twenty** (padrão) | `packages/twenty-front` | `/` | Produção |
-| **SFDS2** | `packages/twenty-sfds2` | `/sfds2` | Beta |
+| **EDS** | `packages/twenty-eds` | `/eds` | Beta |
 
 A seleção do frontend é determinada por:
 1. Política da workspace (`workspace.frontendPolicy`)
@@ -123,6 +123,6 @@ A seleção do frontend é determinada por:
 
 **Documentação:**
 - [DUAL-FRONTEND.md](./DUAL-FRONTEND.md) — Visão geral da arquitetura dual-frontend
-- [SFDS2-COMPONENTS.md](./SFDS2-COMPONENTS.md) — Guia de componentes SFDS2
-- [SFDS2-CONTRIBUTING.md](./SFDS2-CONTRIBUTING.md) — Como contribuir para o SFDS2
-- [SFDS2-MIGRATION.md](./SFDS2-MIGRATION.md) — Plano de migração incremental
+- [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) — Guia de componentes EDS
+- [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) — Como contribuir para o EDS
+- [EDS-MIGRATION.md](./EDS-MIGRATION.md) — Plano de migração incremental

@@ -17,13 +17,13 @@ export const FrontendPreferenceSettings = () => {
 
   const workspacePolicy = currentWorkspace?.frontendPolicy;
   const isForcedByWorkspace =
-    workspacePolicy === 'FORCE_TWENTY' || workspacePolicy === 'FORCE_SFDS2';
+    workspacePolicy === 'FORCE_TWENTY' || workspacePolicy === 'FORCE_EDS';
 
-  const currentValue: 'TWENTY' | 'SFDS2' = isForcedByWorkspace
-    ? workspacePolicy === 'FORCE_SFDS2'
-      ? 'SFDS2'
+  const currentValue: 'TWENTY' | 'EDS' = isForcedByWorkspace
+    ? workspacePolicy === 'FORCE_EDS'
+      ? 'EDS'
       : 'TWENTY'
-    : (currentUser.frontendPreference === 'SFDS2' ? 'SFDS2' : 'TWENTY');
+    : (currentUser.frontendPreference === 'EDS' ? 'EDS' : 'TWENTY');
 
   const options = [
     {
@@ -31,18 +31,18 @@ export const FrontendPreferenceSettings = () => {
       label: t`Standard (Twenty)`,
     },
     {
-      value: 'SFDS2' as const,
-      label: t`SFDS2 — Salesforce Design System 2`,
+      value: 'EDS' as const,
+      label: t`EDS — Erencio Design System`,
     },
   ];
 
-  const handleChange = async (value: 'TWENTY' | 'SFDS2') => {
+  const handleChange = async (value: 'TWENTY' | 'EDS') => {
     if (isForcedByWorkspace) return;
 
     await updateFrontendPreference(value);
 
-    if (value === 'SFDS2') {
-      window.location.href = '/sfds2';
+    if (value === 'EDS') {
+      window.location.href = '/eds';
     }
   };
 

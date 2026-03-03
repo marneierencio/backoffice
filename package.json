@@ -232,7 +232,7 @@
       "packages/twenty-cli",
       "packages/create-twenty-app",
       "packages/twenty-eslint-rules",
-      "packages/twenty-sfds2"
+      "packages/twenty-eds"
     ]
   },
   "prettier": {

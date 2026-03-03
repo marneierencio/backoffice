@@ -121,7 +121,7 @@ npx nx start twenty-server
 npx nx run twenty-server:worker
 ```
 
-### Fast startup flows (SFDS2 login validation)
+### Fast startup flows (EDS login validation)
 
 Before running the commands below, ensure **Docker Desktop is open**.
 
@@ -130,7 +130,7 @@ Before running the commands below, ensure **Docker Desktop is open**.
 Run in a WSL terminal:
 
 ```bash
-set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start twenty-sfds2
+set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start twenty-eds
 ```
 
 #### Option B — Git Bash on Windows
@@ -155,13 +155,13 @@ If you prefer backend in Docker (instead of local Nest), run:
 cd /d/src/Erencio.com/backoffice && SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local docker compose -f packages/twenty-docker/docker-compose.yml up -d server
 ```
 
-Terminal 2 (SFDS2 frontend):
+Terminal 2 (EDS frontend):
 
 ```bash
-cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start twenty-sfds2
+cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start twenty-eds
 ```
 
-Use this login in SFDS2:
+Use this login in EDS:
 
 - Email: `tim@apple.dev`
 - Password: `tim@apple.dev`
@@ -195,16 +195,16 @@ When changing entities/migrations:
 npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/<migration-name> -d src/database/typeorm/core/core.datasource.ts
 ```
 
-## 9) SFDS2-specific check (for this branch context)
+## 9) EDS-specific check (for this branch context)
 
-If your changes touch SFDS2, validate both frontends:
+If your changes touch EDS, validate both frontends:
 
 ```bash
 npx nx build twenty-front
-npx nx build twenty-sfds2
+npx nx build twenty-eds
 ```
 
-`twenty-sfds2` uses Vite. Ensure `packages/twenty-sfds2/src/vite-env.d.ts` exists with:
+`twenty-eds` uses Vite. Ensure `packages/twenty-eds/src/vite-env.d.ts` exists with:
 
 ```ts
 /// <reference types="vite/client" />

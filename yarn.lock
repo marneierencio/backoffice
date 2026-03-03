@@ -59336,9 +59336,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"twenty-sfds2@workspace:packages/twenty-sfds2":
+"twenty-eds@workspace:packages/twenty-eds":
   version: 0.0.0-use.local
-  resolution: "twenty-sfds2@workspace:packages/twenty-sfds2"
+  resolution: "twenty-eds@workspace:packages/twenty-eds"
   dependencies:
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
