@@ -1,6 +1,9 @@
 import { Shell } from '@eds/components/Layout';
 import { useAuth } from '@eds/hooks/useAuth';
+import { CompaniesListPage } from '@eds/pages/CompaniesListPage';
+import { ContactsListPage } from '@eds/pages/ContactsListPage';
 import { DashboardPage } from '@eds/pages/DashboardPage';
+import { DealsListPage } from '@eds/pages/DealsListPage';
 import { LoginPage } from '@eds/pages/LoginPage';
 import { ProfileSettingsPage } from '@eds/pages/ProfileSettingsPage';
 import { tokens } from '@eds/tokens';
@@ -93,6 +96,30 @@ const router = createHashRouter([
     element: (
       <ProtectedLayout>
         <DashboardPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/contacts',
+    element: (
+      <ProtectedLayout>
+        <ContactsListPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/companies',
+    element: (
+      <ProtectedLayout>
+        <CompaniesListPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/deals',
+    element: (
+      <ProtectedLayout>
+        <DealsListPage />
       </ProtectedLayout>
     ),
   },

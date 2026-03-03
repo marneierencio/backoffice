@@ -6,6 +6,11 @@ const GRAPHQL_URL =
   import.meta.env.VITE_GRAPHQL_URL ??
   (apiBaseUrl ? `${apiBaseUrl}/metadata` : '/metadata');
 
+// Workspace-scoped GraphQL endpoint (for record CRUD operations)
+const WORKSPACE_GRAPHQL_URL =
+  import.meta.env.VITE_WORKSPACE_GRAPHQL_URL ??
+  (apiBaseUrl ? `${apiBaseUrl}/api` : '/api');
+
 export type FetchOptions = {
   headers?: Record<string, string>;
   signal?: AbortSignal;
@@ -34,6 +39,36 @@ export const gql = async <TData = unknown>(
   }
 
   const response = await fetch(GRAPHQL_URL, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query, variables }),
+    signal: options?.signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status}`);
+  }
+
+  return response.json() as Promise<{ data?: TData; errors?: Array<{ message: string }> }>;
+};
+
+// Workspace-scoped GraphQL client — used for record CRUD operations
+// (contacts, companies, opportunities, etc.)
+export const gqlWorkspace = async <TData = unknown>(
+  query: string,
+  variables?: Record<string, unknown>,
+  options?: FetchOptions,
+): Promise<{ data?: TData; errors?: Array<{ message: string }> }> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers ?? {}),
+  };
+
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
+  const response = await fetch(WORKSPACE_GRAPHQL_URL, {
     method: 'POST',
     headers,
     body: JSON.stringify({ query, variables }),

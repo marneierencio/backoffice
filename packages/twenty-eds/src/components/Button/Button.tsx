@@ -15,6 +15,7 @@ export type ButtonProps = {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit' | 'reset';
   'aria-label'?: string;
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false';
 };
 
 const getVariantStyles = (variant: ButtonVariant): React.CSSProperties => {
@@ -88,6 +89,7 @@ export const Button = ({
   onClick,
   type = 'button',
   'aria-label': ariaLabel,
+  'aria-current': ariaCurrent,
 }: ButtonProps) => {
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -114,6 +116,7 @@ export const Button = ({
       onClick={onClick}
       aria-label={ariaLabel ?? label}
       aria-busy={loading}
+      aria-current={ariaCurrent}
     >
       {iconLeft}
       {loading ? 'Loading…' : label}

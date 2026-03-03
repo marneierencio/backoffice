@@ -26,13 +26,13 @@ This document outlines the strategy for gradually migrating screens from the Twe
 - [x] Workspace settings integration (SettingsWorkspace)
 - [x] Feature flag `IS_EDS_ENABLED`
 
-### Phase 1 — Record Listing
-- [ ] Select component
-- [ ] Table component with sorting and pagination
-- [ ] Search bar
-- [ ] Contacts list page
-- [ ] Companies list page
-- [ ] Deals/Opportunities list page
+### Phase 1 — Record Listing ✅
+- [x] Select component
+- [x] Table component with sorting and pagination
+- [x] Search bar
+- [x] Contacts list page
+- [x] Companies list page
+- [x] Deals/Opportunities list page
 
 ### Phase 2 — Record Detail
 - [ ] Record show page

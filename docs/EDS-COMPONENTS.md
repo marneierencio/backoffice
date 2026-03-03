@@ -165,3 +165,198 @@ Where the implementation diverges from the official SLDS 2 spec, the decision is
 4. **System fonts**: Following SLDS 2's recommendation, EDS uses the system font stack instead of branded fonts, for faster load times and native OS integration.
 
 5. **Simplified token structure**: The full SLDS 2 spec has 500+ tokens. EDS includes the essential set with room to expand.
+
+---
+
+## Phase 1 Components (Record Listing)
+
+The following components were added in Phase 1 to support record listing pages.
+
+### Icon
+
+A minimal inline SVG icon system with no external dependencies.
+
+```tsx
+import { Icon } from '@eds/components/Icon';
+
+<Icon
+  name="search"    // 'search' | 'sort-ascending' | 'sort-descending' | 'chevron-left' | 'chevron-right' | etc.
+  size={16}        // pixel size (default 16)
+  color="currentColor"
+/>
+```
+
+Available icons: `search`, `sort-ascending`, `sort-descending`, `chevron-left`, `chevron-right`, `chevron-down`, `check`, `minus`, `close`, `filter`, `refresh`, `chevron-first`, `chevron-last`.
+
+### Checkbox
+
+> SLDS 2 ref: [Checkbox](https://www.lightningdesignsystem.com/components/checkbox/)
+
+```tsx
+import { Checkbox } from '@eds/components/Checkbox';
+
+<Checkbox
+  label="Select all"
+  checked={true}
+  indeterminate={false}
+  disabled={false}
+  onChange={(checked) => {}}
+/>
+```
+
+Custom visual checkbox with support for `indeterminate` state (used by DataTable select-all). Uses native `<input type="checkbox">` under the hood for accessibility.
+
+### Select
+
+> SLDS 2 ref: [Select](https://www.lightningdesignsystem.com/components/select/)
+
+```tsx
+import { Select } from '@eds/components/Select';
+
+<Select
+  label="Status"
+  value={status}
+  options={[
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ]}
+  placeholder="Select…"
+  required
+  error="Please select a status"
+  onChange={(value) => setStatus(value)}
+/>
+```
+
+Uses native `<select>` element for full accessibility compliance. Label, hint, error, required decorations match the Input component style.
+
+### Spinner
+
+> SLDS 2 ref: [Spinners](https://www.lightningdesignsystem.com/components/spinners/)
+
+```tsx
+import { Spinner } from '@eds/components/Spinner';
+
+// Overlay spinner (default)
+<Spinner size="medium" label="Loading" />
+
+// Inline spinner
+<Spinner size="small" label="Loading" inline />
+```
+
+**Sizes:** `x-small` (16px), `small` (24px), `medium` (32px), `large` (48px).
+
+CSS-only animation with a brand-colored arc spinning over a neutral track. Overlay mode adds a semi-transparent background.
+
+### SearchBar
+
+> Based on SLDS 2 [Input — Search type](https://www.lightningdesignsystem.com/components/input/)
+
+```tsx
+import { SearchBar } from '@eds/components/SearchBar';
+
+<SearchBar
+  value={query}
+  placeholder="Search contacts…"
+  onChange={(value) => setQuery(value)}
+  debounceMs={300}
+/>
+```
+
+Search input with a magnifying glass icon, debounced `onChange`, clear button, and Escape-to-clear keyboard support.
+
+### EmptyState
+
+> SLDS 2 ref: [Empty State](https://www.lightningdesignsystem.com/components/empty-state/)
+
+```tsx
+import { EmptyState } from '@eds/components/EmptyState';
+
+<EmptyState
+  title="No contacts found"
+  description="Try adjusting your search criteria"
+  icon="👥"
+  action={<Button label="Clear filters" variant="outline" />}
+/>
+```
+
+Centered message displayed when a list or table has no data.
+
+### PageHeader
+
+Consistent header for list pages with title, description, search, and action slots.
+
+```tsx
+import { PageHeader } from '@eds/components/PageHeader';
+
+<PageHeader
+  title="Contacts"
+  description="Manage your contacts"
+  icon="👥"
+  actions={<Button label="New Contact" variant="brand" />}
+>
+  <SearchBar value={query} onChange={setQuery} />
+</PageHeader>
+```
+
+### DataTable
+
+> SLDS 2 ref: [Data Table](https://www.lightningdesignsystem.com/components/data-tables/)
+
+The primary component of Phase 1. Renders a semantic `<table>` with sortable columns, row selection, hover/striped rows, loading overlay, and empty state.
+
+```tsx
+import { DataTable } from '@eds/components/DataTable';
+import type { ColumnDefinition } from '@eds/components/DataTable';
+
+const columns: ColumnDefinition<Contact>[] = [
+  { key: 'name', label: 'Name', accessor: 'name', sortable: true, width: '30%' },
+  { key: 'email', label: 'Email', accessor: 'email', sortable: true, width: '30%',
+    renderCell: (val, record) => <a href={`mailto:${val}`}>{val}</a> },
+  { key: 'city', label: 'City', accessor: 'city', width: '20%' },
+  { key: 'created', label: 'Created', accessor: 'createdAt', sortable: true, width: '20%',
+    renderCell: (val) => new Date(val).toLocaleDateString() },
+];
+
+<DataTable
+  columns={columns}
+  data={contacts}
+  loading={isLoading}
+  selectable
+  selectedIds={selected}
+  onSelectionChange={setSelected}
+  sortColumn="name"
+  sortDirection="asc"
+  onSort={(col, dir) => setSort(col, dir)}
+  bordered
+  striped
+/>
+```
+
+**Key features:**
+- Semantic `<table>` with `<th scope="col">` and `aria-sort`
+- Select-all checkbox with indeterminate state
+- Sort toggle: click header → asc → desc → unsorted
+- Row hover highlight
+- Loading spinner overlay with `aria-busy`
+- Empty state when no data
+- Custom cell renderers via `renderCell`
+
+### Pagination
+
+Page navigation controls following SLDS 2 button group patterns.
+
+```tsx
+import { Pagination } from '@eds/components/Pagination';
+
+<Pagination
+  currentPage={1}
+  totalCount={1248}
+  pageSize={25}
+  onPageChange={(page) => setPage(page)}
+  onPageSizeChange={(size) => setPageSize(size)}
+  pageSizeOptions={[10, 25, 50, 100]}
+/>
+```
+
+Renders: record count summary, first/prev/page-numbers/next/last buttons, and a rows-per-page select. Active page is highlighted with brand color. Uses `<nav aria-label="Pagination">` for accessibility.
+
