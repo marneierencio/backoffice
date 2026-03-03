@@ -1,8 +1,10 @@
 // Minimal API client for SFDS2 frontend communicating with the Twenty backend
+// Note: Twenty uses /metadata endpoint for core GraphQL operations (auth, users, workspaces)
+// The /graphql endpoint is workspace-specific and requires workspace context
 const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
 const GRAPHQL_URL =
   import.meta.env.VITE_GRAPHQL_URL ??
-  (apiBaseUrl ? `${apiBaseUrl}/graphql` : '/graphql');
+  (apiBaseUrl ? `${apiBaseUrl}/metadata` : '/metadata');
 
 export type FetchOptions = {
   headers?: Record<string, string>;
