@@ -14,6 +14,10 @@ export default defineConfig({
   server: {
     port: 3002,
     proxy: {
+      '/metadata': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
       '/graphql': {
         target: 'http://127.0.0.1:3000',
         changeOrigin: true,
