@@ -141,7 +141,9 @@ export const DealsListPage = () => {
     setSearchQuery,
   } = useRecordList<OpportunityRecord>({
     objectNamePlural: 'opportunities',
+    objectNameSingular: 'opportunity',
     fields: FIELDS,
+    searchFields: ['name'],
     initialSortColumn: 'createdAt',
     initialSortDirection: 'desc',
   });

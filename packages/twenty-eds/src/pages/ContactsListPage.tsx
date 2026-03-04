@@ -117,7 +117,9 @@ export const ContactsListPage = () => {
     setSearchQuery,
   } = useRecordList<PersonRecord>({
     objectNamePlural: 'people',
+    objectNameSingular: 'person',
     fields: FIELDS,
+    searchFields: ['name.firstName', 'name.lastName'],
     initialSortColumn: 'createdAt',
     initialSortDirection: 'desc',
   });

@@ -7,9 +7,10 @@ const GRAPHQL_URL =
   (apiBaseUrl ? `${apiBaseUrl}/metadata` : '/metadata');
 
 // Workspace-scoped GraphQL endpoint (for record CRUD operations)
+// Twenty server exposes /graphql for workspace data (people, companies, etc.)
 const WORKSPACE_GRAPHQL_URL =
   import.meta.env.VITE_WORKSPACE_GRAPHQL_URL ??
-  (apiBaseUrl ? `${apiBaseUrl}/api` : '/api');
+  (apiBaseUrl ? `${apiBaseUrl}/graphql` : '/graphql');
 
 export type FetchOptions = {
   headers?: Record<string, string>;

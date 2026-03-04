@@ -108,7 +108,9 @@ export const CompaniesListPage = () => {
     setSearchQuery,
   } = useRecordList<CompanyRecord>({
     objectNamePlural: 'companies',
+    objectNameSingular: 'company',
     fields: FIELDS,
+    searchFields: ['name'],
     initialSortColumn: 'createdAt',
     initialSortDirection: 'desc',
   });

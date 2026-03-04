@@ -10,7 +10,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type UseRecordListOptions = {
   objectNamePlural: string;
+  // Singular PascalCase name used for GraphQL input types (e.g. 'Person', 'Company', 'Opportunity')
+  objectNameSingular: string;
   fields: string;
+  // Fields to search across when searchQuery is set (e.g. ['name'])
+  searchFields?: string[];
   pageSize?: number;
   // Optional initial sort
   initialSortColumn?: string;
@@ -55,17 +59,25 @@ type RelayResponse<TRecord> = {
   totalCount: number;
 };
 
+// Convert to PascalCase: 'person' → 'Person', 'connectedAccount' → 'ConnectedAccount'
+const toPascalCase = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
+
 // Build a dynamic GraphQL query for fetching records
-const buildQuery = (objectNamePlural: string, fields: string): string => {
-  // Capitalize first letter for the type name in filter/orderBy input types
-  const capitalized = objectNamePlural.charAt(0).toUpperCase() + objectNamePlural.slice(1);
-  // Most Twenty objects use singular for filter type: PersonFilterInput, CompanyFilterInput, etc.
-  // But the pattern might vary. Use a generic approach with no explicit types for now.
+// Twenty's workspace GraphQL uses singularPascalCase for input types:
+//   PersonFilterInput, CompanyFilterInput, OpportunityFilterInput, etc.
+const buildQuery = (
+  objectNamePlural: string,
+  objectNameSingular: string,
+  fields: string,
+): string => {
+  const singularPascal = toPascalCase(objectNameSingular);
+  const pluralPascal = toPascalCase(objectNamePlural);
 
   return `
-    query FindMany${capitalized}(
-      $filter: ${capitalized}FilterInput
-      $orderBy: [${capitalized}OrderByInput!]
+    query FindMany${pluralPascal}(
+      $filter: ${singularPascal}FilterInput
+      $orderBy: [${singularPascal}OrderByInput!]
       $first: Int
       $after: String
       $last: Int
@@ -97,24 +109,35 @@ const buildQuery = (objectNamePlural: string, fields: string): string => {
   `;
 };
 
-// Build filter for search query (basic text search across common fields)
+// Build filter for search query — searches across the specified fields
 const buildSearchFilter = (
   searchQuery: string,
+  searchFields?: string[],
 ): Record<string, unknown> | undefined => {
   if (!searchQuery.trim()) return undefined;
 
   const searchValue = `%${searchQuery.trim()}%`;
+  const fields = searchFields ?? ['name'];
 
-  // Twenty's filter system uses nested field filters
-  // We build an OR filter that checks common text fields
-  // This is a simplified approach — specific pages can override via custom filters
-  return {
-    or: [
-      { name: { firstName: { like: searchValue } } },
-      { name: { lastName: { like: searchValue } } },
-      { name: { like: searchValue } },
-    ],
-  };
+  // Build an OR filter across the specified fields
+  // Each field can be a dot-separated path (e.g. 'name.firstName')
+  const orClauses = fields.map((field) => {
+    const parts = field.split('.');
+    if (parts.length === 1) {
+      return { [field]: { like: searchValue } };
+    }
+    // Nested field: build nested object
+    let obj: Record<string, unknown> = {};
+    let current = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      current[parts[i]] = {};
+      current = current[parts[i]] as Record<string, unknown>;
+    }
+    current[parts[parts.length - 1]] = { like: searchValue };
+    return obj;
+  });
+
+  return orClauses.length === 1 ? orClauses[0] : { or: orClauses };
 };
 
 // Build orderBy from sort column and direction
@@ -149,7 +172,9 @@ export const useRecordList = <TRecord extends { id: string }>(
 ): UseRecordListReturn<TRecord> => {
   const {
     objectNamePlural,
+    objectNameSingular,
     fields,
+    searchFields,
     pageSize: initialPageSize = 25,
     initialSortColumn = null,
     initialSortDirection = null,
@@ -170,7 +195,7 @@ export const useRecordList = <TRecord extends { id: string }>(
   const cursorMapRef = useRef<PageCursorMap>({ 1: null });
   const fetchCounterRef = useRef(0);
 
-  const query = buildQuery(objectNamePlural, fields);
+  const query = buildQuery(objectNamePlural, objectNameSingular, fields);
 
   const fetchData = useCallback(async () => {
     const fetchId = ++fetchCounterRef.current;
@@ -181,7 +206,7 @@ export const useRecordList = <TRecord extends { id: string }>(
       const variables: Record<string, unknown> = {
         first: pageSize,
         after: cursorMapRef.current[currentPage] ?? undefined,
-        filter: buildSearchFilter(searchQuery),
+        filter: buildSearchFilter(searchQuery, searchFields),
         orderBy: buildOrderBy(sortColumn, sortDirection),
       };
 
