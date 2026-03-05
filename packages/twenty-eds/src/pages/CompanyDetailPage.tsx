@@ -1,3 +1,6 @@
+import { Button } from '@eds/components/Button';
+import { ConfirmDialog } from '@eds/components/ConfirmDialog';
+import { Icon } from '@eds/components/Icon';
 import type { PropertyItem } from '@eds/components/PropertyBox';
 import { PropertyBox } from '@eds/components/PropertyBox';
 import { RecordHeader } from '@eds/components/RecordHeader';
@@ -6,12 +9,13 @@ import { Spinner } from '@eds/components/Spinner';
 import { Tabs } from '@eds/components/Tabs';
 import type { TimelineEvent } from '@eds/components/Timeline';
 import { Timeline } from '@eds/components/Timeline';
+import { useRecordDelete } from '@eds/hooks/useRecordDelete';
 import { useRecordDetail } from '@eds/hooks/useRecordDetail';
 import { useRecordUpdate } from '@eds/hooks/useRecordUpdate';
 import { useToast } from '@eds/hooks/useToast';
 import { tokens } from '@eds/tokens';
 import { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 type CompanyRecord = {
   id: string;
@@ -62,9 +66,11 @@ const TABS = [
 
 export const CompanyDetailPage = () => {
   const { recordId } = useParams<{ recordId: string }>();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const { record, loading, error, refresh } = useRecordDetail<CompanyRecord>({
@@ -78,6 +84,23 @@ export const CompanyDetailPage = () => {
     objectNameSingular: 'company',
     objectNamePlural: 'companies',
   });
+
+  const { deleteRecord, loading: deleting } = useRecordDelete({
+    objectNameSingular: 'company',
+    objectNamePlural: 'companies',
+  });
+
+  const handleDelete = useCallback(async () => {
+    if (!recordId) return;
+    const result = await deleteRecord(recordId);
+    if (result.success) {
+      showSuccess('Company deleted', 'The company has been permanently removed.');
+      navigate('/companies');
+    } else {
+      showError('Failed to delete company', result.error ?? 'An unknown error occurred.');
+      setShowDeleteDialog(false);
+    }
+  }, [recordId, deleteRecord, showSuccess, showError, navigate]);
 
   const fieldPathMap: Record<string, string> = {
     name: 'name',
@@ -188,6 +211,15 @@ export const CompanyDetailPage = () => {
           { label: 'Companies', href: '#/companies' },
           { label: displayName },
         ]}
+        actions={
+          <Button
+            label="Delete"
+            variant="destructive"
+            size="small"
+            iconLeft={<Icon name="trash" size={14} />}
+            onClick={() => setShowDeleteDialog(true)}
+          />
+        }
       />
 
       <Tabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
@@ -243,6 +275,17 @@ export const CompanyDetailPage = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${displayName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+      />
     </div>
   );
 };

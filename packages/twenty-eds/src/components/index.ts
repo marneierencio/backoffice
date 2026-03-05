@@ -71,3 +71,27 @@ export type { RelationCardProps, RelationRecord } from './RelationCard';
 export { Timeline } from './Timeline';
 export type { TimelineEvent, TimelineEventType, TimelineProps } from './Timeline';
 
+// Phase 3 — Core CRM Actions components
+export { FormElement } from './FormElement';
+export type { FormElementLayout, FormElementProps } from './FormElement';
+
+export { Textarea } from './Textarea';
+export type { TextareaProps } from './Textarea';
+
+export { FileSelector } from './FileSelector';
+export type { FileSelectorProps } from './FileSelector';
+
+export { Combobox } from './Combobox';
+export type { ComboboxOption, ComboboxProps } from './Combobox';
+
+export { ConfirmDialog } from './ConfirmDialog';
+export type { ConfirmDialogProps, ConfirmDialogVariant } from './ConfirmDialog';
+
+export { RecordForm } from './RecordForm';
+export type {
+    FormFieldDefinition,
+    FormFieldType,
+    FormSection,
+    RecordFormProps
+} from './RecordForm';
+

@@ -1,3 +1,6 @@
+import { Button } from '@eds/components/Button';
+import { ConfirmDialog } from '@eds/components/ConfirmDialog';
+import { Icon } from '@eds/components/Icon';
 import type { PropertyItem } from '@eds/components/PropertyBox';
 import { PropertyBox } from '@eds/components/PropertyBox';
 import { RecordHeader } from '@eds/components/RecordHeader';
@@ -6,12 +9,13 @@ import { Spinner } from '@eds/components/Spinner';
 import { Tabs } from '@eds/components/Tabs';
 import type { TimelineEvent } from '@eds/components/Timeline';
 import { Timeline } from '@eds/components/Timeline';
+import { useRecordDelete } from '@eds/hooks/useRecordDelete';
 import { useRecordDetail } from '@eds/hooks/useRecordDetail';
 import { useRecordUpdate } from '@eds/hooks/useRecordUpdate';
 import { useToast } from '@eds/hooks/useToast';
 import { tokens } from '@eds/tokens';
 import { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 type PersonRecord = {
   id: string;
@@ -48,9 +52,11 @@ const TABS = [
 
 export const ContactDetailPage = () => {
   const { recordId } = useParams<{ recordId: string }>();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const { record, loading, error, refresh } = useRecordDetail<PersonRecord>({
@@ -64,6 +70,23 @@ export const ContactDetailPage = () => {
     objectNameSingular: 'person',
     objectNamePlural: 'people',
   });
+
+  const { deleteRecord, loading: deleting } = useRecordDelete({
+    objectNameSingular: 'person',
+    objectNamePlural: 'people',
+  });
+
+  const handleDelete = useCallback(async () => {
+    if (!recordId) return;
+    const result = await deleteRecord(recordId);
+    if (result.success) {
+      showSuccess('Contact deleted', 'The contact has been permanently removed.');
+      navigate('/contacts');
+    } else {
+      showError('Failed to delete contact', result.error ?? 'An unknown error occurred.');
+      setShowDeleteDialog(false);
+    }
+  }, [recordId, deleteRecord, showSuccess, showError, navigate]);
 
   // Maps field keys back to GraphQL mutation field paths
   const fieldPathMap: Record<string, string> = {
@@ -184,6 +207,15 @@ export const ContactDetailPage = () => {
           { label: 'Contacts', href: '#/contacts' },
           { label: displayName },
         ]}
+        actions={
+          <Button
+            label="Delete"
+            variant="destructive"
+            size="small"
+            iconLeft={<Icon name="trash" size={14} />}
+            onClick={() => setShowDeleteDialog(true)}
+          />
+        }
       />
 
       <Tabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
@@ -239,6 +271,17 @@ export const ContactDetailPage = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        title="Delete Contact"
+        message={`Are you sure you want to delete "${displayName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+      />
     </div>
   );
 };

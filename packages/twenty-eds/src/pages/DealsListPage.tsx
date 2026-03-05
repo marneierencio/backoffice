@@ -1,6 +1,8 @@
 import { Badge } from '@eds/components/Badge';
+import { Button } from '@eds/components/Button';
 import type { ColumnDefinition, SortDirection } from '@eds/components/DataTable';
 import { DataTable } from '@eds/components/DataTable';
+import { Icon } from '@eds/components/Icon';
 import { PageHeader } from '@eds/components/PageHeader';
 import { Pagination } from '@eds/components/Pagination';
 import { SearchBar } from '@eds/components/SearchBar';
@@ -161,6 +163,15 @@ export const DealsListPage = () => {
         title="Deals"
         description="Manage your opportunities and deals pipeline"
         icon="💼"
+        actions={
+          <Button
+            label="New Deal"
+            variant="brand"
+            size="small"
+            iconLeft={<Icon name="plus" size={14} />}
+            onClick={() => { window.location.hash = '/deals/new'; }}
+          />
+        }
       >
         <SearchBar
           value={searchQuery}

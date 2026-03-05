@@ -20,7 +20,7 @@ const toPascalCase = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
 // Twenty's workspace GraphQL singular endpoint uses a filter-based approach:
-//   query FindOnePerson($filter: PersonFilterInput) {
+//   query FindOnePerson($filter: PersonFilterInput!) {
 //     person(filter: { id: { eq: $recordId } }) { ...fields }
 //   }
 // The singular endpoint returns the object directly (no edges/relay wrapper).
@@ -31,7 +31,7 @@ const buildFindOneQuery = (
   const singularPascal = toPascalCase(objectNameSingular);
 
   return `
-    query FindOne${singularPascal}($filter: ${singularPascal}FilterInput) {
+    query FindOne${singularPascal}($filter: ${singularPascal}FilterInput!) {
       ${objectNameSingular}(filter: $filter) {
         ${fields}
       }

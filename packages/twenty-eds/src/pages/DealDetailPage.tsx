@@ -1,3 +1,6 @@
+import { Button } from '@eds/components/Button';
+import { ConfirmDialog } from '@eds/components/ConfirmDialog';
+import { Icon } from '@eds/components/Icon';
 import type { PropertyItem } from '@eds/components/PropertyBox';
 import { PropertyBox } from '@eds/components/PropertyBox';
 import { RecordHeader } from '@eds/components/RecordHeader';
@@ -6,19 +9,20 @@ import { Spinner } from '@eds/components/Spinner';
 import { Tabs } from '@eds/components/Tabs';
 import type { TimelineEvent } from '@eds/components/Timeline';
 import { Timeline } from '@eds/components/Timeline';
+import { useRecordDelete } from '@eds/hooks/useRecordDelete';
 import { useRecordDetail } from '@eds/hooks/useRecordDetail';
 import { useRecordUpdate } from '@eds/hooks/useRecordUpdate';
 import { useToast } from '@eds/hooks/useToast';
 import { tokens } from '@eds/tokens';
 import { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 type OpportunityRecord = {
   id: string;
   name: string;
   amount: {
     amountMicros: number;
-    currency: { code: string; symbol: string };
+    currencyCode: string;
   } | null;
   stage: string;
   closeDate: string | null;
@@ -30,7 +34,7 @@ type OpportunityRecord = {
 const FIELDS = `
   id
   name
-  amount { amountMicros currency { code symbol } }
+  amount { amountMicros currencyCode }
   stage
   closeDate
   createdAt
@@ -57,9 +61,11 @@ const STAGE_OPTIONS = [
 
 export const DealDetailPage = () => {
   const { recordId } = useParams<{ recordId: string }>();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const { record, loading, error, refresh } = useRecordDetail<OpportunityRecord>({
@@ -73,6 +79,23 @@ export const DealDetailPage = () => {
     objectNameSingular: 'opportunity',
     objectNamePlural: 'opportunities',
   });
+
+  const { deleteRecord, loading: deleting } = useRecordDelete({
+    objectNameSingular: 'opportunity',
+    objectNamePlural: 'opportunities',
+  });
+
+  const handleDelete = useCallback(async () => {
+    if (!recordId) return;
+    const result = await deleteRecord(recordId);
+    if (result.success) {
+      showSuccess('Deal deleted', 'The deal has been permanently removed.');
+      navigate('/deals');
+    } else {
+      showError('Failed to delete deal', result.error ?? 'An unknown error occurred.');
+      setShowDeleteDialog(false);
+    }
+  }, [recordId, deleteRecord, showSuccess, showError, navigate]);
 
   const fieldPathMap: Record<string, string> = {
     name: 'name',
@@ -112,7 +135,7 @@ export const DealDetailPage = () => {
     if (!record) return [];
     return [
       { key: 'name', label: 'Name', value: record.name ?? '', fieldType: 'text' },
-      { key: 'amount', label: 'Amount', value: record.amount?.amountMicros ?? null, fieldType: 'currency', currencyCode: record.amount?.currency?.code ?? 'USD' },
+      { key: 'amount', label: 'Amount', value: record.amount?.amountMicros ?? null, fieldType: 'currency', currencyCode: record.amount?.currencyCode ?? 'USD' },
       {
         key: 'stage',
         label: 'Stage',
@@ -189,6 +212,15 @@ export const DealDetailPage = () => {
           { label: 'Deals', href: '#/deals' },
           { label: displayName },
         ]}
+        actions={
+          <Button
+            label="Delete"
+            variant="destructive"
+            size="small"
+            iconLeft={<Icon name="trash" size={14} />}
+            onClick={() => setShowDeleteDialog(true)}
+          />
+        }
       />
 
       <Tabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
@@ -244,6 +276,17 @@ export const DealDetailPage = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        title="Delete Deal"
+        message={`Are you sure you want to delete "${displayName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+      />
     </div>
   );
 };

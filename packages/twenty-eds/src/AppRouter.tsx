@@ -4,6 +4,9 @@ import { CompaniesListPage } from '@eds/pages/CompaniesListPage';
 import { CompanyDetailPage } from '@eds/pages/CompanyDetailPage';
 import { ContactDetailPage } from '@eds/pages/ContactDetailPage';
 import { ContactsListPage } from '@eds/pages/ContactsListPage';
+import { CreateCompanyPage } from '@eds/pages/CreateCompanyPage';
+import { CreateContactPage } from '@eds/pages/CreateContactPage';
+import { CreateDealPage } from '@eds/pages/CreateDealPage';
 import { DashboardPage } from '@eds/pages/DashboardPage';
 import { DealDetailPage } from '@eds/pages/DealDetailPage';
 import { DealsListPage } from '@eds/pages/DealsListPage';
@@ -111,6 +114,14 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/contacts/new',
+    element: (
+      <ProtectedLayout>
+        <CreateContactPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/contacts/:recordId',
     element: (
       <ProtectedLayout>
@@ -127,6 +138,14 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/companies/new',
+    element: (
+      <ProtectedLayout>
+        <CreateCompanyPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/companies/:recordId',
     element: (
       <ProtectedLayout>
@@ -139,6 +158,14 @@ const router = createHashRouter([
     element: (
       <ProtectedLayout>
         <DealsListPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/deals/new',
+    element: (
+      <ProtectedLayout>
+        <CreateDealPage />
       </ProtectedLayout>
     ),
   },

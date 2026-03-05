@@ -1,5 +1,7 @@
+import { Button } from '@eds/components/Button';
 import type { ColumnDefinition, SortDirection } from '@eds/components/DataTable';
 import { DataTable } from '@eds/components/DataTable';
+import { Icon } from '@eds/components/Icon';
 import { PageHeader } from '@eds/components/PageHeader';
 import { Pagination } from '@eds/components/Pagination';
 import { SearchBar } from '@eds/components/SearchBar';
@@ -128,6 +130,15 @@ export const CompaniesListPage = () => {
         title="Companies"
         description="Manage your company records"
         icon="🏢"
+        actions={
+          <Button
+            label="New Company"
+            variant="brand"
+            size="small"
+            iconLeft={<Icon name="plus" size={14} />}
+            onClick={() => { window.location.hash = '/companies/new'; }}
+          />
+        }
       >
         <SearchBar
           value={searchQuery}

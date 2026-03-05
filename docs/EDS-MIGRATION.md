@@ -43,11 +43,11 @@ This document outlines the strategy for gradually migrating screens from the Twe
 - [ ] Avatar component
 
 ### Phase 3 — Core CRM Actions
-- [ ] Create record form
-- [ ] Edit record form
-- [ ] Delete confirmation dialog
-- [ ] Relationship fields
-- [ ] File upload field
+- [x] Create record form
+- [x] Edit record form
+- [x] Delete confirmation dialog
+- [x] Relationship fields
+- [x] File upload field
 
 ### Phase 4 — Navigation & Productivity
 - [ ] Command menu integration
