@@ -34,9 +34,33 @@ const CURRENT_USER_QUERY = `
   }
 `;
 
+// SignIn returns a workspace-agnostic token AND a list of available workspaces.
+// Each workspace carries a loginToken that must be exchanged for a
+// workspace-scoped ACCESS token before querying the /graphql endpoint.
 const LOGIN_MUTATION = `
   mutation SignIn($email: String!, $password: String!) {
     signIn(email: $email, password: $password) {
+      tokens {
+        accessOrWorkspaceAgnosticToken {
+          token
+        }
+      }
+      availableWorkspaces {
+        availableWorkspacesForSignIn {
+          id
+          displayName
+          loginToken
+        }
+      }
+    }
+  }
+`;
+
+// Exchange a workspace-specific loginToken for a workspace-scoped ACCESS token.
+// The 'origin' arg lets the server verify the workspace domain.
+const GET_AUTH_TOKENS_FROM_LOGIN_TOKEN_MUTATION = `
+  mutation GetAuthTokensFromLoginToken($loginToken: String!, $origin: String!) {
+    getAuthTokensFromLoginToken(loginToken: $loginToken, origin: $origin) {
       tokens {
         accessOrWorkspaceAgnosticToken {
           token
@@ -51,6 +75,12 @@ const UPDATE_FRONTEND_PREFERENCE_MUTATION = `
     updateUserFrontendPreference(frontendPreference: $frontendPreference)
   }
 `;
+
+type AvailableWorkspace = {
+  id: string;
+  displayName?: string;
+  loginToken?: string;
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -84,6 +114,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => setIsLoading(false));
   }, [token, fetchCurrentUser]);
 
+  // Exchange a workspace loginToken for a workspace-scoped ACCESS token
+  const exchangeLoginToken = useCallback(async (loginToken: string): Promise<string> => {
+    // Temporarily use the workspace-agnostic token so the mutation can reach /metadata
+    const result = await gql<{
+      getAuthTokensFromLoginToken: {
+        tokens: {
+          accessOrWorkspaceAgnosticToken: {
+            token: string;
+          };
+        };
+      };
+    }>(
+      GET_AUTH_TOKENS_FROM_LOGIN_TOKEN_MUTATION,
+      { loginToken, origin: window.location.origin },
+    );
+
+    const accessToken =
+      result.data?.getAuthTokensFromLoginToken?.tokens?.accessOrWorkspaceAgnosticToken?.token;
+
+    if (result.errors || !accessToken) {
+      throw new Error(result.errors?.[0]?.message ?? 'Failed to exchange login token');
+    }
+
+    return accessToken;
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     const result = await gql<{
       signIn: {
@@ -92,25 +148,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             token: string;
           };
         };
+        availableWorkspaces: {
+          availableWorkspacesForSignIn: AvailableWorkspace[];
+        };
       };
     }>(
       LOGIN_MUTATION,
       { email, password },
     );
 
-    const newToken = result.data?.signIn?.tokens?.accessOrWorkspaceAgnosticToken?.token;
+    const agnosticToken = result.data?.signIn?.tokens?.accessOrWorkspaceAgnosticToken?.token;
 
-    if (result.errors || !newToken) {
+    if (result.errors || !agnosticToken) {
       throw new Error(result.errors?.[0]?.message ?? 'Login failed');
     }
 
-    localStorage.setItem(TOKEN_KEY, newToken);
-    setToken(newToken);
+    // Set the agnostic token temporarily so we can call /metadata mutations
+    setAuthToken(agnosticToken);
 
-    const currentUser = await fetchCurrentUser(newToken);
+    // Find the first workspace with a loginToken and exchange it for a
+    // workspace-scoped ACCESS token.  This is required so that queries to
+    // the /graphql endpoint can resolve the workspace-specific schema
+    // (PersonFilterInput, CompanyFilterInput, etc.).
+    const workspaces =
+      result.data?.signIn?.availableWorkspaces?.availableWorkspacesForSignIn ?? [];
+    const targetWorkspace = workspaces.find((ws) => ws.loginToken);
+
+    let finalToken: string;
+
+    if (targetWorkspace?.loginToken) {
+      finalToken = await exchangeLoginToken(targetWorkspace.loginToken);
+    } else {
+      // Fallback: no workspace loginToken available (e.g. single-workspace
+      // setup where the agnostic token already carries workspace context)
+      finalToken = agnosticToken;
+    }
+
+    localStorage.setItem(TOKEN_KEY, finalToken);
+    setToken(finalToken);
+
+    const currentUser = await fetchCurrentUser(finalToken);
 
     setUser(currentUser);
-  }, [fetchCurrentUser]);
+  }, [fetchCurrentUser, exchangeLoginToken]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
