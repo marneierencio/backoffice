@@ -164,6 +164,9 @@ export const CompaniesListPage = () => {
         bordered
         emptyMessage="No companies found"
         emptyIcon="🏢"
+        onRowClick={(record) => {
+          window.location.hash = `/companies/${record.id}`;
+        }}
       />
 
       <Pagination

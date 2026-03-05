@@ -1,8 +1,11 @@
 import { Shell } from '@eds/components/Layout';
 import { useAuth } from '@eds/hooks/useAuth';
 import { CompaniesListPage } from '@eds/pages/CompaniesListPage';
+import { CompanyDetailPage } from '@eds/pages/CompanyDetailPage';
+import { ContactDetailPage } from '@eds/pages/ContactDetailPage';
 import { ContactsListPage } from '@eds/pages/ContactsListPage';
 import { DashboardPage } from '@eds/pages/DashboardPage';
+import { DealDetailPage } from '@eds/pages/DealDetailPage';
 import { DealsListPage } from '@eds/pages/DealsListPage';
 import { LoginPage } from '@eds/pages/LoginPage';
 import { ProfileSettingsPage } from '@eds/pages/ProfileSettingsPage';
@@ -108,6 +111,14 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/contacts/:recordId',
+    element: (
+      <ProtectedLayout>
+        <ContactDetailPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/companies',
     element: (
       <ProtectedLayout>
@@ -116,10 +127,26 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/companies/:recordId',
+    element: (
+      <ProtectedLayout>
+        <CompanyDetailPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/deals',
     element: (
       <ProtectedLayout>
         <DealsListPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/deals/:recordId',
+    element: (
+      <ProtectedLayout>
+        <DealDetailPage />
       </ProtectedLayout>
     ),
   },

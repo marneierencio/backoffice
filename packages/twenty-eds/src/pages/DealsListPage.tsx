@@ -197,6 +197,9 @@ export const DealsListPage = () => {
         bordered
         emptyMessage="No deals found"
         emptyIcon="💼"
+        onRowClick={(record) => {
+          window.location.hash = `/deals/${record.id}`;
+        }}
       />
 
       <Pagination

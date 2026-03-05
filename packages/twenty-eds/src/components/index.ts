@@ -40,3 +40,34 @@ export type { ColumnDefinition, DataTableProps, SortDirection } from './DataTabl
 export { Pagination } from './Pagination';
 export type { PaginationProps } from './Pagination';
 
+// Phase 2 — Record Detail components
+export { Avatar } from './Avatar';
+export type { AvatarProps, AvatarSize, AvatarType } from './Avatar';
+
+export { Tabs } from './Tabs';
+export type { TabItem, TabsProps, TabsSize } from './Tabs';
+
+export { Modal } from './Modal';
+export type { ModalProps, ModalSize } from './Modal';
+
+export { Toast, ToastContainer, ToastProvider } from './Toast';
+export type { ToastData, ToastMode, ToastProps, ToastVariant } from './Toast';
+
+export { FieldRenderer } from './FieldRenderer';
+export type { FieldRendererProps, FieldType } from './FieldRenderer';
+
+export { InlineEdit } from './InlineEdit';
+export type { InlineEditProps } from './InlineEdit';
+
+export { PropertyBox } from './PropertyBox';
+export type { PropertyBoxProps, PropertyItem } from './PropertyBox';
+
+export { RecordHeader } from './RecordHeader';
+export type { BreadcrumbItem, RecordHeaderProps } from './RecordHeader';
+
+export { RelationCard } from './RelationCard';
+export type { RelationCardProps, RelationRecord } from './RelationCard';
+
+export { Timeline } from './Timeline';
+export type { TimelineEvent, TimelineEventType, TimelineProps } from './Timeline';
+

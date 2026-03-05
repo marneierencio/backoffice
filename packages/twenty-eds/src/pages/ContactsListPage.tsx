@@ -173,6 +173,9 @@ export const ContactsListPage = () => {
         bordered
         emptyMessage="No contacts found"
         emptyIcon="👥"
+        onRowClick={(record) => {
+          window.location.hash = `/contacts/${record.id}`;
+        }}
       />
 
       <Pagination

@@ -360,3 +360,289 @@ import { Pagination } from '@eds/components/Pagination';
 
 Renders: record count summary, first/prev/page-numbers/next/last buttons, and a rows-per-page select. Active page is highlighted with brand color. Uses `<nav aria-label="Pagination">` for accessibility.
 
+---
+
+## Phase 2 — Record Detail Components
+
+Components added in Phase 2 to support record detail pages (contact, company, deal).
+
+### Avatar
+
+Circular (user) or rounded-square (entity) avatar with image, initials fallback, or icon fallback.
+
+```tsx
+import { Avatar } from '@eds/components/Avatar';
+
+<Avatar
+  name="John Doe"
+  src="https://example.com/avatar.jpg"
+  type="user"     // 'user' | 'entity'
+  size="medium"   // 'x-small' (20px) | 'small' (24px) | 'medium' (32px) | 'large' (48px)
+/>
+```
+
+**Behavior:**
+- `user` type renders as circle; `entity` renders as rounded square
+- If `src` fails to load or is not provided, renders initials extracted from `name`
+- User initials: first letter of first + last word; Entity initials: first two letters
+- Falls back to `user` or `company` icon if name is empty
+- Uses `brandPrimary` background with `textInverse` foreground for initials
+
+### Tabs
+
+Horizontal tab bar with ARIA tablist/tab/tabpanel roles following SLDS 2 tab pattern.
+
+```tsx
+import { Tabs } from '@eds/components/Tabs';
+
+<Tabs
+  items={[
+    { id: 'details', label: 'Details' },
+    { id: 'timeline', label: 'Timeline', badge: 3 },
+    { id: 'notes', label: 'Notes', disabled: true },
+  ]}
+  activeId="details"
+  onTabChange={(id) => setActiveTab(id)}
+  size="medium"   // 'small' | 'medium'
+/>
+```
+
+**Accessibility:**
+- `role="tablist"` on container, `role="tab"` on each tab, `role="tabpanel"` on content
+- Arrow keys navigate between tabs; Home/End jump to first/last
+- Only active tab is in tab order (`tabIndex={0}`)
+- `aria-selected`, `aria-controls`, `aria-labelledby` correctly wired
+
+### Modal
+
+Dialog overlay with focus trap, backdrop, and keyboard support.
+
+```tsx
+import { Modal } from '@eds/components/Modal';
+
+<Modal
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="Confirm Action"
+  size="medium"   // 'small' (480px) | 'medium' (640px) | 'large' (960px)
+  footer={<Button label="OK" variant="brand" onClick={handleOk} />}
+>
+  <p>Are you sure?</p>
+</Modal>
+```
+
+**Behavior:**
+- `role="dialog"`, `aria-modal="true"`, `aria-labelledby` linked to title
+- Focus trapped inside modal when open; Escape key closes
+- Focus moves to first focusable element on open, restores to trigger on close
+- Backdrop click closes modal
+- CSS animations: `eds-fade-in` (backdrop), `eds-slide-up` (panel)
+
+### Toast / ToastProvider
+
+Notification system with success/error/warning/info variants following SLDS 2 toast pattern.
+
+```tsx
+// Wrap app with provider
+import { ToastProvider } from '@eds/components/Toast';
+
+<ToastProvider>
+  <App />
+</ToastProvider>
+
+// Use in any component
+import { useToast } from '@eds/hooks/useToast';
+
+const { showSuccess, showError, showWarning, showInfo } = useToast();
+showSuccess('Record saved');
+showError('Failed to update', 'Please try again');
+```
+
+**Variants:** `success` (green), `error` (red), `warning` (amber), `info` (blue)
+**Auto-dismiss:** Success without detail link = 4.8s; all others = sticky (user must dismiss)
+**Accessibility:** `role="status"`, `aria-live="polite"`, `aria-atomic="true"`. Close button has `aria-label="Close notification"`.
+
+### FieldRenderer
+
+Read-only field display that formats values by type.
+
+```tsx
+import { FieldRenderer } from '@eds/components/FieldRenderer';
+
+<FieldRenderer
+  type="email"    // 'text' | 'email' | 'phone' | 'url' | 'number' | 'date' | 'currency' | 'boolean' | 'select'
+  value="john@example.com"
+  emptyPlaceholder="—"
+/>
+```
+
+**Type behaviors:**
+- `email` → renders `mailto:` link
+- `phone` → renders `tel:` link
+- `url` → renders external link with icon
+- `number` → locale-formatted with `toLocaleString()`
+- `currency` → micros/1M formatted with `Intl.NumberFormat`
+- `boolean` → "Yes" / "No"
+- `date` → `toLocaleDateString()`
+
+### InlineEdit
+
+Click-to-edit field with read/edit mode toggle. Uses FieldRenderer in read mode.
+
+```tsx
+import { InlineEdit } from '@eds/components/InlineEdit';
+
+<InlineEdit
+  type="text"
+  value="John"
+  label="First Name"
+  onSave={async (value) => { /* save to API */ }}
+  editable={true}
+/>
+```
+
+**Behavior:**
+- Read mode: displays value via FieldRenderer, pencil icon on hover
+- Edit mode: shows appropriate `<input>` type (text, email, tel, number, date, url) or `<select>`
+- Save: Enter key or checkmark button. Cancel: Escape key or × button
+- Shows loading spinner while saving, error message on failure
+- `role="button"` + `aria-label="Edit {label}"` in read mode
+
+### PropertyBox
+
+Vertical list of labeled field pairs, each using InlineEdit.
+
+```tsx
+import { PropertyBox } from '@eds/components/PropertyBox';
+
+<PropertyBox
+  fields={[
+    { label: 'Name', fieldName: 'name', type: 'text', editable: true },
+    { label: 'Email', fieldName: 'email', type: 'email', editable: true },
+    { label: 'Created', fieldName: 'createdAt', type: 'date', editable: false },
+  ]}
+  values={{ name: 'John', email: 'john@example.com', createdAt: '2025-01-15T00:00:00Z' }}
+  onSave={async (fieldName, value) => { /* save */ }}
+  compact={false}
+/>
+```
+
+**Layout:** Label (140px, right-aligned) + value (flex 1, max-width 300px). Dividers between rows (omitted in compact mode).
+
+### RecordHeader
+
+Page header for record detail pages with breadcrumb navigation, avatar, name, and object label.
+
+```tsx
+import { RecordHeader } from '@eds/components/RecordHeader';
+
+<RecordHeader
+  avatar={<Avatar name="John Doe" type="user" size="large" />}
+  recordName="John Doe"
+  objectLabel="Contact"
+  breadcrumbs={[
+    { label: 'Contacts', href: '#/contacts' },
+    { label: 'John Doe' },
+  ]}
+  actions={<Button label="Edit" variant="outline" />}
+/>
+```
+
+**Accessibility:** `<nav aria-label="Breadcrumb">` + `<ol>` for breadcrumbs. Record name rendered as `<h1>`.
+
+### RelationCard
+
+Collapsible card displaying related records (one-to-one or one-to-many).
+
+```tsx
+import { RelationCard } from '@eds/components/RelationCard';
+
+<RelationCard
+  title="Contacts"
+  type="many"     // 'one' | 'many'
+  records={[
+    { id: '1', name: 'John Doe', subtitle: 'john@example.com', avatarUrl: '...' },
+    { id: '2', name: 'Jane Smith', subtitle: 'jane@example.com' },
+  ]}
+  onRecordClick={(record) => navigate(`/contacts/${record.id}`)}
+  initialExpanded={true}
+  maxVisible={5}
+  avatarType="user"
+  emptyMessage="No contacts linked"
+/>
+```
+
+**Behavior:**
+- Shows count badge in title for `many` type
+- Collapsible with chevron toggle
+- "Show more" / "Show less" when records exceed `maxVisible`
+- Each record row: Avatar + name + subtitle, clickable with hover highlight
+
+### Timeline
+
+Vertical timeline displaying activity events with relative timestamps.
+
+```tsx
+import { Timeline } from '@eds/components/Timeline';
+
+<Timeline
+  events={[
+    { id: '1', type: 'created', title: 'Record created', timestamp: '2025-01-15T10:30:00Z' },
+    { id: '2', type: 'email', title: 'Email sent', timestamp: '2025-01-16T14:00:00Z',
+      author: { name: 'John Doe', avatarUrl: '...' } },
+  ]}
+  maxVisible={10}
+  onShowMore={() => loadMore()}
+/>
+```
+
+**Event types:** `created`, `updated`, `note`, `email`, `task`, `call`, `event` — each with a distinct icon and color on the timeline dot.
+**Timestamps:** Relative format ("2h ago", "Yesterday", "Mar 15, 2025").
+
+---
+
+## Hooks
+
+### useRecordDetail
+
+Fetches a single record by ID via the Twenty workspace GraphQL API.
+
+```tsx
+import { useRecordDetail } from '@eds/hooks/useRecordDetail';
+
+const { record, loading, error, refresh } = useRecordDetail<PersonRecord>({
+  objectNameSingular: 'person',
+  objectNamePlural: 'people',
+  recordId: 'uuid-here',
+  fields: 'id name { firstName lastName } emails { primaryEmail }',
+});
+```
+
+### useRecordUpdate
+
+Mutation hook for updating a single field on a record. Supports nested dot-path fields.
+
+```tsx
+import { useRecordUpdate } from '@eds/hooks/useRecordUpdate';
+
+const { updateField, loading } = useRecordUpdate({
+  objectNameSingular: 'person',
+  objectNamePlural: 'people',
+});
+
+const result = await updateField('record-id', 'name.firstName', 'Jane');
+// result: { success: true } or { success: false, error: 'message' }
+```
+
+### useToast
+
+Provides access to the toast notification system via React context.
+
+```tsx
+import { useToast } from '@eds/hooks/useToast';
+
+const { showSuccess, showError, showWarning, showInfo } = useToast();
+showSuccess('Saved successfully');
+showError('An error occurred', 'Please try again later');
+```
+

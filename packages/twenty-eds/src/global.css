@@ -168,3 +168,36 @@ button {
   white-space: nowrap;
   border: 0;
 }
+
+/* ==========================================================================
+   Animations — Phase 2 (Modal, Toast)
+   ========================================================================== */
+
+@keyframes eds-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes eds-slide-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes eds-toast-enter {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Inline Edit hover indicator
+   ========================================================================== */
+
+.eds-inline-edit-pencil {
+  opacity: 0;
+  transition: opacity var(--eds-g-duration-quickly, 100ms);
+}
+
+.eds-inline-edit-trigger:hover .eds-inline-edit-pencil,
+.eds-inline-edit-trigger:focus-within .eds-inline-edit-pencil {
+  opacity: 1;
+}
