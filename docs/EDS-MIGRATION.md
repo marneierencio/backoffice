@@ -35,12 +35,12 @@ This document outlines the strategy for gradually migrating screens from the Twe
 - [x] Deals/Opportunities list page
 
 ### Phase 2 — Record Detail
-- [ ] Record show page
-- [ ] Field editing inline
-- [ ] Modal component
-- [ ] Tabs component
-- [ ] Toast notification system
-- [ ] Avatar component
+- [x] Record show page
+- [x] Field editing inline
+- [x] Modal component
+- [x] Tabs component
+- [x] Toast notification system
+- [x] Avatar component
 
 ### Phase 3 — Core CRM Actions
 - [x] Create record form
@@ -50,11 +50,11 @@ This document outlines the strategy for gradually migrating screens from the Twe
 - [x] File upload field
 
 ### Phase 4 — Navigation & Productivity
-- [ ] Command menu integration
-- [ ] Global search
-- [ ] Notifications panel
-- [ ] Calendar view
-- [ ] Kanban view
+- [x] Command menu integration
+- [x] Global search
+- [x] Notifications panel
+- [x] Calendar view
+- [x] Kanban view
 
 ### Phase 5 — Settings (Admin)
 - [ ] Full workspace settings

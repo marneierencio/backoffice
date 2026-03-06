@@ -1,5 +1,9 @@
+import { GlobalSearch } from '@eds/components/GlobalSearch';
 import { Shell } from '@eds/components/Layout';
+import { NotificationPanel } from '@eds/components/NotificationPanel';
 import { useAuth } from '@eds/hooks/useAuth';
+import { useNotifications } from '@eds/hooks/useNotifications';
+import { CalendarPage } from '@eds/pages/CalendarPage';
 import { CompaniesListPage } from '@eds/pages/CompaniesListPage';
 import { CompanyDetailPage } from '@eds/pages/CompanyDetailPage';
 import { ContactDetailPage } from '@eds/pages/ContactDetailPage';
@@ -10,6 +14,7 @@ import { CreateDealPage } from '@eds/pages/CreateDealPage';
 import { DashboardPage } from '@eds/pages/DashboardPage';
 import { DealDetailPage } from '@eds/pages/DealDetailPage';
 import { DealsListPage } from '@eds/pages/DealsListPage';
+import { KanbanDealsPage } from '@eds/pages/KanbanDealsPage';
 import { LoginPage } from '@eds/pages/LoginPage';
 import { ProfileSettingsPage } from '@eds/pages/ProfileSettingsPage';
 import { tokens } from '@eds/tokens';
@@ -48,6 +53,8 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         { id: 'contacts', label: 'Contacts', href: '#/contacts', icon: '👥' },
         { id: 'companies', label: 'Companies', href: '#/companies', icon: '🏢' },
         { id: 'deals', label: 'Deals', href: '#/deals', icon: '💼' },
+        { id: 'deals-kanban', label: 'Deals Pipeline', href: '#/deals/kanban', icon: '📊' },
+        { id: 'calendar', label: 'Calendar', href: '#/calendar', icon: '📅' },
       ],
     },
     {
@@ -58,8 +65,20 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     },
   ];
 
+  const { notifications, markAsRead, markAllAsRead } = useNotifications();
+
   const topBarRight = (
     <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing.spacingSmall }}>
+      <GlobalSearch
+        onResultClick={(result) => { window.location.hash = result.href; }}
+        onOpenCommandMenu={() => {}}
+      />
+      <NotificationPanel
+        notifications={notifications}
+        onNotificationClick={(n) => { if (n.href) window.location.hash = n.href; }}
+        onMarkAsRead={(id) => markAsRead(id)}
+        onMarkAllAsRead={markAllAsRead}
+      />
       <span style={{ color: tokens.color.neutral3, fontSize: tokens.typography.fontSizeSmall }}>
         {user.firstName || user.email}
       </span>
@@ -174,6 +193,22 @@ const router = createHashRouter([
     element: (
       <ProtectedLayout>
         <DealDetailPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/deals/kanban',
+    element: (
+      <ProtectedLayout>
+        <KanbanDealsPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/calendar',
+    element: (
+      <ProtectedLayout>
+        <CalendarPage />
       </ProtectedLayout>
     ),
   },

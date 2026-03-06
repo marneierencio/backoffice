@@ -95,3 +95,28 @@ export type {
     RecordFormProps
 } from './RecordForm';
 
+// Phase 4 — Navigation & Productivity components
+export { Popover } from './Popover';
+export type { PopoverPlacement, PopoverProps } from './Popover';
+
+export { DropdownMenu } from './DropdownMenu';
+export type { DropdownMenuProps, MenuItemData } from './DropdownMenu';
+
+export { Pill } from './Pill';
+export type { PillProps, PillVariant } from './Pill';
+
+export { CommandMenu } from './CommandMenu';
+export type { CommandGroup, CommandItem, CommandMenuProps, CommandType } from './CommandMenu';
+
+export { GlobalSearch } from './GlobalSearch';
+export type { GlobalSearchProps, SearchResult } from './GlobalSearch';
+
+export { NotificationItem, NotificationPanel } from './NotificationPanel';
+export type { NotificationData, NotificationItemProps, NotificationPanelProps, NotificationType } from './NotificationPanel';
+
+export { CalendarEvent, CalendarGrid } from './CalendarGrid';
+export type { CalendarEventData, CalendarEventProps, CalendarEventVariant, CalendarGridProps } from './CalendarGrid';
+
+export { KanbanBoard, KanbanCard } from './KanbanBoard';
+export type { KanbanBoardProps, KanbanCardProps, KanbanColumnData } from './KanbanBoard';
+
