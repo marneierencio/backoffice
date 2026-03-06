@@ -120,3 +120,16 @@ export type { CalendarEventData, CalendarEventProps, CalendarEventVariant, Calen
 export { KanbanBoard, KanbanCard } from './KanbanBoard';
 export type { KanbanBoardProps, KanbanCardProps, KanbanColumnData } from './KanbanBoard';
 
+// Phase 5 — Settings Admin components
+export { Switch } from './Switch';
+export type { SwitchProps } from './Switch';
+
+export { SectionHeader } from './SectionHeader';
+export type { SectionHeaderProps } from './SectionHeader';
+
+export { CopyInput } from './CopyInput';
+export type { CopyInputProps } from './CopyInput';
+
+export { SettingsLayout } from './SettingsLayout';
+export type { SettingsLayoutProps, SettingsNavGroup, SettingsNavItem } from './SettingsLayout';
+

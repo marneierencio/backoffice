@@ -18,7 +18,7 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 │  ┌──────────────────────┐  ┌──────────────────────────┐ │
 │  │  backoffice-main     │  │  backoffice-dev          │ │
 │  │  192.168.1.90        │  │  192.168.1.92            │ │
-│  │  (Produção)          │  │  (Desenvolvolvimento)    │ │
+│  │  (Produção)          │  │  (Desenvolvimento)      │ │
 │  │  branch: main        │  │  branch: development     │ │
 │  │                      │  │                          │ │
 │  │  ┌────────────────┐  │  │  ┌────────────────────┐  │ │

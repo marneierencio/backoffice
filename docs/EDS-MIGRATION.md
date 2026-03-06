@@ -1,97 +1,97 @@
-# EDS Incremental Migration Plan
+# Plano de Migração Incremental do EDS
 
-This document outlines the strategy for gradually migrating screens from the Twenty (standard) frontend to the EDS (Erencio Design System) interface.
+Este documento descreve a estratégia para migração gradual de telas do frontend Twenty (padrão) para a interface EDS (Erencio Design System).
 
-## Principles
+## Princípios
 
-- **No forced migration**: Users choose their interface, admins can enforce via workspace policy
-- **Feature parity last**: The EDS frontend reaches feature parity gradually — missing pages fall back gracefully
-- **Independent releases**: Each sprint can deliver new EDS pages without affecting the standard frontend
-- **API-compatible**: Both frontends call the same GraphQL API — no backend changes per page
+- **Sem migração forçada**: usuários escolhem sua interface; admins podem impor via política da workspace
+- **Paridade funcional por último**: o frontend EDS alcança paridade gradualmente — páginas ausentes fazem fallback graciosamente
+- **Releases independentes**: cada sprint pode entregar novas páginas EDS sem afetar o frontend padrão
+- **Compatível com a API**: ambos os frontends chamam a mesma API GraphQL — sem alterações no backend por página
 
-## Migration Phases
+## Fases de Migração
 
-### Phase 0 — Foundation (Current) ✅
-- [x] EDS package structure
-- [x] Design tokens with CSS custom properties (`--eds-g-*`)
-- [x] Utility CSS classes (`.eds-*`)
-- [x] Core primitive components: Button, Input, Card, Badge
-- [x] Layout: Shell (topbar + collapsible sidebar)
-- [x] Auth context (JWT login, session persistence)
-- [x] Dashboard page
-- [x] Profile settings page with frontend switch
+### Fase 0 — Fundação ✅
+- [x] Estrutura do pacote EDS
+- [x] Design tokens com CSS custom properties (`--eds-g-*`)
+- [x] Classes CSS utilitárias (`.eds-*`)
+- [x] Componentes primitivos: Button, Input, Card, Badge
+- [x] Layout: Shell (topbar + sidebar retrátil)
+- [x] Contexto de autenticação (login JWT, persistência de sessão)
+- [x] Página Dashboard
+- [x] Página de configurações de perfil com troca de frontend
 - [x] Backend: `user.frontendPreference` + `workspace.frontendPolicy`
-- [x] Frontend selection logic (`useFrontendShell` hook)
-- [x] User settings integration (SettingsExperience)
-- [x] Workspace settings integration (SettingsWorkspace)
+- [x] Lógica de seleção de frontend (hook `useFrontendShell`)
+- [x] Integração nas configurações do usuário (SettingsExperience)
+- [x] Integração nas configurações da workspace (SettingsWorkspace)
 - [x] Feature flag `IS_EDS_ENABLED`
 
-### Phase 1 — Record Listing ✅
-- [x] Select component
-- [x] Table component with sorting and pagination
-- [x] Search bar
-- [x] Contacts list page
-- [x] Companies list page
-- [x] Deals/Opportunities list page
+### Fase 1 — Listagem de Registros ✅
+- [x] Componente Select
+- [x] Componente DataTable com ordenação e paginação
+- [x] Barra de busca (SearchBar)
+- [x] Página de lista de Contatos
+- [x] Página de lista de Empresas
+- [x] Página de lista de Negócios/Oportunidades
 
-### Phase 2 — Record Detail
-- [x] Record show page
-- [x] Field editing inline
-- [x] Modal component
-- [x] Tabs component
-- [x] Toast notification system
-- [x] Avatar component
+### Fase 2 — Detalhe do Registro ✅
+- [x] Página de visualização de registro
+- [x] Edição de campos inline
+- [x] Componente Modal
+- [x] Componente Tabs
+- [x] Sistema de notificações Toast
+- [x] Componente Avatar
 
-### Phase 3 — Core CRM Actions
-- [x] Create record form
-- [x] Edit record form
-- [x] Delete confirmation dialog
-- [x] Relationship fields
-- [x] File upload field
+### Fase 3 — Ações CRM Essenciais ✅
+- [x] Formulário de criação de registro
+- [x] Formulário de edição de registro
+- [x] Diálogo de confirmação de exclusão
+- [x] Campos de relacionamento
+- [x] Campo de upload de arquivo
 
-### Phase 4 — Navigation & Productivity
-- [x] Command menu integration
-- [x] Global search
-- [x] Notifications panel
-- [x] Calendar view
-- [x] Kanban view
+### Fase 4 — Navegação e Produtividade ✅
+- [x] Integração do menu de comandos (Command Menu)
+- [x] Busca global (Global Search)
+- [x] Painel de notificações
+- [x] Visualização de calendário
+- [x] Visualização Kanban
 
-### Phase 5 — Settings (Admin)
-- [ ] Full workspace settings
-- [ ] Member management
-- [ ] Role management
-- [ ] Data model settings
-- [ ] API keys
-- [ ] Billing
+### Fase 5 — Configurações (Admin)
+- [x] Configurações completas da workspace
+- [x] Gerenciamento de membros
+- [x] Gerenciamento de papéis (roles)
+- [x] Configurações do modelo de dados
+- [x] Chaves de API
+- [x] Faturamento
 
-### Phase 6 — Feature Parity
-- [ ] All remaining pages migrated
-- [ ] EDS can be set as workspace default
-- [ ] Feature flag `IS_EDS_ENABLED` becomes on-by-default
+### Fase 6 — Paridade Funcional
+- [ ] Todas as páginas restantes migradas
+- [ ] EDS pode ser definido como padrão da workspace
+- [ ] Feature flag `IS_EDS_ENABLED` passa a ser habilitada por padrão
 
-## Fallback Strategy
+## Estratégia de Fallback
 
-For pages not yet migrated in EDS, two strategies are possible:
+Para páginas ainda não migradas no EDS, duas estratégias são possíveis:
 
-### Option A: Redirect to Twenty (current)
-If a user navigates to `/eds/contacts` but the page is not yet implemented, redirect them to the equivalent path in Twenty (`/contacts`).
+### Opção A: Redirecionar para o Twenty (atual)
+Se um usuário navega para `/eds/contacts` mas a página ainda não foi implementada, redireciona para o caminho equivalente no Twenty (`/contacts`).
 
-### Option B: Embedded iframe (future)
-Embed the Twenty page in an iframe within the EDS shell for a seamless experience while migration is in progress.
+### Opção B: Iframe embutido (futuro)
+Incorporar a página do Twenty em um iframe dentro do shell EDS para uma experiência integrada enquanto a migração está em andamento.
 
-Currently **Option A** is implemented implicitly — the `AppRouter.tsx` only has routes for implemented pages; unmatched routes fall back to the Dashboard.
+Atualmente a **Opção A** está implementada implicitamente — o `AppRouter.tsx` só possui rotas para páginas implementadas; rotas não reconhecidas fazem fallback para o Dashboard.
 
-## Tracking Progress
+## Acompanhamento de Progresso
 
-Open a GitHub Issue tagged `eds-migration` for each screen migration sprint. Reference this document in the issue description.
+Abra uma Issue no GitHub com a tag `eds-migration` para cada sprint de migração de tela. Referencie este documento na descrição da issue.
 
-## Definition of Done per Screen
+## Definição de Pronto por Tela
 
-A screen is considered migrated when:
-1. All data is loaded via the same GraphQL queries as Twenty
-2. All CRUD actions work
-3. Component uses only EDS design tokens
-4. Accessibility: keyboard navigable, ARIA attributes correct
-5. Responsive: works on tablet (768px) and desktop (1280px+)
-6. Added to AppRouter with correct path
-7. Documented in EDS-COMPONENTS.md if new components were created
+Uma tela é considerada migrada quando:
+1. Todos os dados são carregados pelas mesmas queries GraphQL do Twenty
+2. Todas as ações CRUD funcionam
+3. O componente usa apenas design tokens do EDS
+4. Acessibilidade: navegável por teclado, atributos ARIA corretos
+5. Responsivo: funciona em tablet (768px) e desktop (1280px+)
+6. Adicionado ao AppRouter com o caminho correto
+7. Documentado em EDS-COMPONENTS.md se novos componentes foram criados

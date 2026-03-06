@@ -1,107 +1,107 @@
-# EDS Frontend — Contribution Guide
+# EDS Frontend — Guia de Contribuição
 
-This guide covers how to contribute to the EDS frontend package (`packages/twenty-eds`).
+Este guia cobre como contribuir para o pacote frontend EDS (`packages/twenty-eds`).
 
-## Getting Started
+## Primeiros Passos
 
 ```bash
-# From the repo root
+# Na raiz do repositório
 yarn install
 
-# Start only the EDS frontend (port 3002)
+# Iniciar apenas o frontend EDS (porta 3002)
 npx nx start twenty-eds
 
-# The backend must be running separately:
-npx nx start twenty-server   # port 3000
+# O backend deve estar rodando separadamente:
+npx nx start twenty-server   # porta 3000
 ```
 
-> The Vite dev server proxies `/api` to `http://localhost:3000`, so you don't need CORS configuration.
+> O servidor de desenvolvimento Vite faz proxy de `/api` para `http://localhost:3000`, então não é necessário configurar CORS.
 
-## Package Structure
+## Estrutura do Pacote
 
 ```
 packages/twenty-eds/
-├── index.html              # Entry HTML
-├── vite.config.ts          # Vite config (port 3002, API proxy)
-├── tsconfig.json           # TypeScript config
+├── index.html              # HTML de entrada
+├── vite.config.ts          # Config Vite (porta 3002, proxy da API)
+├── tsconfig.json           # Configuração TypeScript
 ├── package.json
 └── src/
-    ├── main.tsx            # ReactDOM entry point
-    ├── App.tsx             # Root component (AuthProvider + AppRouter)
-    ├── AppRouter.tsx       # Hash-based routing (login, dashboard, settings)
+    ├── main.tsx            # Ponto de entrada ReactDOM
+    ├── App.tsx             # Componente raiz (AuthProvider + AppRouter)
+    ├── AppRouter.tsx       # Roteamento baseado em hash (login, dashboard, settings)
     ├── global.css          # CSS custom properties (--eds-g-*) + reset
-    ├── utilities.css       # SLDS 2-style utility classes (.eds-*)
+    ├── utilities.css       # Classes utilitárias estilo SLDS 2 (.eds-*)
     ├── tokens/             # Design tokens
-    │   └── tokens.ts       # Color, typography, spacing, radius, elevation, z-index
-    ├── components/         # Primitive UI components
+    │   └── tokens.ts       # Cor, tipografia, espaçamento, borda, elevação, z-index
+    ├── components/         # Componentes primitivos de UI
     │   ├── Button/
     │   ├── Input/
     │   ├── Card/
     │   ├── Badge/
-    │   └── Layout/         # Shell (app shell with topbar + sidebar)
+    │   └── Layout/         # Shell (app shell com topbar + sidebar)
     ├── hooks/
-    │   └── useAuth.tsx     # Authentication context + JWT management
+    │   └── useAuth.tsx     # Contexto de autenticação + gerenciamento JWT
     ├── pages/
     │   ├── LoginPage.tsx
     │   ├── DashboardPage.tsx
     │   └── ProfileSettingsPage.tsx
     └── utils/
-        └── api.ts          # Minimal GraphQL client
+        └── api.ts          # Cliente GraphQL mínimo
 ```
 
-## Adding a New Component
+## Adicionar um Novo Componente
 
-1. Create `src/components/<ComponentName>/<ComponentName>.tsx`
-2. Export named component and types
-3. Create `src/components/<ComponentName>/index.ts` (barrel export)
-4. Add to `src/components/index.ts`
-5. Document in `docs/EDS-COMPONENTS.md`
+1. Crie `src/components/<NomeDoComponente>/<NomeDoComponente>.tsx`
+2. Exporte o componente e tipos com named exports
+3. Crie `src/components/<NomeDoComponente>/index.ts` (barrel export)
+4. Adicione em `src/components/index.ts`
+5. Documente em `docs/EDS-COMPONENTS.md`
 
-### Component Template
+### Template de Componente
 
 ```tsx
 import React from 'react';
 import { tokens } from '@eds/tokens';
 
-export type MyComponentProps = {
+export type MeuComponenteProps = {
   label: string;
-  // ... other props
+  // ... outras props
 };
 
-export const MyComponent = ({ label }: MyComponentProps) => {
+export const MeuComponente = ({ label }: MeuComponenteProps) => {
   const style: React.CSSProperties = {
     fontFamily: tokens.typography.fontFamilyBase,
     color: tokens.color.textDefault,
-    // ... styles from tokens
+    // ... estilos a partir dos tokens
   };
 
   return <div style={style}>{label}</div>;
 };
 ```
 
-## Adding a New Page
+## Adicionar uma Nova Página
 
-1. Create `src/pages/<PageName>Page.tsx`
-2. Add a route in `src/AppRouter.tsx`
-3. Add a sidebar item in `src/App.tsx` (inside `ProtectedLayout`)
+1. Crie `src/pages/<NomeDaPagina>Page.tsx`
+2. Adicione uma rota em `src/AppRouter.tsx`
+3. Adicione um item na sidebar em `src/App.tsx` (dentro de `ProtectedLayout`)
 
-## Design Token Usage
+## Uso de Design Tokens
 
-Always use tokens for visual values — never hard-code colors or spacings:
+Sempre use tokens para valores visuais — nunca codifique cores ou espaçamentos diretamente:
 
 ```tsx
-// ✅ Correct
+// ✅ Correto
 backgroundColor: tokens.color.brandPrimary
 
-// ❌ Wrong
+// ❌ Errado
 backgroundColor: '#0176d3'
 ```
 
-See `src/tokens/tokens.ts` for all available tokens.
+Veja `src/tokens/tokens.ts` para todos os tokens disponíveis.
 
-## API Calls
+## Chamadas de API
 
-Use the GraphQL client from `@eds/utils/api`:
+Use o cliente GraphQL de `@eds/utils/api`:
 
 ```tsx
 import { gql } from '@eds/utils/api';
@@ -112,37 +112,37 @@ const result = await gql<{ myQuery: MyType }>(
 );
 ```
 
-The `authToken` is set automatically after login via `setAuthToken()`.
+O `authToken` é definido automaticamente após o login via `setAuthToken()`.
 
-## Code Style
+## Estilo de Código
 
-- Named exports only (no default exports)
-- Types over interfaces (except for extending 3rd party interfaces)
-- No `any` — strict TypeScript
-- Inline styles using `React.CSSProperties` + tokens
-- No Emotion (keep zero CSS-in-JS dependencies in this package)
-- Use `--eds-g-*` CSS custom properties for all visual values
-- Utility CSS classes from `utilities.css` available for layout helpers
-- File names: PascalCase for components, camelCase for utilities and hooks
+- Apenas named exports (sem default exports)
+- Types ao invés de interfaces (exceto para estender interfaces de terceiros)
+- Sem `any` — TypeScript estrito
+- Estilos inline usando `React.CSSProperties` + tokens
+- Sem Emotion (manter zero dependências CSS-in-JS neste pacote)
+- Usar CSS custom properties `--eds-g-*` para todos os valores visuais
+- Classes CSS utilitárias de `utilities.css` disponíveis para helpers de layout
+- Nomes de arquivo: PascalCase para componentes, camelCase para utilitários e hooks
 
-## Testing
+## Testes
 
 ```bash
-# Run EDS-related tests
+# Rodar testes relacionados ao EDS
 cd packages/twenty-front && npx jest "useFrontendShell"
 ```
 
-The main test coverage for the frontend selection logic is in the `twenty-front` package:
+A principal cobertura de testes para a lógica de seleção de frontend está no pacote `twenty-front`:
 `src/modules/workspace/hooks/__tests__/useFrontendShell.test.ts`
 
-## Deployment
+## Deploy
 
-The EDS build output goes to `packages/twenty-eds/dist`. To serve it alongside the main Twenty frontend:
+O output do build do EDS vai para `packages/twenty-eds/dist`. Para servi-lo junto ao frontend Twenty principal:
 
 1. Build: `npx nx build twenty-eds`
-2. Serve the `dist/` folder at `/eds` on your reverse proxy (Nginx/Caddy/Cloudflare)
+2. Sirva a pasta `dist/` em `/eds` no seu proxy reverso (Nginx/Caddy/Cloudflare)
 
-Example Nginx configuration:
+Exemplo de configuração Nginx:
 
 ```nginx
 location /eds {

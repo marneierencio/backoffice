@@ -1,56 +1,56 @@
-# EDS Phase 1 — Record Listing: Design & Implementation Plan
+# EDS Fase 1 — Listagem de Registros: Plano de Design e Implementação
 
-This document specifies the components, behaviors, tokens, and page structure for Phase 1 of the EDS migration (Record Listing). All designs follow [SLDS 2](https://www.lightningdesignsystem.com/) principles adapted for React, using EDS design tokens (`--eds-g-*`).
+Este documento especifica os componentes, comportamentos, tokens e estrutura de página para a Fase 1 da migração EDS (Listagem de Registros). Todos os designs seguem os princípios do [SLDS 2](https://www.lightningdesignsystem.com/) adaptados para React, usando design tokens EDS (`--eds-g-*`).
 
 ---
 
-## Table of Contents
+## Índice
 
-1. [Scope](#scope)
-2. [New Components](#new-components)
+1. [Escopo](#escopo)
+2. [Novos Componentes](#novos-componentes)
    - [Checkbox](#checkbox)
    - [Select](#select)
    - [Spinner](#spinner)
-   - [Icon (utility)](#icon-utility)
+   - [Icon (utilitário)](#icon-utilitário)
    - [SearchBar](#searchbar)
    - [DataTable](#datatable)
    - [Pagination](#pagination)
    - [EmptyState](#emptystate)
    - [PageHeader](#pageheader)
-3. [New Hooks](#new-hooks)
+3. [Novos Hooks](#novos-hooks)
    - [useRecordList](#userecordlist)
-4. [Pages](#pages)
+4. [Páginas](#páginas)
    - [ContactsListPage](#contactslistpage)
    - [CompaniesListPage](#companieslistpage)
-   - [DealsListPage (Opportunities)](#dealslistpage-opportunities)
-5. [GraphQL Queries](#graphql-queries)
-6. [Routing Changes](#routing-changes)
-7. [Design Token Additions](#design-token-additions)
-8. [Accessibility Checklist](#accessibility-checklist)
+   - [DealsListPage (Oportunidades)](#dealslistpage-oportunidades)
+5. [Queries GraphQL](#queries-graphql)
+6. [Alterações de Roteamento](#alterações-de-roteamento)
+7. [Adições de Design Tokens](#adições-de-design-tokens)
+8. [Checklist de Acessibilidade](#checklist-de-acessibilidade)
 
 ---
 
-## Scope
+## Escopo
 
-Phase 1 delivers **read-only record listing** for the three core CRM objects. Users can:
+A Fase 1 entrega **listagem somente leitura de registros** para os três objetos CRM principais. Os usuários podem:
 
-- View a paginated table of records
-- Sort by column (single-column ascending/descending)
-- Search with a text query
-- Select rows (checkbox) — no batch actions yet, but the ground is prepared
-- Navigate pages via pagination controls
+- Visualizar uma tabela paginada de registros
+- Ordenar por coluna (ascendente/descendente em coluna única)
+- Buscar com texto
+- Selecionar linhas (checkbox) — sem ações em lote ainda, mas a base está preparada
+- Navegar páginas via controles de paginação
 
-No inline editing, no record creation, no record deletion in this phase.
+Sem edição inline, sem criação de registros, sem exclusão de registros nesta fase.
 
 ---
 
-## New Components
+## Novos Componentes
 
 ### Checkbox
 
-> SLDS 2 reference: [Checkbox](https://www.lightningdesignsystem.com/components/checkbox/)
+> Ref SLDS 2: [Checkbox](https://www.lightningdesignsystem.com/components/checkbox/)
 
-**File:** `src/components/Checkbox/Checkbox.tsx`
+**Arquivo:** `src/components/Checkbox/Checkbox.tsx`
 
 ```tsx
 type CheckboxProps = {
@@ -64,21 +64,21 @@ type CheckboxProps = {
 };
 ```
 
-**Visual spec:**
-- 16×16px box, `border: 1px solid borderInput`, `border-radius: radiusSmall` (2px)
-- Checked: `backgroundColor: brandPrimary`, white SVG checkmark
-- Indeterminate: `backgroundColor: brandPrimary`, white horizontal dash
-- Focus ring: `0 0 0 2px brandPrimaryLight, 0 0 0 4px brandPrimary`
-- Label (if provided) appears to the right, `fontSizeMedium`, `fontWeightRegular`
-- Hover: border darkens to `neutral6`
+**Especificação visual:**
+- Caixa 16×16px, `border: 1px solid borderInput`, `border-radius: radiusSmall` (2px)
+- Marcado: `backgroundColor: brandPrimary`, checkmark SVG branco
+- Indeterminado: `backgroundColor: brandPrimary`, traço horizontal branco
+- Anel de foco: `0 0 0 2px brandPrimaryLight, 0 0 0 4px brandPrimary`
+- Label (se fornecido) aparece à direita, `fontSizeMedium`, `fontWeightRegular`
+- Hover: borda escurece para `neutral6`
 
 ---
 
 ### Select
 
-> SLDS 2 reference: [Select](https://www.lightningdesignsystem.com/components/select/)
+> Ref SLDS 2: [Select](https://www.lightningdesignsystem.com/components/select/)
 
-**File:** `src/components/Select/Select.tsx`
+**Arquivo:** `src/components/Select/Select.tsx`
 
 ```tsx
 type SelectOption = {
@@ -101,44 +101,44 @@ type SelectProps = {
 };
 ```
 
-**Visual spec:**
-- Uses native `<select>` element styled with EDS tokens
-- Height: 36px, `padding: 0 spacingSmall`, border matches Input component
-- Right arrow indicator via native browser chrome (we don't override)
-- Label above the select, matching Input label style
-- States: default, focus (blue border), disabled (gray background), error (red border + message)
+**Especificação visual:**
+- Usa elemento `<select>` nativo estilizado com tokens EDS
+- Altura: 36px, `padding: 0 spacingSmall`, borda corresponde ao componente Input
+- Indicador de seta via chrome nativo do navegador (não sobrescrevemos)
+- Label acima do select, correspondendo ao estilo do label do Input
+- Estados: padrão, foco (borda azul), desabilitado (fundo cinza), erro (borda vermelha + mensagem)
 
 ---
 
 ### Spinner
 
-> SLDS 2 reference: [Spinners](https://www.lightningdesignsystem.com/components/spinners/)
+> Ref SLDS 2: [Spinners](https://www.lightningdesignsystem.com/components/spinners/)
 
-**File:** `src/components/Spinner/Spinner.tsx`
+**Arquivo:** `src/components/Spinner/Spinner.tsx`
 
 ```tsx
 type SpinnerSize = 'x-small' | 'small' | 'medium' | 'large';
 
 type SpinnerProps = {
   size?: SpinnerSize;
-  label?: string;         // screen-reader label, default "Loading"
-  inline?: boolean;       // inline-block vs centered overlay
+  label?: string;         // label para leitor de tela, padrão "Loading"
+  inline?: boolean;       // inline-block vs overlay centralizado
 };
 ```
 
-**Visual spec:**
-- CSS-only animation: a circular border with one colored arc spinning (`animation: spin 0.8s linear infinite`)
-- Sizes: x-small=16px, small=24px, medium=32px, large=48px
-- Color: `brandPrimary` arc, `neutral2` track
-- When `inline=false` (default), centered with semi-transparent backdrop
+**Especificação visual:**
+- Animação apenas CSS: borda circular com um arco colorido girando (`animation: spin 0.8s linear infinite`)
+- Tamanhos: x-small=16px, small=24px, medium=32px, large=48px
+- Cor: arco `brandPrimary`, trilha `neutral2`
+- Quando `inline=false` (padrão), centralizado com backdrop semi-transparente
 
 ---
 
-### Icon (utility)
+### Icon (utilitário)
 
-**File:** `src/components/Icon/Icon.tsx`
+**Arquivo:** `src/components/Icon/Icon.tsx`
 
-A minimal inline SVG icon system using svg paths. No icon library dependency.
+Sistema mínimo de ícones SVG inline usando paths SVG. Sem dependência de biblioteca de ícones.
 
 ```tsx
 type IconName =
@@ -156,54 +156,54 @@ type IconName =
 
 type IconProps = {
   name: IconName;
-  size?: number;           // default 16
-  color?: string;          // default currentColor
-  'aria-hidden'?: boolean; // default true
+  size?: number;           // padrão 16
+  color?: string;          // padrão currentColor
+  'aria-hidden'?: boolean; // padrão true
   className?: string;
 };
 ```
 
-**Visual spec:**
-- Rendered as `<svg>` with `width`/`height` from `size` prop and `fill` from `color`
-- `aria-hidden="true"` by default (decorative)
-- Each icon is a `<path d="...">` within a 16×16 viewBox
+**Especificação visual:**
+- Renderizado como `<svg>` com `width`/`height` da prop `size` e `fill` de `color`
+- `aria-hidden="true"` por padrão (decorativo)
+- Cada ícone é um `<path d="...">` dentro de viewBox 16×16
 
 ---
 
 ### SearchBar
 
-> Based on SLDS 2 [Input — Search type](https://www.lightningdesignsystem.com/components/input/)
+> Baseado em SLDS 2 [Input — tipo Search](https://www.lightningdesignsystem.com/components/input/)
 
-**File:** `src/components/SearchBar/SearchBar.tsx`
+**Arquivo:** `src/components/SearchBar/SearchBar.tsx`
 
 ```tsx
 type SearchBarProps = {
   value: string;
-  placeholder?: string;  // default "Search…"
+  placeholder?: string;  // padrão "Buscar…"
   onChange: (value: string) => void;
   onClear?: () => void;
-  debounceMs?: number;    // default 300
+  debounceMs?: number;    // padrão 300
   disabled?: boolean;
   'aria-label'?: string;
 };
 ```
 
-**Visual spec:**
-- Input with search icon (`Icon name="search"`) on the left
-- Clear button (×) appears when value is non-empty
-- Border: `1px solid borderInput`, focus: `borderFocus`
-- Height: 36px, border-radius: `radiusMedium`
-- Internal state debounces onChange callback
+**Especificação visual:**
+- Input com ícone de busca (`Icon name="search"`) à esquerda
+- Botão limpar (×) aparece quando o valor não está vazio
+- Borda: `1px solid borderInput`, foco: `borderFocus`
+- Altura: 36px, border-radius: `radiusMedium`
+- Estado interno faz debounce do callback onChange
 
 ---
 
 ### DataTable
 
-> SLDS 2 reference: [Data Table](https://www.lightningdesignsystem.com/components/data-tables/)
+> Ref SLDS 2: [Data Table](https://www.lightningdesignsystem.com/components/data-tables/)
 
-**File:** `src/components/DataTable/DataTable.tsx`
+**Arquivo:** `src/components/DataTable/DataTable.tsx`
 
-This is the primary component of Phase 1.
+Este é o componente principal da Fase 1.
 
 ```tsx
 type SortDirection = 'asc' | 'desc' | null;
@@ -213,7 +213,7 @@ type ColumnDefinition<TRecord> = {
   label: string;
   accessor: keyof TRecord | ((record: TRecord) => React.ReactNode);
   sortable?: boolean;
-  width?: string;             // CSS width, e.g. "200px" or "25%"
+  width?: string;             // largura CSS, ex: "200px" ou "25%"
   align?: 'left' | 'center' | 'right';
   renderCell?: (value: unknown, record: TRecord) => React.ReactNode;
 };
@@ -224,162 +224,133 @@ type DataTableProps<TRecord extends { id: string }> = {
   loading?: boolean;
   emptyMessage?: string;
 
-  // Selection
+  // Seleção
   selectable?: boolean;
   selectedIds?: Set<string>;
   onSelectionChange?: (selected: Set<string>) => void;
 
-  // Sorting
+  // Ordenação
   sortColumn?: string;
   sortDirection?: SortDirection;
   onSort?: (column: string, direction: SortDirection) => void;
 
-  // Row click
+  // Clique na linha
   onRowClick?: (record: TRecord) => void;
 
-  // Striped rows
+  // Linhas listradas
   striped?: boolean;
 
-  // Bordered
+  // Com bordas
   bordered?: boolean;
 };
 ```
 
-**Anatomy (SLDS 2):**
+**Anatomia (SLDS 2):**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Header Row | Top row with column titles, sort controls |
-| 2 | Header Cell | `<th>` with label + sort icon button |
-| 3 | Select-all Checkbox | In first header cell when `selectable` |
-| 4 | Body Row | `<tr>` with record data |
-| 5 | Row Checkbox | In first body cell when `selectable` |
-| 6 | Cell | `<td>` with content |
-| 7 | Sort Icon | Ascending/descending indicator in sorted column header |
-| 8 | Hover Row | Background highlight on mouse hover |
-| 9 | Selected Row | Light blue background when row is selected |
-| 10 | Loading Overlay | Spinner overlay when `loading=true` |
-| 11 | Empty State | Message when `data.length === 0` and not loading |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Linha de cabeçalho | Linha superior com títulos de coluna, controles de ordenação |
+| 2 | Célula de cabeçalho | `<th>` com label + botão de ícone de ordenação |
+| 3 | Checkbox selecionar todos | Na primeira célula do cabeçalho quando `selectable` |
+| 4 | Linha do corpo | `<tr>` com dados do registro |
+| 5 | Checkbox da linha | Na primeira célula do corpo quando `selectable` |
+| 6 | Célula | `<td>` com conteúdo |
+| 7 | Ícone de ordenação | Indicador ascendente/descendente no cabeçalho da coluna ordenada |
+| 8 | Linha hover | Destaque de fundo ao passar o mouse |
+| 9 | Linha selecionada | Fundo azul claro quando a linha está selecionada |
+| 10 | Overlay de carregamento | Overlay com spinner quando `loading=true` |
+| 11 | Estado vazio | Mensagem quando `data.length === 0` e não está carregando |
 
-**Visual spec:**
-
-- **Table**: `width: 100%`, `border-collapse: separate`, `border-spacing: 0`
-- **Optional border**: `border: 1px solid borderDefault`, `border-radius: radiusLarge`
-- **Header row**: `backgroundColor: neutral1`, `borderBottom: 2px solid neutral3`
-- **Header cell**: `padding: spacingXSmall spacingMedium`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightBold`, `color: textLabel`, `text-transform: uppercase`, `letter-spacing: 0.04em`
-- **Body row**: `borderBottom: 1px solid neutral2`
-- **Body row hover**: `backgroundColor: brandPrimaryLight` (very light blue)
-- **Body row selected**: `backgroundColor: brandPrimaryLight`
-- **Striped rows**: odd rows `backgroundColor: neutral1`
-- **Body cell**: `padding: spacingXSmall spacingMedium`, `fontSize: fontSizeMedium`, `color: textDefault`, `verticalAlign: middle`
-- **Sort button**: icon-only button in header cell, shows `sort-ascending` or `sort-descending`; unsorted columns show icon on hover
-- **Loading**: `Spinner` component overlaid with `position: absolute`, 50% opacity backdrop
-- **Empty state**: centered text in a `<tr>` spanning all columns
-
-**Behaviors:**
-- Click sortable header → toggle sort direction: null → asc → desc → null
-- Click checkbox → select/deselect individual row
-- Click select-all → select all / deselect all (indeterminate when partial)
-- Sort indicators follow SLDS 2: arrow-up for ascending, arrow-down for descending
+**Comportamentos:**
+- Clique no cabeçalho ordenável → alterna direção: null → asc → desc → null
+- Clique no checkbox → seleciona/deseleciona linha individual
+- Clique no selecionar todos → seleciona/deseleciona todos (indeterminado quando parcial)
+- Indicadores de ordenação seguem SLDS 2: seta para cima para ascendente, seta para baixo para descendente
 
 ---
 
 ### Pagination
 
-> No direct SLDS 2 pagination component; follows [Button Group](https://www.lightningdesignsystem.com/components/button-groups/) pattern + page info text.
+> Segue o padrão de [Button Group](https://www.lightningdesignsystem.com/components/button-groups/) + texto de informação de página.
 
-**File:** `src/components/Pagination/Pagination.tsx`
+**Arquivo:** `src/components/Pagination/Pagination.tsx`
 
 ```tsx
 type PaginationProps = {
-  currentPage: number;         // 1-based
+  currentPage: number;         // baseado em 1
   totalCount: number;
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-  pageSizeOptions?: number[];  // default [10, 25, 50, 100]
+  pageSizeOptions?: number[];  // padrão [10, 25, 50, 100]
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Showing 1–25 of 1,248     │  « ‹ 1 2 3 ... 50 › »   │  25 ▾ │
+│  Mostrando 1–25 de 1.248    │  « ‹ 1 2 3 ... 50 › »   │  25 ▾ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-- Left: text summary "Showing {start}–{end} of {total}"
-- Center: page buttons — first, prev, page numbers (max 5 visible + ellipsis), next, last
-- Right: page-size select dropdown
-- All buttons use `Button` variant `ghost` or `outline`, `size: small`
-- Active page: `Button` variant `brand`
-- Disabled prev/next at boundaries
+- Esquerda: texto resumo "Mostrando {início}–{fim} de {total}"
+- Centro: botões de página — primeiro, anterior, números (máx 5 visíveis + reticências), próximo, último
+- Direita: dropdown de seleção de linhas por página
+- Todos os botões usam `Button` variante `ghost` ou `outline`, `size: small`
+- Página ativa: `Button` variante `brand`
+- Anterior/próximo desabilitados nos limites
 
 ---
 
 ### EmptyState
 
-> SLDS 2 reference: [Empty State](https://www.lightningdesignsystem.com/components/empty-state/)
+> Ref SLDS 2: [Empty State](https://www.lightningdesignsystem.com/components/empty-state/)
 
-**File:** `src/components/EmptyState/EmptyState.tsx`
+**Arquivo:** `src/components/EmptyState/EmptyState.tsx`
 
 ```tsx
 type EmptyStateProps = {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  action?: React.ReactNode;  // e.g. a Button
+  action?: React.ReactNode;  // ex: um Button
 };
 ```
-
-**Visual spec:**
-- Centered container, `padding: spacingXXLarge`
-- Icon/emoji at top, `fontSize: 3rem`, muted color
-- Title: `fontSizeXLarge`, `fontWeightBold`, `color: textDefault`
-- Description: `fontSizeMedium`, `color: textPlaceholder`, `marginTop: spacingXSmall`
-- Action: `marginTop: spacingMedium`
 
 ---
 
 ### PageHeader
 
-> Consistent header for list pages with title, description, search, and actions.
+> Cabeçalho consistente para páginas de lista com título, descrição, busca e ações.
 
-**File:** `src/components/PageHeader/PageHeader.tsx`
+**Arquivo:** `src/components/PageHeader/PageHeader.tsx`
 
 ```tsx
 type PageHeaderProps = {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  actions?: React.ReactNode;   // right-aligned action buttons
-  children?: React.ReactNode;  // below the header (search bar, filters)
+  actions?: React.ReactNode;   // botões de ação alinhados à direita
+  children?: React.ReactNode;  // abaixo do cabeçalho (barra de busca, filtros)
 };
 ```
 
-**Visual spec:**
-- Flex row: icon + title/description on the left, actions on the right
-- Title: `fontSizeXXLarge`, `fontWeightBold`
-- Description: `fontSizeMedium`, `textPlaceholder`
-- Below header: optional slot for search bar/filters with `marginTop: spacingMedium`
-- `marginBottom: spacingLarge` separating from content below
-
 ---
 
-## New Hooks
+## Novos Hooks
 
 ### useRecordList
 
-**File:** `src/hooks/useRecordList.ts`
+**Arquivo:** `src/hooks/useRecordList.ts`
 
-A generic hook for fetching paginated, sortable, searchable record lists from the Twenty GraphQL API.
+Hook genérico para buscar listas paginadas, ordenáveis e pesquisáveis de registros da API GraphQL do Twenty.
 
 ```tsx
 type UseRecordListOptions = {
-  objectNamePlural: string;   // e.g. "people", "companies", "opportunities"
-  fields: string;             // GraphQL field selection string
-  pageSize?: number;          // default 25
+  objectNamePlural: string;   // ex: "people", "companies", "opportunities"
+  fields: string;             // string de seleção de campos GraphQL
+  pageSize?: number;          // padrão 25
 };
 
 type UseRecordListReturn<TRecord> = {
@@ -388,27 +359,27 @@ type UseRecordListReturn<TRecord> = {
   loading: boolean;
   error: string | null;
 
-  // Pagination
+  // Paginação
   currentPage: number;
   pageSize: number;
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
 
-  // Sorting
+  // Ordenação
   sortColumn: string | null;
   sortDirection: 'asc' | 'desc' | null;
   setSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
 
-  // Search
+  // Busca
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 
-  // Refresh
+  // Atualizar
   refresh: () => void;
 };
 ```
 
-The hook builds a dynamic GraphQL query using the Twenty object API pattern:
+O hook constrói uma query GraphQL dinâmica usando o padrão da API de objetos do Twenty:
 
 ```graphql
 query FindManyPeople($filter: PersonFilterInput, $orderBy: [PersonOrderByInput!], $first: Int, $after: String) {
@@ -433,101 +404,74 @@ query FindManyPeople($filter: PersonFilterInput, $orderBy: [PersonOrderByInput!]
 }
 ```
 
-**Implementation notes:**
-- Uses cursor-based pagination internally but exposes page-based API to consumers
-- Maintains cursor map: `{ [pageNumber]: cursor }` for back-navigation
-- Search query maps to `filter: { or: [{ name: { firstName: { like: "%query%" } } }, ...] }`
-- Sort maps to `orderBy: [{ fieldName: direction }]`
+**Notas de implementação:**
+- Usa paginação baseada em cursor internamente, mas expõe API baseada em página para os consumidores
+- Mantém mapa de cursores: `{ [numeroPagina]: cursor }` para navegação reversa
+- Query de busca mapeia para `filter: { or: [{ name: { firstName: { like: "%query%" } } }, ...] }`
+- Ordenação mapeia para `orderBy: [{ fieldName: direction }]`
 
 ---
 
-## Pages
+## Páginas
 
 ### ContactsListPage
 
-**File:** `src/pages/ContactsListPage.tsx`
+**Arquivo:** `src/pages/ContactsListPage.tsx`
 
-**Object:** `people` (Twenty's Person object)
+**Objeto:** `people` (objeto Person do Twenty)
 
-**Columns:**
-| Column | Field | Sortable | Width |
-|--------|-------|----------|-------|
-| Name | `name.firstName + name.lastName` | Yes | 25% |
-| Email | `emails.primaryEmail` | Yes | 20% |
-| Phone | `phones.primaryPhoneNumber` | No | 15% |
-| Company | `company.name` | Yes | 20% |
-| City | `city` | Yes | 10% |
-| Created | `createdAt` | Yes | 10% |
-
-**Layout:**
-```
-PageHeader (title="Contacts", icon="👥")
-  └─ SearchBar
-DataTable (columns, data, sorting, selection, pagination)
-Pagination
-```
-
----
+**Colunas:**
+| Coluna | Campo | Ordenável | Largura |
+|--------|-------|-----------|---------|
+| Nome | `name.firstName + name.lastName` | Sim | 25% |
+| Email | `emails.primaryEmail` | Sim | 20% |
+| Telefone | `phones.primaryPhoneNumber` | Não | 15% |
+| Empresa | `company.name` | Sim | 20% |
+| Cidade | `city` | Sim | 10% |
+| Criado em | `createdAt` | Sim | 10% |
 
 ### CompaniesListPage
 
-**File:** `src/pages/CompaniesListPage.tsx`
+**Arquivo:** `src/pages/CompaniesListPage.tsx`
 
-**Object:** `companies` (Twenty's Company object)
+**Objeto:** `companies` (objeto Company do Twenty)
 
-**Columns:**
-| Column | Field | Sortable | Width |
-|--------|-------|----------|-------|
-| Name | `name` | Yes | 25% |
-| Domain | `domainName.primaryLinkUrl` | No | 20% |
-| Employees | `employees` | Yes | 10% |
-| Address | `address.addressCity` | Yes | 15% |
-| Created | `createdAt` | Yes | 15% |
+**Colunas:**
+| Coluna | Campo | Ordenável | Largura |
+|--------|-------|-----------|---------|
+| Nome | `name` | Sim | 25% |
+| Domínio | `domainName.primaryLinkUrl` | Não | 20% |
+| Funcionários | `employees` | Sim | 10% |
+| Endereço | `address.addressCity` | Sim | 15% |
+| Criado em | `createdAt` | Sim | 15% |
 
----
+### DealsListPage (Oportunidades)
 
-### DealsListPage (Opportunities)
+**Arquivo:** `src/pages/DealsListPage.tsx`
 
-**File:** `src/pages/DealsListPage.tsx`
+**Objeto:** `opportunities` (objeto Opportunity do Twenty)
 
-**Object:** `opportunities` (Twenty's Opportunity object)
-
-**Columns:**
-| Column | Field | Sortable | Width |
-|--------|-------|----------|-------|
-| Name | `name` | Yes | 25% |
-| Amount | `amount.amountMicros` | Yes | 15% |
-| Stage | `stage` | Yes | 15% |
-| Close Date | `closeDate` | Yes | 15% |
-| Company | `company.name` | Yes | 20% |
-| Created | `createdAt` | Yes | 10% |
+**Colunas:**
+| Coluna | Campo | Ordenável | Largura |
+|--------|-------|-----------|---------|
+| Nome | `name` | Sim | 25% |
+| Valor | `amount.amountMicros` | Sim | 15% |
+| Estágio | `stage` | Sim | 15% |
+| Data de Fechamento | `closeDate` | Sim | 15% |
+| Empresa | `company.name` | Sim | 20% |
+| Criado em | `createdAt` | Sim | 10% |
 
 ---
 
-## GraphQL Queries
+## Queries GraphQL
 
-The EDS frontend uses the `/api` endpoint (workspace-scoped GraphQL) rather than `/metadata`. The `api.ts` utility must be extended to support both endpoints.
-
-### API Changes
-
-Add a second GraphQL executor that targets `/api` (workspace-scoped):
-
-```tsx
-// api.ts additions
-export const gqlWorkspace = async <TData = unknown>(
-  query: string,
-  variables?: Record<string, unknown>,
-  options?: FetchOptions,
-): Promise<{ data?: TData; errors?: Array<{ message: string }> }> => {
-  // Same as gql() but hits /api instead of /metadata
-};
-```
+O frontend EDS usa o endpoint `/api` (GraphQL com escopo de workspace) ao invés de `/metadata`. O utilitário `api.ts` deve ser estendido para suportar ambos os endpoints.
 
 ---
 
-## Routing Changes
+## Alterações de Roteamento
 
-Update `AppRouter.tsx` to add three new routes:
+Novas rotas adicionadas ao `AppRouter.tsx`:
 
 ```tsx
 { path: '/contacts',  element: <ProtectedLayout><ContactsListPage /></ProtectedLayout> },
@@ -535,51 +479,51 @@ Update `AppRouter.tsx` to add three new routes:
 { path: '/deals',     element: <ProtectedLayout><DealsListPage /></ProtectedLayout> },
 ```
 
-The sidebar already has these entries (added in Phase 0). The routes will activate them.
+A sidebar já possui estas entradas (adicionadas na Fase 0). As rotas as ativam.
 
 ---
 
-## Design Token Additions
+## Adições de Design Tokens
 
-No new CSS custom properties needed. All components use existing tokens. Some composite style references:
+Nenhuma nova CSS custom property necessária. Todos os componentes usam tokens existentes.
 
-| Usage | Tokens Used |
-|-------|-------------|
-| Table header bg | `neutral1` |
-| Table header border | `neutral3` (2px bottom) |
-| Row divider | `neutral2` (1px bottom) |
-| Row hover | `brandPrimaryLight` |
-| Selected row | `brandPrimaryLight` |
-| Sort icon active | `brandPrimary` |
-| Sort icon inactive | `neutral4` |
-| Search icon | `textPlaceholder` |
-| Pagination active page | `brandPrimary` bg, `textInverse` text |
-| Empty state icon | `textPlaceholder` |
-
----
-
-## Accessibility Checklist
-
-Per [SLDS 2 Data Table Accessibility](https://www.lightningdesignsystem.com/components/data-tables/) and WCAG 2.1 AA:
-
-- [ ] DataTable uses `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` (semantic HTML)
-- [ ] `<th scope="col">` for column headers
-- [ ] Sort controls are `<button>` elements (keyboard accessible)
-- [ ] Sort state communicated via `aria-sort="ascending"` / `"descending"` / `"none"` on `<th>`
-- [ ] Select-all checkbox has `aria-label="Select all rows"`
-- [ ] Individual row checkboxes have `aria-label="Select {record name}"`
-- [ ] Loading state: `aria-busy="true"` on `<table>`, Spinner has `role="status"` and `aria-label="Loading"`
-- [ ] Empty state uses `role="status"` for screen-reader announcement
-- [ ] Pagination: `<nav aria-label="Pagination">`, buttons with `aria-label` for prev/next/page
-- [ ] Current page button has `aria-current="page"`
-- [ ] Search input has `role="searchbox"` and `aria-label`
-- [ ] All interactive elements reachable via Tab key
-- [ ] Focus visible on all interactive elements (browser default + custom ring)
-- [ ] Select component uses native `<select>` (fully accessible by default)
+| Uso | Tokens Utilizados |
+|-----|-------------------|
+| Fundo do cabeçalho da tabela | `neutral1` |
+| Borda do cabeçalho da tabela | `neutral3` (2px inferior) |
+| Divisor de linha | `neutral2` (1px inferior) |
+| Hover da linha | `brandPrimaryLight` |
+| Linha selecionada | `brandPrimaryLight` |
+| Ícone de ordenação ativo | `brandPrimary` |
+| Ícone de ordenação inativo | `neutral4` |
+| Ícone de busca | `textPlaceholder` |
+| Página ativa na paginação | fundo `brandPrimary`, texto `textInverse` |
+| Ícone do estado vazio | `textPlaceholder` |
 
 ---
 
-## File Structure Summary
+## Checklist de Acessibilidade
+
+Conforme [SLDS 2 Data Table Accessibility](https://www.lightningdesignsystem.com/components/data-tables/) e WCAG 2.1 AA:
+
+- [ ] DataTable usa `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` (HTML semântico)
+- [ ] `<th scope="col">` para cabeçalhos de coluna
+- [ ] Controles de ordenação são elementos `<button>` (acessíveis por teclado)
+- [ ] Estado de ordenação comunicado via `aria-sort="ascending"` / `"descending"` / `"none"` no `<th>`
+- [ ] Checkbox selecionar todos tem `aria-label="Selecionar todas as linhas"`
+- [ ] Checkboxes individuais de linha têm `aria-label="Selecionar {nome do registro}"`
+- [ ] Estado de carregamento: `aria-busy="true"` no `<table>`, Spinner com `role="status"` e `aria-label="Carregando"`
+- [ ] Estado vazio usa `role="status"` para anúncio ao leitor de tela
+- [ ] Paginação: `<nav aria-label="Paginação">`, botões com `aria-label` para anterior/próximo/página
+- [ ] Botão da página atual tem `aria-current="page"`
+- [ ] Input de busca tem `role="searchbox"` e `aria-label`
+- [ ] Todos os elementos interativos alcançáveis via tecla Tab
+- [ ] Foco visível em todos os elementos interativos
+- [ ] Componente Select usa `<select>` nativo (totalmente acessível por padrão)
+
+---
+
+## Resumo da Estrutura de Arquivos
 
 ```
 packages/twenty-eds/src/
@@ -611,30 +555,12 @@ packages/twenty-eds/src/
 │   ├── Spinner/
 │   │   ├── Spinner.tsx
 │   │   └── index.ts
-│   └── index.ts            ← updated barrel
+│   └── index.ts
 ├── hooks/
-│   ├── useAuth.tsx
-│   └── useRecordList.ts    ← new
+│   └── useRecordList.ts
 ├── pages/
-│   ├── ContactsListPage.tsx   ← new
-│   ├── CompaniesListPage.tsx  ← new
-│   ├── DealsListPage.tsx      ← new
-│   ├── DashboardPage.tsx
-│   ├── LoginPage.tsx
-│   └── ProfileSettingsPage.tsx
-├── utils/
-│   └── api.ts              ← extended
-└── AppRouter.tsx            ← updated
+│   ├── ContactsListPage.tsx
+│   ├── CompaniesListPage.tsx
+│   └── DealsListPage.tsx
+└── AppRouter.tsx
 ```
-
----
-
-## Definition of Done (Per EDS-MIGRATION.md)
-
-1. ✅ All data loaded via GraphQL (same API as Twenty)
-2. ✅ Read-only listing (CRUD deferred to Phase 3)
-3. ✅ Components use only EDS design tokens
-4. ✅ Accessibility: keyboard navigable, ARIA attributes correct
-5. ✅ Responsive: works on tablet (768px) and desktop (1280px+)
-6. ✅ Routes added to AppRouter
-7. ✅ Documented in EDS-COMPONENTS.md

@@ -1,125 +1,125 @@
-# EDS Phase 3 — Core CRM Actions: Design & Implementation Plan
+# EDS Fase 3 — Ações Principais do CRM: Plano de Design e Implementação
 
-This document specifies the components, behaviors, tokens, and page structure for Phase 3 of the EDS migration (Core CRM Actions). All designs follow [SLDS 2](https://www.lightningdesignsystem.com/) principles adapted for React, using EDS design tokens (`--eds-g-*`).
+Este documento especifica os componentes, comportamentos, tokens e estrutura de página para a Fase 3 da migração EDS (Ações Principais do CRM). Todos os designs seguem os princípios do [SLDS 2](https://www.lightningdesignsystem.com/) adaptados para React, usando design tokens EDS (`--eds-g-*`).
 
 ---
 
-## Table of Contents
+## Índice
 
-1. [Scope](#scope)
-2. [New Components](#new-components)
+1. [Escopo](#escopo)
+2. [Novos Componentes](#novos-componentes)
    - [FormElement](#formelement)
    - [Textarea](#textarea)
    - [FileSelector](#fileselector)
    - [Combobox](#combobox)
    - [ConfirmDialog](#confirmdialog)
    - [RecordForm](#recordform)
-3. [Updated Components](#updated-components)
-   - [Icon (new icons)](#icon-new-icons)
-   - [InlineEdit (relationship support)](#inlineedit-relationship-support)
-4. [New Hooks](#new-hooks)
+3. [Componentes Atualizados](#componentes-atualizados)
+   - [Icon (novos ícones)](#icon-novos-ícones)
+   - [InlineEdit (suporte a relacionamentos)](#inlineedit-suporte-a-relacionamentos)
+4. [Novos Hooks](#novos-hooks)
    - [useRecordCreate](#userecordcreate)
    - [useRecordDelete](#userecorddelete)
    - [useFileUpload](#usefileupload)
    - [useRelationSearch](#userelationsearch)
-5. [Pages](#pages)
+5. [Páginas](#páginas)
    - [CreateContactPage](#createcontactpage)
    - [CreateCompanyPage](#createcompanypage)
    - [CreateDealPage](#createdealpage)
-6. [GraphQL Queries & Mutations](#graphql-queries--mutations)
-7. [Routing Changes](#routing-changes)
-8. [Design Token Additions](#design-token-additions)
-9. [Accessibility Checklist](#accessibility-checklist)
-10. [File Structure Summary](#file-structure-summary)
-11. [Definition of Done](#definition-of-done)
+6. [Queries e Mutations GraphQL](#queries-e-mutations-graphql)
+7. [Alterações de Roteamento](#alterações-de-roteamento)
+8. [Adições de Design Tokens](#adições-de-design-tokens)
+9. [Checklist de Acessibilidade](#checklist-de-acessibilidade)
+10. [Resumo da Estrutura de Arquivos](#resumo-da-estrutura-de-arquivos)
+11. [Definição de Pronto](#definição-de-pronto)
 
 ---
 
-## Scope
+## Escopo
 
-Phase 3 delivers **Core CRM Actions** for the three primary objects (contacts, companies, opportunities). Users can:
+A Fase 3 entrega as **Ações Principais do CRM** para os três objetos primários (contatos, empresas, oportunidades). Os usuários podem:
 
-- Create a new record via a dedicated form page (stacked form layout)
-- Edit an existing record in-place (click-to-edit, already via InlineEdit from Phase 2) AND via a full edit-mode form
-- Delete a record with a destructive confirmation dialog
-- Set relationship fields (e.g. assign a company to a contact) via a searchable combobox
-- Upload files (attachments) to a record
+- Criar um novo registro via página de formulário dedicada (layout de formulário empilhado)
+- Editar um registro existente in-place (clique-para-editar, já via InlineEdit da Fase 2) E via formulário de edição completo
+- Excluir um registro com diálogo de confirmação destrutivo
+- Definir campos de relacionamento (ex: atribuir uma empresa a um contato) via combobox pesquisável
+- Fazer upload de arquivos (anexos) em um registro
 
-Navigation from list pages: a "New" button in the `PageHeader` opens the create form. From detail pages: "Edit" toggles full-form edit mode and "Delete" triggers the confirmation dialog.
+Navegação a partir das páginas de lista: um botão "Novo" no `PageHeader` abre o formulário de criação. A partir das páginas de detalhe: "Editar" alterna o modo de formulário completo e "Excluir" aciona o diálogo de confirmação.
 
 ---
 
-## New Components
+## Novos Componentes
 
 ### FormElement
 
-> SLDS 2 reference: [Form Element](https://www.lightningdesignsystem.com/components/form-element/)
+> Referência SLDS 2: [Form Element](https://www.lightningdesignsystem.com/components/form-element/)
 
-**File:** `src/components/FormElement/FormElement.tsx`
+**Arquivo:** `src/components/FormElement/FormElement.tsx`
 
-The foundational wrapper that provides structure (label, help text, validation message) around any input control. All form fields use this wrapper.
+O wrapper fundamental que fornece estrutura (label, texto de ajuda, mensagem de validação) ao redor de qualquer controle de input. Todos os campos de formulário usam este wrapper.
 
 ```tsx
 type FormElementLayout = 'stacked' | 'horizontal';
 
 type FormElementProps = {
-  id: string;                          // Unique ID, used for label-input association
-  label: string;                       // Field label text
-  required?: boolean;                  // Shows red asterisk, marks field required
-  helpText?: string;                   // Tooltip/help text shown via info icon
-  error?: string;                      // Validation error message (red text below input)
-  layout?: FormElementLayout;          // 'stacked' (default) or 'horizontal'
-  children: React.ReactNode;           // The input control (Input, Textarea, Select, etc.)
+  id: string;                          // ID único, usado para associação label-input
+  label: string;                       // Texto do label do campo
+  required?: boolean;                  // Mostra asterisco vermelho, marca campo como obrigatório
+  helpText?: string;                   // Texto de ajuda/tooltip exibido via ícone de info
+  error?: string;                      // Mensagem de erro de validação (texto vermelho abaixo do input)
+  layout?: FormElementLayout;          // 'stacked' (padrão) ou 'horizontal'
+  children: React.ReactNode;           // O controle de input (Input, Textarea, Select, etc.)
   className?: string;
   style?: React.CSSProperties;
 };
 ```
 
-**Anatomy (SLDS 2):**
+**Anatomia (SLDS 2):**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Required Asterisk | Red `*` before label when `required=true` |
-| 2 | Field Label | `<label>` describing the purpose of the input |
-| 3 | Help Text Icon | Info icon that triggers a tooltip with `helpText` |
-| 4 | Input Component | Child element (the actual control) |
-| 5 | Supporting Text | Below input; shows `error` message or helper text |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Asterisco Obrigatório | `*` vermelho antes do label quando `required=true` |
+| 2 | Label do Campo | `<label>` descrevendo o propósito do input |
+| 3 | Ícone de Ajuda | Ícone de info que aciona tooltip com `helpText` |
+| 4 | Componente de Input | Elemento filho (o controle real) |
+| 5 | Texto de Suporte | Abaixo do input; exibe mensagem de `error` ou texto auxiliar |
 
-**Visual spec:**
-- **Stacked layout (default):** Label sits above the input; full width. `marginBottom: spacingMedium` between form elements.
-- **Horizontal layout:** Label left (33% width), control right (67% width). Items vertically centered.
-- **Label:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textLabel`, `marginBottom: spacingXXSmall` (stacked) or inline (horizontal).
-- **Required asterisk:** `color: error`, placed before label text. `aria-hidden="true"` (screen readers get `aria-required` on the input instead).
-- **Error state:** Input border turns `borderError`. Error message below: `fontSize: fontSizeSmall`, `color: error`, prefixed with error icon. Associated via `aria-describedby`.
-- **Help icon:** 14px info icon, `color: textPlaceholder`, hover reveals tooltip. `aria-label="Help for {label}"`.
+**Especificação visual:**
+- **Layout empilhado (padrão):** Label fica acima do input; largura total. `marginBottom: spacingMedium` entre elementos de formulário.
+- **Layout horizontal:** Label à esquerda (33% largura), controle à direita (67% largura). Itens centralizados verticalmente.
+- **Label:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textLabel`, `marginBottom: spacingXXSmall` (empilhado) ou inline (horizontal).
+- **Asterisco obrigatório:** `color: error`, posicionado antes do texto do label. `aria-hidden="true"` (leitores de tela recebem `aria-required` no input).
+- **Estado de erro:** Borda do input fica `borderError`. Mensagem de erro abaixo: `fontSize: fontSizeSmall`, `color: error`, prefixada com ícone de erro. Associada via `aria-describedby`.
+- **Ícone de ajuda:** 14px ícone info, `color: textPlaceholder`, hover revela tooltip. `aria-label="Ajuda para {label}"`.
 
-**Behaviors:**
-- When `error` is set, the supporting text area shows the message with `aria-live="assertive"` for screen readers.
-- The `<label>` uses `htmlFor={id}` so clicking the label focuses the input.
-- Tab order follows natural document order.
+**Comportamentos:**
+- Quando `error` é definido, a área de texto de suporte exibe a mensagem com `aria-live="assertive"` para leitores de tela.
+- O `<label>` usa `htmlFor={id}` para que clicar no label foque o input.
+- Ordem de tabulação segue a ordem natural do documento.
 
 ---
 
 ### Textarea
 
-> SLDS 2 reference: [Textarea](https://www.lightningdesignsystem.com/components/textarea/)
+> Referência SLDS 2: [Textarea](https://www.lightningdesignsystem.com/components/textarea/)
 
-**File:** `src/components/Textarea/Textarea.tsx`
+**Arquivo:** `src/components/Textarea/Textarea.tsx`
 
-Multi-line text input for descriptions, notes, and comments.
+Input de texto multi-linhas para descrições, notas e comentários.
 
 ```tsx
 type TextareaProps = {
   id?: string;
   value: string;
   placeholder?: string;
-  label?: string;                      // If used standalone (without FormElement wrapper)
-  rows?: number;                       // Default: 4
-  maxLength?: number;                  // Optional character limit
+  label?: string;                      // Se usado standalone (sem wrapper FormElement)
+  rows?: number;                       // Padrão: 4
+  maxLength?: number;                  // Limite de caracteres opcional
   disabled?: boolean;
   readOnly?: boolean;
-  error?: boolean;                     // Visual error state (border + icon)
-  resize?: 'none' | 'vertical' | 'both';  // Default: 'vertical'
+  error?: boolean;                     // Estado visual de erro (borda + ícone)
+  resize?: 'none' | 'vertical' | 'both';  // Padrão: 'vertical'
   onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
   'aria-label'?: string;
@@ -127,159 +127,159 @@ type TextareaProps = {
 };
 ```
 
-**Visual spec:**
-- `width: 100%`, `minHeight: rows * lineHeight`, default `rows: 4`.
-- Border: `1px solid borderInput`, focus: `borderFocus` with `box-shadow: 0 0 0 1px brandPrimary`.
-- Error: `borderError` border, no shadow.
+**Especificação visual:**
+- `width: 100%`, `minHeight: rows * lineHeight`, padrão `rows: 4`.
+- Borda: `1px solid borderInput`, foco: `borderFocus` com `box-shadow: 0 0 0 1px brandPrimary`.
+- Erro: borda `borderError`, sem sombra.
 - `padding: spacingXSmall spacingSmall`, `borderRadius: radiusMedium`.
 - `fontFamily: fontFamilyBase`, `fontSize: fontSizeMedium`, `color: textDefault`.
-- Disabled: `backgroundColor: neutral1`, `color: textDisabled`, `cursor: not-allowed`.
-- Read-only: `backgroundColor: transparent`, `border: none`, `padding: 0`.
-- Grabber (resize handle): native browser resize handle, controlled via `resize` prop.
-- Character counter (when `maxLength` set): displayed below right-aligned, `fontSize: fontSizeSmall`, `color: textPlaceholder`. Turns `color: error` when at/over limit.
+- Desabilitado: `backgroundColor: neutral1`, `color: textDisabled`, `cursor: not-allowed`.
+- Somente leitura: `backgroundColor: transparent`, `border: none`, `padding: 0`.
+- Handle de resize: handle nativo do navegador, controlado via prop `resize`.
+- Contador de caracteres (quando `maxLength` definido): exibido abaixo alinhado à direita, `fontSize: fontSizeSmall`, `color: textPlaceholder`. Muda para `color: error` quando no/acima do limite.
 
-**States:**
-1. Default — gray border, placeholder visible
-2. Active/Focus — blue border + focus ring, placeholder hidden
-3. Disabled — gray background, no focus
-4. Read-only — no border, plain text appearance
-5. Error — red border, error message below
+**Estados:**
+1. Padrão — borda cinza, placeholder visível
+2. Ativo/Foco — borda azul + anel de foco, placeholder oculto
+3. Desabilitado — fundo cinza, sem foco
+4. Somente leitura — sem borda, aparência de texto simples
+5. Erro — borda vermelha, mensagem de erro abaixo
 
 ---
 
 ### FileSelector
 
-> SLDS 2 reference: [File Selector](https://www.lightningdesignsystem.com/components/file-selector/)
+> Referência SLDS 2: [File Selector](https://www.lightningdesignsystem.com/components/file-selector/)
 
-**File:** `src/components/FileSelector/FileSelector.tsx`
+**Arquivo:** `src/components/FileSelector/FileSelector.tsx`
 
-Upload files from a local device. Supports drag-and-drop and click-to-browse.
+Upload de arquivos do dispositivo local. Suporta arrastar-e-soltar e clique-para-navegar.
 
 ```tsx
 type FileSelectorProps = {
-  label?: string;                      // Field label (e.g. "Attachments")
-  accept?: string;                     // File type filter (e.g. "image/*,.pdf")
-  multiple?: boolean;                  // Allow multiple files (default: false)
-  maxSizeMB?: number;                  // Max file size in MB (default: 10)
+  label?: string;                      // Label do campo (ex: "Anexos")
+  accept?: string;                     // Filtro de tipo de arquivo (ex: "image/*,.pdf")
+  multiple?: boolean;                  // Permitir múltiplos arquivos (padrão: false)
+  maxSizeMB?: number;                  // Tamanho máx do arquivo em MB (padrão: 10)
   disabled?: boolean;
-  files: File[];                       // Currently selected files (controlled)
-  uploading?: boolean;                 // Show upload spinner
-  error?: string;                      // Error message
-  onChange: (files: File[]) => void;   // Called when files are selected/dropped
-  onRemove?: (index: number) => void;  // Called when a file is removed from list
+  files: File[];                       // Arquivos selecionados atualmente (controlado)
+  uploading?: boolean;                 // Mostrar spinner de upload
+  error?: string;                      // Mensagem de erro
+  onChange: (files: File[]) => void;   // Chamado quando arquivos são selecionados/soltos
+  onRemove?: (index: number) => void;  // Chamado quando um arquivo é removido da lista
   'aria-label'?: string;
 };
 ```
 
-**Anatomy (SLDS 2):**
+**Anatomia (SLDS 2):**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Field Label | Describes purpose of the file selector |
-| 2 | Drop Zone | Dashed-border area inviting drag-and-drop |
-| 3 | Upload Button | Opens file browser |
-| 4 | Instructions | "Or drag files here" helper text |
-| 5 | File List | Selected files shown as removable pills |
-| 6 | Supporting Text | Error/validation messages |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Label do Campo | Descreve o propósito do seletor de arquivo |
+| 2 | Zona de Soltar | Área com borda tracejada convidando arrastar-e-soltar |
+| 3 | Botão de Upload | Abre o navegador de arquivos |
+| 4 | Instruções | Texto auxiliar "Ou arraste arquivos aqui" |
+| 5 | Lista de Arquivos | Arquivos selecionados exibidos como pílulas removíveis |
+| 6 | Texto de Suporte | Mensagens de erro/validação |
 
-**Visual spec:**
-- **Drop zone:** Dashed border `2px dashed borderDefault`, `borderRadius: radiusMedium`, `padding: spacingLarge`, centered content.
-- **Drop zone (hover/drag-over):** `borderColor: brandPrimary`, `backgroundColor: brandPrimaryLight` (faint blue).
-- **Drop zone (drag-over error):** `borderColor: error`, error icon visible.
-- **Upload button:** Brand outline variant, centered in drop zone.
-- **Instructions:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, below button.
-- **File list:** Each file as a pill/chip with filename + size + remove (×) button. `backgroundColor: neutral1`, `borderRadius: radiusPill`, `padding: spacingXXSmall spacingSmall`.
-- **Uploading state:** Spinner replaces button text, progress shown.
-- **Disabled:** `opacity: 0.5`, `cursor: not-allowed`, drop zone non-interactive.
-- **Error:** `borderColor: borderError`, error message below in red.
+**Especificação visual:**
+- **Zona de soltar:** Borda tracejada `2px dashed borderDefault`, `borderRadius: radiusMedium`, `padding: spacingLarge`, conteúdo centralizado.
+- **Zona de soltar (hover/drag-over):** `borderColor: brandPrimary`, `backgroundColor: brandPrimaryLight` (azul sutil).
+- **Zona de soltar (drag-over erro):** `borderColor: error`, ícone de erro visível.
+- **Botão de upload:** Variante outline brand, centralizado na zona de soltar.
+- **Instruções:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, abaixo do botão.
+- **Lista de arquivos:** Cada arquivo como pílula/chip com nome + tamanho + botão remover (×). `backgroundColor: neutral1`, `borderRadius: radiusPill`, `padding: spacingXXSmall spacingSmall`.
+- **Estado de upload:** Spinner substitui o texto do botão, progresso exibido.
+- **Desabilitado:** `opacity: 0.5`, `cursor: not-allowed`, zona de soltar não interativa.
+- **Erro:** `borderColor: borderError`, mensagem de erro abaixo em vermelho.
 
-**Behaviors:**
-- Click on drop zone or button → opens native file picker.
-- Drag file over drop zone → visual highlight (border + bg change).
-- Drop files → validates size/type, calls `onChange`.
-- Files exceeding `maxSizeMB` or not matching `accept` → show error, reject file.
-- Remove button on each file pill calls `onRemove(index)`.
-- When `uploading=true`, show spinner inside drop zone area.
-- `aria-label` on the hidden file input for screen readers.
+**Comportamentos:**
+- Clique na zona de soltar ou botão → abre seletor de arquivo nativo.
+- Arrastar arquivo sobre a zona → destaque visual (mudança de borda + fundo).
+- Soltar arquivos → valida tamanho/tipo, chama `onChange`.
+- Arquivos excedendo `maxSizeMB` ou não correspondendo ao `accept` → exibe erro, rejeita arquivo.
+- Botão remover em cada pílula de arquivo chama `onRemove(index)`.
+- Quando `uploading=true`, exibe spinner dentro da área da zona de soltar.
+- `aria-label` no input de arquivo oculto para leitores de tela.
 
 ---
 
 ### Combobox
 
-> SLDS 2 reference: [Combobox](https://www.lightningdesignsystem.com/components/combobox/)
+> Referência SLDS 2: [Combobox](https://www.lightningdesignsystem.com/components/combobox/)
 
-**File:** `src/components/Combobox/Combobox.tsx`
+**Arquivo:** `src/components/Combobox/Combobox.tsx`
 
-A searchable select dropdown used primarily for relationship fields (e.g., selecting a company for a contact).
+Um dropdown com busca usado principalmente para campos de relacionamento (ex: selecionar uma empresa para um contato).
 
 ```tsx
 type ComboboxOption = {
   id: string;
   label: string;
-  sublabel?: string;                   // Secondary line (e.g. domain name)
-  avatarUrl?: string;                  // Optional avatar/icon
+  sublabel?: string;                   // Linha secundária (ex: nome de domínio)
+  avatarUrl?: string;                  // Avatar/ícone opcional
 };
 
 type ComboboxProps = {
   id?: string;
   label?: string;
   placeholder?: string;
-  value: ComboboxOption | null;        // Currently selected option
-  options: ComboboxOption[];           // Available options (can be live-searched)
-  loading?: boolean;                   // Show spinner in dropdown
+  value: ComboboxOption | null;        // Opção selecionada atualmente
+  options: ComboboxOption[];           // Opções disponíveis (pode ter busca em tempo real)
+  loading?: boolean;                   // Mostrar spinner no dropdown
   disabled?: boolean;
   readOnly?: boolean;
   error?: string;
-  searchQuery: string;                 // Controlled search input
-  onSearchChange: (query: string) => void;   // Called as user types
-  onSelect: (option: ComboboxOption | null) => void;  // Called on selection
-  onClear?: () => void;               // Called when selection is cleared
-  emptyMessage?: string;              // Shown when no options match
+  searchQuery: string;                 // Input de busca controlado
+  onSearchChange: (query: string) => void;   // Chamado conforme o usuário digita
+  onSelect: (option: ComboboxOption | null) => void;  // Chamado na seleção
+  onClear?: () => void;               // Chamado quando a seleção é limpa
+  emptyMessage?: string;              // Exibido quando nenhuma opção corresponde
   'aria-label'?: string;
   'aria-describedby'?: string;
 };
 ```
 
-**Anatomy (SLDS 2):**
+**Anatomia (SLDS 2):**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Input | Text input for searching/filtering |
-| 2 | Selected Pill | Shows current selection as a pill (when value set) |
-| 3 | Dropdown Listbox | `<ul role="listbox">` showing filtered options |
-| 4 | Option | `<li role="option">` with label, sublabel, and optional avatar |
-| 5 | Clear Button | × button to remove current selection |
-| 6 | Loading Spinner | Shown inside dropdown when loading options |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Input | Input de texto para busca/filtragem |
+| 2 | Pílula Selecionada | Exibe a seleção atual como uma pílula (quando valor definido) |
+| 3 | Listbox Dropdown | `<ul role="listbox">` mostrando opções filtradas |
+| 4 | Opção | `<li role="option">` com label, sublabel e avatar opcional |
+| 5 | Botão Limpar | Botão × para remover a seleção atual |
+| 6 | Spinner de Carregamento | Exibido dentro do dropdown quando carregando opções |
 
-**Visual spec:**
-- **Input:** Same dimensions as standard Input (height 36px, same borders/radius).
-- **Input with selection:** Shows selected option label as text; clear (×) button on right.
+**Especificação visual:**
+- **Input:** Mesmas dimensões do Input padrão (altura 36px, mesmas bordas/radius).
+- **Input com seleção:** Exibe label da opção selecionada como texto; botão limpar (×) à direita.
 - **Dropdown:** `position: absolute`, `zIndex: zIndexDropdown`, `backgroundColor: neutral0`, `border: 1px solid borderDefault`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `maxHeight: 240px`, `overflowY: auto`.
-- **Option (default):** `padding: spacingXSmall spacingSmall`, `fontSize: fontSizeMedium`. Avatar (20px, rounded) on left if present.
-- **Option (hover):** `backgroundColor: neutral1`.
-- **Option (focused):** `backgroundColor: brandPrimaryLight`, `outline: none`. Indicated by `aria-activedescendant`.
-- **Option (selected):** Check icon on right, `fontWeight: fontWeightMedium`.
-- **Empty state:** Centered text "No results found", `color: textPlaceholder`, `padding: spacingMedium`.
-- **Loading:** Spinner centered in dropdown with "Searching..." text.
+- **Opção (padrão):** `padding: spacingXSmall spacingSmall`, `fontSize: fontSizeMedium`. Avatar (20px, arredondado) à esquerda se presente.
+- **Opção (hover):** `backgroundColor: neutral1`.
+- **Opção (focada):** `backgroundColor: brandPrimaryLight`, `outline: none`. Indicado por `aria-activedescendant`.
+- **Opção (selecionada):** Ícone de check à direita, `fontWeight: fontWeightMedium`.
+- **Estado vazio:** Texto centralizado "Nenhum resultado encontrado", `color: textPlaceholder`, `padding: spacingMedium`.
+- **Carregando:** Spinner centralizado no dropdown com texto "Buscando...".
 
-**Behaviors:**
-- Typing in the input calls `onSearchChange` (debounced externally by the hook).
-- Arrow Down/Up navigates options. Enter selects highlighted option. Escape closes dropdown.
-- Click on option selects it and closes dropdown.
-- When `value` is set, the input shows the label read-only. Click on clear (×) resets.
-- Dropdown opens on focus/click when no value is set.
-- `role="combobox"` on input, `aria-expanded`, `aria-controls`, `aria-activedescendant` for accessibility.
-- `role="listbox"` on dropdown, `role="option"` on each item.
+**Comportamentos:**
+- Digitar no input chama `onSearchChange` (debounce feito externamente pelo hook).
+- Setas para baixo/cima navegam as opções. Enter seleciona a opção destacada. Escape fecha o dropdown.
+- Clicar em uma opção seleciona e fecha o dropdown.
+- Quando `value` está definido, o input exibe o label em somente leitura. Clicar em limpar (×) reseta.
+- Dropdown abre no foco/clique quando nenhum valor está definido.
+- `role="combobox"` no input, `aria-expanded`, `aria-controls`, `aria-activedescendant` para acessibilidade.
+- `role="listbox"` no dropdown, `role="option"` em cada item.
 
 ---
 
 ### ConfirmDialog
 
-> Based on SLDS 2 [Prompt](https://www.lightningdesignsystem.com/components/prompt/) + [Modal](https://www.lightningdesignsystem.com/components/modals/)
+> Baseado em SLDS 2 [Prompt](https://www.lightningdesignsystem.com/components/prompt/) + [Modal](https://www.lightningdesignsystem.com/components/modals/)
 
-**File:** `src/components/ConfirmDialog/ConfirmDialog.tsx`
+**Arquivo:** `src/components/ConfirmDialog/ConfirmDialog.tsx`
 
-A focused modal for destructive confirmations (delete record, discard changes).
+Um modal focado para confirmações destrutivas (excluir registro, descartar alterações).
 
 ```tsx
 type ConfirmDialogVariant = 'destructive' | 'warning' | 'info';
@@ -288,39 +288,39 @@ type ConfirmDialogProps = {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
-  title: string;                         // e.g. "Delete Contact"
-  message: string | React.ReactNode;     // e.g. "Are you sure you want to delete John Doe?"
-  confirmLabel?: string;                 // Default: "Delete" / "Confirm"
-  cancelLabel?: string;                  // Default: "Cancel"
-  variant?: ConfirmDialogVariant;        // Default: 'destructive'
-  loading?: boolean;                     // Shows spinner on confirm button
+  title: string;                         // ex: "Excluir Contato"
+  message: string | React.ReactNode;     // ex: "Tem certeza que deseja excluir João Silva?"
+  confirmLabel?: string;                 // Padrão: "Excluir" / "Confirmar"
+  cancelLabel?: string;                  // Padrão: "Cancelar"
+  variant?: ConfirmDialogVariant;        // Padrão: 'destructive'
+  loading?: boolean;                     // Exibe spinner no botão confirmar
   'aria-label'?: string;
 };
 ```
 
-**Visual spec:**
-- Uses the existing `Modal` component internally, `size="small"`.
-- **Header:** Icon matching variant (error-icon for destructive, warning for warning, info for info) + title text.
-- **Icon color:** Destructive → `error`, Warning → `warning`, Info → `brandPrimary`.
-- **Body:** Message text, `fontSize: fontSizeMedium`, `color: textDefault`.
-- **Footer:** Two buttons — Cancel (neutral variant) and Confirm (destructive/brand variant matching `variant`).
-- **Confirm button (destructive):** `backgroundColor: error`, `color: textInverse`.
-- **Confirm button (warning):** `backgroundColor: warning`, `color: textInverse`.
-- **Loading state:** Confirm button shows spinner, disabled state.
+**Especificação visual:**
+- Usa o componente `Modal` existente internamente, `size="small"`.
+- **Cabeçalho:** Ícone correspondente à variante (error-icon para destructive, warning para warning, info para info) + texto do título.
+- **Cor do ícone:** Destructive → `error`, Warning → `warning`, Info → `brandPrimary`.
+- **Corpo:** Texto da mensagem, `fontSize: fontSizeMedium`, `color: textDefault`.
+- **Rodapé:** Dois botões — Cancelar (variante neutral) e Confirmar (variante destructive/brand correspondente ao `variant`).
+- **Botão confirmar (destructive):** `backgroundColor: error`, `color: textInverse`.
+- **Botão confirmar (warning):** `backgroundColor: warning`, `color: textInverse`.
+- **Estado de carregamento:** Botão confirmar exibe spinner, estado desabilitado.
 
-**Behaviors:**
-- Built on top of `Modal` — inherits focus trap, Escape to close, overlay click.
-- Confirm button receives initial focus (for keyboard users).
-- `onConfirm` called when confirm button clicked. `onCancel` called on cancel, Escape, or overlay click.
-- Screen reader: Dialog announced as `role="alertdialog"` with `aria-describedby` pointing to message.
+**Comportamentos:**
+- Construído sobre `Modal` — herda focus trap, Escape para fechar, clique no overlay.
+- Botão confirmar recebe foco inicial (para usuários de teclado).
+- `onConfirm` chamado quando botão confirmar clicado. `onCancel` chamado em cancelar, Escape ou clique no overlay.
+- Leitor de tela: Diálogo anunciado como `role="alertdialog"` com `aria-describedby` apontando para a mensagem.
 
 ---
 
 ### RecordForm
 
-**File:** `src/components/RecordForm/RecordForm.tsx`
+**Arquivo:** `src/components/RecordForm/RecordForm.tsx`
 
-A generic form component that renders a structured form from field definitions. Used for both create and edit modes.
+Um componente de formulário genérico que renderiza um formulário estruturado a partir de definições de campos. Usado tanto para modos de criação quanto de edição.
 
 ```tsx
 type FormFieldType =
@@ -339,110 +339,110 @@ type FormFieldType =
   | 'file';
 
 type FormFieldDefinition = {
-  key: string;                         // Field key (maps to GraphQL field path)
-  label: string;                       // Display label
-  type: FormFieldType;                 // Input type
-  required?: boolean;                  // Field required?
+  key: string;                         // Chave do campo (mapeia para caminho do campo GraphQL)
+  label: string;                       // Label de exibição
+  type: FormFieldType;                 // Tipo de input
+  required?: boolean;                  // Campo obrigatório?
   placeholder?: string;
   helpText?: string;
-  options?: Array<{ value: string; label: string }>;  // For 'select' type
-  // Relation-specific
-  relationObjectNameSingular?: string; // e.g. 'company'
-  relationObjectNamePlural?: string;   // e.g. 'companies'
-  relationSearchFields?: string[];     // Fields to search on
-  relationDisplayField?: string;       // Field to show as label
-  // File-specific
+  options?: Array<{ value: string; label: string }>;  // Para tipo 'select'
+  // Específico de relacionamento
+  relationObjectNameSingular?: string; // ex: 'company'
+  relationObjectNamePlural?: string;   // ex: 'companies'
+  relationSearchFields?: string[];     // Campos para buscar
+  relationDisplayField?: string;       // Campo para exibir como label
+  // Específico de arquivo
   accept?: string;
   maxSizeMB?: number;
   multiple?: boolean;
   // Layout
-  colSpan?: 1 | 2;                    // 1 column (50%) or 2 columns (100%) in 2-col grid
+  colSpan?: 1 | 2;                    // 1 coluna (50%) ou 2 colunas (100%) no grid de 2 colunas
 };
 
 type FormSection = {
-  title?: string;                      // Section heading (optional)
-  columns?: 1 | 2;                     // Number of columns (default: 2)
+  title?: string;                      // Título da seção (opcional)
+  columns?: 1 | 2;                     // Número de colunas (padrão: 2)
   fields: FormFieldDefinition[];
 };
 
 type RecordFormProps = {
-  title: string;                       // Page/form title ("New Contact", "Edit Company")
-  sections: FormSection[];             // Form sections with fields
-  values: Record<string, unknown>;     // Current form values
-  errors: Record<string, string>;      // Per-field errors
-  saving: boolean;                     // Form submission in progress
+  title: string;                       // Título da página/formulário ("Novo Contato", "Editar Empresa")
+  sections: FormSection[];             // Seções do formulário com campos
+  values: Record<string, unknown>;     // Valores atuais do formulário
+  errors: Record<string, string>;      // Erros por campo
+  saving: boolean;                     // Envio do formulário em andamento
   onChange: (field: string, value: unknown) => void;
   onSubmit: () => void;
   onCancel: () => void;
-  submitLabel?: string;                // Default: "Save"
-  cancelLabel?: string;                // Default: "Cancel"
+  submitLabel?: string;                // Padrão: "Salvar"
+  cancelLabel?: string;                // Padrão: "Cancelar"
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Form Header | Title + Cancel/Save buttons |
-| 2 | Section | Optional section heading + grid of form elements |
-| 3 | Form Element | Individual field (FormElement + appropriate input) |
-| 4 | Footer | Fixed bottom bar with Cancel + Save buttons |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Cabeçalho do Formulário | Título + botões Cancelar/Salvar |
+| 2 | Seção | Título de seção opcional + grid de elementos de formulário |
+| 3 | Elemento de Formulário | Campo individual (FormElement + input apropriado) |
+| 4 | Rodapé | Barra inferior fixa com botões Cancelar + Salvar |
 
-**Visual spec:**
-- **Form header:** Title uses `fontSizeXXLarge`, `fontWeightBold`. Cancel button (ghost) and Save button (brand) aligned right.
-- **Section heading:** `fontSize: fontSizeLarge`, `fontWeight: fontWeightMedium`, `color: textDefault`, `borderBottom: 1px solid borderDefault`, `paddingBottom: spacingXSmall`, `marginBottom: spacingMedium`.
-- **Field grid:** CSS Grid, 2 columns with `gap: spacingMedium spacingLarge`. Single-column fields span 50%, `colSpan: 2` spans 100%.
-- **Single-column layout:** Each field takes full width.
-- **Footer bar:** Sticky bottom, `backgroundColor: neutral0`, `borderTop: 1px solid borderDefault`, `padding: spacingMedium spacingLarge`. Buttons right-aligned.
-- **Saving state:** Save button disabled + spinner.
+**Especificação visual:**
+- **Cabeçalho do formulário:** Título usa `fontSizeXXLarge`, `fontWeightBold`. Botão Cancelar (ghost) e botão Salvar (brand) alinhados à direita.
+- **Título da seção:** `fontSize: fontSizeLarge`, `fontWeight: fontWeightMedium`, `color: textDefault`, `borderBottom: 1px solid borderDefault`, `paddingBottom: spacingXSmall`, `marginBottom: spacingMedium`.
+- **Grid de campos:** CSS Grid, 2 colunas com `gap: spacingMedium spacingLarge`. Campos de coluna única ocupam 50%, `colSpan: 2` ocupa 100%.
+- **Layout de coluna única:** Cada campo ocupa largura total.
+- **Barra de rodapé:** Fixa na parte inferior, `backgroundColor: neutral0`, `borderTop: 1px solid borderDefault`, `padding: spacingMedium spacingLarge`. Botões alinhados à direita.
+- **Estado de salvamento:** Botão Salvar desabilitado + spinner.
 
-**Behaviors:**
-- `<form>` element with `onSubmit` handler. Enter key in last field submits form.
-- Each field calls `onChange(fieldKey, value)` on change.
-- Validation errors mapped by field key → shown in FormElement.
-- Relation fields use the Combobox component internally.
-- File fields use the FileSelector component.
-- `aria-busy="true"` on form when saving.
+**Comportamentos:**
+- Elemento `<form>` com handler `onSubmit`. Tecla Enter no último campo submete o formulário.
+- Cada campo chama `onChange(fieldKey, value)` na alteração.
+- Erros de validação mapeados por chave de campo → exibidos no FormElement.
+- Campos de relacionamento usam o componente Combobox internamente.
+- Campos de arquivo usam o componente FileSelector.
+- `aria-busy="true"` no formulário durante salvamento.
 
 ---
 
-## Updated Components
+## Componentes Atualizados
 
-### Icon (new icons)
+### Icon (novos ícones)
 
-New icon additions for Phase 3:
+Novos ícones adicionados para a Fase 3:
 
-| Icon Name | Usage |
-|-----------|-------|
-| `plus` | "New record" buttons, add actions |
-| `trash` | Delete actions |
-| `upload` | File upload button |
-| `attachment` | File attachment indicator |
-| `link` | Relationship link indicator |
-| `unlink` | Remove relationship |
-| `drag` | Drag handle for file drop zone |
+| Nome do Ícone | Uso |
+|---------------|-----|
+| `plus` | Botões "Novo registro", ações de adição |
+| `trash` | Ações de exclusão |
+| `upload` | Botão de upload de arquivo |
+| `attachment` | Indicador de anexo de arquivo |
+| `link` | Indicador de link de relacionamento |
+| `unlink` | Remover relacionamento |
+| `drag` | Handle de arraste para zona de soltar |
 
-### InlineEdit (relationship support)
+### InlineEdit (suporte a relacionamentos)
 
-The existing `InlineEdit` component gains a new `fieldType: 'relation'` mode that renders a Combobox instead of a text input. Additional props:
+O componente `InlineEdit` existente ganha um novo modo `fieldType: 'relation'` que renderiza um Combobox ao invés de um input de texto. Props adicionais:
 
 ```tsx
-// Added to InlineEditProps
+// Adicionado ao InlineEditProps
 relationObjectNameSingular?: string;
 relationObjectNamePlural?: string;
 relationSearchFields?: string[];
 relationDisplayField?: string;
 ```
 
-When `fieldType === 'relation'`, InlineEdit renders a Combobox in edit mode with live search of related records.
+Quando `fieldType === 'relation'`, o InlineEdit renderiza um Combobox no modo edição com busca em tempo real de registros relacionados.
 
 ---
 
-## New Hooks
+## Novos Hooks
 
 ### useRecordCreate
 
-**File:** `src/hooks/useRecordCreate.ts`
+**Arquivo:** `src/hooks/useRecordCreate.ts`
 
 ```tsx
 type UseRecordCreateOptions = {
@@ -460,9 +460,9 @@ type UseRecordCreateReturn = {
 };
 ```
 
-Builds and executes a `createPerson` / `createCompany` / `createOpportunity` mutation dynamically.
+Constrói e executa uma mutation `createPerson` / `createCompany` / `createOpportunity` dinamicamente.
 
-GraphQL mutation shape:
+Formato da mutation GraphQL:
 ```graphql
 mutation CreatePerson($input: PersonCreateInput!) {
   createPerson(data: $input) {
@@ -473,7 +473,7 @@ mutation CreatePerson($input: PersonCreateInput!) {
 
 ### useRecordDelete
 
-**File:** `src/hooks/useRecordDelete.ts`
+**Arquivo:** `src/hooks/useRecordDelete.ts`
 
 ```tsx
 type UseRecordDeleteOptions = {
@@ -490,9 +490,9 @@ type UseRecordDeleteReturn = {
 };
 ```
 
-Builds and executes a `deletePerson` / `deleteCompany` / `deleteOpportunity` mutation.
+Constrói e executa uma mutation `deletePerson` / `deleteCompany` / `deleteOpportunity`.
 
-GraphQL mutation shape:
+Formato da mutation GraphQL:
 ```graphql
 mutation DeletePerson($id: ID!) {
   deletePerson(id: $id) {
@@ -503,7 +503,7 @@ mutation DeletePerson($id: ID!) {
 
 ### useFileUpload
 
-**File:** `src/hooks/useFileUpload.ts`
+**Arquivo:** `src/hooks/useFileUpload.ts`
 
 ```tsx
 type UseFileUploadReturn = {
@@ -517,11 +517,11 @@ type UseFileUploadReturn = {
 };
 ```
 
-Twenty's file upload uses a REST endpoint: `POST /files` with `multipart/form-data`. The hook manages the upload lifecycle and returns the attachment URL.
+O upload de arquivos do Twenty usa um endpoint REST: `POST /files` com `multipart/form-data`. O hook gerencia o ciclo de vida do upload e retorna a URL do anexo.
 
 ### useRelationSearch
 
-**File:** `src/hooks/useRelationSearch.ts`
+**Arquivo:** `src/hooks/useRelationSearch.ts`
 
 ```tsx
 type UseRelationSearchOptions = {
@@ -529,7 +529,7 @@ type UseRelationSearchOptions = {
   objectNamePlural: string;
   searchFields: string[];
   displayField: string;
-  fields: string;            // GraphQL fields to fetch
+  fields: string;            // Campos GraphQL para buscar
 };
 
 type UseRelationSearchReturn = {
@@ -540,71 +540,71 @@ type UseRelationSearchReturn = {
 };
 ```
 
-Reuses the `useRecordList` pattern internally but returns results formatted as `ComboboxOption[]`. Includes debounce (300ms) on search input.
+Reutiliza o padrão `useRecordList` internamente mas retorna resultados formatados como `ComboboxOption[]`. Inclui debounce (300ms) no input de busca.
 
 ---
 
-## Pages
+## Páginas
 
 ### CreateContactPage
 
-**File:** `src/pages/CreateContactPage.tsx`
+**Arquivo:** `src/pages/CreateContactPage.tsx`
 
-**Route:** `/contacts/new`
+**Rota:** `/contacts/new`
 
-**Sections:**
-1. **Personal Information** (2 columns)
-   - First Name (text, required)
-   - Last Name (text, required)
+**Seções:**
+1. **Informações Pessoais** (2 colunas)
+   - Primeiro Nome (text, obrigatório)
+   - Último Nome (text, obrigatório)
    - Email (email)
-   - Phone (phone)
-   - Job Title (text)
-   - City (text)
+   - Telefone (phone)
+   - Cargo (text)
+   - Cidade (text)
 
-2. **Organization** (2 columns)
-   - Company (relation → `company`, displays company name)
+2. **Organização** (2 colunas)
+   - Empresa (relation → `company`, exibe nome da empresa)
 
-**On submit:** Creates person via `useRecordCreate`, shows success toast, navigates to `/contacts/:id`.
-**On cancel:** Navigates back to `/contacts`.
+**Ao submeter:** Cria pessoa via `useRecordCreate`, exibe toast de sucesso, navega para `/contacts/:id`.
+**Ao cancelar:** Navega de volta para `/contacts`.
 
 ### CreateCompanyPage
 
-**File:** `src/pages/CreateCompanyPage.tsx`
+**Arquivo:** `src/pages/CreateCompanyPage.tsx`
 
-**Route:** `/companies/new`
+**Rota:** `/companies/new`
 
-**Sections:**
-1. **Company Information** (2 columns)
-   - Name (text, required)
-   - Domain Name (url)
-   - Employees (number)
-   - Address (text, colSpan: 2)
-   - Ideal Customer Profile (boolean)
+**Seções:**
+1. **Informações da Empresa** (2 colunas)
+   - Nome (text, obrigatório)
+   - Nome de Domínio (url)
+   - Funcionários (number)
+   - Endereço (text, colSpan: 2)
+   - Perfil de Cliente Ideal (boolean)
 
-**On submit:** Creates company via `useRecordCreate`, shows success toast, navigates to `/companies/:id`.
+**Ao submeter:** Cria empresa via `useRecordCreate`, exibe toast de sucesso, navega para `/companies/:id`.
 
 ### CreateDealPage
 
-**File:** `src/pages/CreateDealPage.tsx`
+**Arquivo:** `src/pages/CreateDealPage.tsx`
 
-**Route:** `/deals/new`
+**Rota:** `/deals/new`
 
-**Sections:**
-1. **Deal Information** (2 columns)
-   - Name (text, required)
-   - Stage (select: options from pipeline stages)
-   - Close Date (date)
-   - Amount (currency)
-   - Company (relation → `company`)
-   - Contact (relation → `person`, displays full name)
+**Seções:**
+1. **Informações da Oportunidade** (2 colunas)
+   - Nome (text, obrigatório)
+   - Estágio (select: opções dos estágios do pipeline)
+   - Data de Fechamento (date)
+   - Valor (currency)
+   - Empresa (relation → `company`)
+   - Contato (relation → `person`, exibe nome completo)
 
-**On submit:** Creates opportunity via `useRecordCreate`, shows success toast, navigates to `/deals/:id`.
+**Ao submeter:** Cria oportunidade via `useRecordCreate`, exibe toast de sucesso, navega para `/deals/:id`.
 
 ---
 
-## GraphQL Queries & Mutations
+## Queries e Mutations GraphQL
 
-### Create Record
+### Criar Registro
 
 ```graphql
 mutation CreatePerson($input: PersonCreateInput!) {
@@ -620,7 +620,7 @@ mutation CreateOpportunity($input: OpportunityCreateInput!) {
 }
 ```
 
-### Delete Record
+### Excluir Registro
 
 ```graphql
 mutation DeletePerson($id: ID!) {
@@ -636,7 +636,7 @@ mutation DeleteOpportunity($id: ID!) {
 }
 ```
 
-### Relation Search (reuses list query pattern)
+### Busca de Relacionamento (reutiliza padrão de query de lista)
 
 ```graphql
 query SearchCompanies($filter: CompanyFilterInput, $first: Int) {
@@ -646,7 +646,7 @@ query SearchCompanies($filter: CompanyFilterInput, $first: Int) {
 }
 ```
 
-### File Upload
+### Upload de Arquivo
 
 ```
 POST /files
@@ -656,60 +656,60 @@ Authorization: Bearer <token>
 file: <binary>
 ```
 
-Response: `{ url: string }`
+Resposta: `{ url: string }`
 
 ---
 
-## Routing Changes
+## Alterações de Roteamento
 
-New routes added to `AppRouter.tsx`:
+Novas rotas adicionadas ao `AppRouter.tsx`:
 
-| Path | Page | Description |
-|------|------|-------------|
-| `/contacts/new` | CreateContactPage | Create new contact |
-| `/companies/new` | CreateCompanyPage | Create new company |
-| `/deals/new` | CreateDealPage | Create new deal |
+| Caminho | Página | Descrição |
+|---------|--------|-----------|
+| `/contacts/new` | CreateContactPage | Criar novo contato |
+| `/companies/new` | CreateCompanyPage | Criar nova empresa |
+| `/deals/new` | CreateDealPage | Criar nova oportunidade |
 
-**Important:** `/contacts/new` must be placed BEFORE `/contacts/:recordId` in the router definition to ensure correct matching.
+**Importante:** `/contacts/new` deve ser colocado ANTES de `/contacts/:recordId` na definição do router para garantir correspondência correta.
 
-The existing detail pages gain "Edit" (full-form toggle) and "Delete" button functionality.
+As páginas de detalhe existentes ganham funcionalidade de botão "Editar" (toggle de formulário completo) e "Excluir".
 
 ---
 
-## Design Token Additions
+## Adições de Design Tokens
 
-New token values (added to existing token objects):
+Novos valores de token (adicionados aos objetos de token existentes):
 
 ```typescript
-// New color tokens for file upload and drag-drop
+// Novos tokens de cor para upload de arquivo e arrastar-e-soltar
 colorTokens.surfaceDragOver = 'var(--eds-g-color-brand-base-5, rgba(1,118,211,0.05))';
 
-// New CSS custom properties in global.css
+// Novas CSS custom properties no global.css
 --eds-g-color-brand-base-5: rgba(1, 118, 211, 0.05);
 ```
 
-No other new tokens required — the existing set covers all Phase 3 needs.
+Nenhum outro token novo necessário — o conjunto existente cobre todas as necessidades da Fase 3.
 
 ---
 
-## Accessibility Checklist
+## Checklist de Acessibilidade
 
-- [ ] All form fields have visible `<label>` elements associated via `htmlFor`/`id`
-- [ ] Required fields have `aria-required="true"` on the input element
-- [ ] Error messages use `aria-describedby` and `aria-live="assertive"`
-- [ ] Combobox follows [WAI-ARIA combobox pattern](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
-- [ ] Arrow keys navigate combobox options, Enter selects, Escape closes
-- [ ] ConfirmDialog uses `role="alertdialog"` with `aria-describedby`
-- [ ] File selector drop zone has `aria-label` and keyboard alternative (button)
-- [ ] All buttons have visible labels or `aria-label`
-- [ ] Tab order follows logical document order
-- [ ] Focus returns to trigger element after modal/dialog closes
-- [ ] Color is not the only means of conveying state (icons accompany colors)
-- [ ] Keyboard: all interactive elements reachable and operable via keyboard
+- [ ] Todos os campos de formulário têm elementos `<label>` visíveis associados via `htmlFor`/`id`
+- [ ] Campos obrigatórios têm `aria-required="true"` no elemento de input
+- [ ] Mensagens de erro usam `aria-describedby` e `aria-live="assertive"`
+- [ ] Combobox segue o [padrão WAI-ARIA combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
+- [ ] Setas navegam opções do combobox, Enter seleciona, Escape fecha
+- [ ] ConfirmDialog usa `role="alertdialog"` com `aria-describedby`
+- [ ] Zona de soltar do seletor de arquivo tem `aria-label` e alternativa por teclado (botão)
+- [ ] Todos os botões têm labels visíveis ou `aria-label`
+- [ ] Ordem de tabulação segue a ordem lógica do documento
+- [ ] Foco retorna ao elemento que acionou após modal/diálogo fechar
+- [ ] Cor não é o único meio de comunicar estado (ícones acompanham cores)
+- [ ] Teclado: todos os elementos interativos alcançáveis e operáveis via teclado
 
 ---
 
-## File Structure Summary
+## Resumo da Estrutura de Arquivos
 
 ```
 packages/twenty-eds/src/
@@ -733,52 +733,52 @@ packages/twenty-eds/src/
 │   │   ├── Textarea.tsx
 │   │   └── index.ts
 │   ├── Icon/
-│   │   └── Icon.tsx          (updated — new icon paths)
+│   │   └── Icon.tsx          (atualizado — novos caminhos de ícone)
 │   ├── InlineEdit/
-│   │   └── InlineEdit.tsx    (updated — relation support)
-│   └── index.ts              (updated — new exports)
+│   │   └── InlineEdit.tsx    (atualizado — suporte a relacionamento)
+│   └── index.ts              (atualizado — novos exports)
 ├── hooks/
-│   ├── useRecordCreate.ts    (new)
-│   ├── useRecordDelete.ts    (new)
-│   ├── useFileUpload.ts      (new)
-│   └── useRelationSearch.ts  (new)
+│   ├── useRecordCreate.ts    (novo)
+│   ├── useRecordDelete.ts    (novo)
+│   ├── useFileUpload.ts      (novo)
+│   └── useRelationSearch.ts  (novo)
 ├── pages/
-│   ├── CreateContactPage.tsx  (new)
-│   ├── CreateCompanyPage.tsx  (new)
-│   └── CreateDealPage.tsx     (new)
-└── AppRouter.tsx              (updated — new routes)
+│   ├── CreateContactPage.tsx  (novo)
+│   ├── CreateCompanyPage.tsx  (novo)
+│   └── CreateDealPage.tsx     (novo)
+└── AppRouter.tsx              (atualizado — novas rotas)
 ```
 
-### Updated Files
+### Arquivos Atualizados
 
-| File | Changes |
-|------|---------|
-| `src/components/Icon/Icon.tsx` | 7 new icon paths added |
-| `src/components/InlineEdit/InlineEdit.tsx` | Relation field type support |
-| `src/components/index.ts` | New exports for Phase 3 components |
-| `src/AppRouter.tsx` | New create routes + "New" button wiring |
-| `src/pages/ContactDetailPage.tsx` | Delete button + full edit mode |
-| `src/pages/CompanyDetailPage.tsx` | Delete button + full edit mode |
-| `src/pages/DealDetailPage.tsx` | Delete button + full edit mode |
-| `src/pages/ContactsListPage.tsx` | "New Contact" button in header |
-| `src/pages/CompaniesListPage.tsx` | "New Company" button in header |
-| `src/pages/DealsListPage.tsx` | "New Deal" button in header |
+| Arquivo | Alterações |
+|---------|------------|
+| `src/components/Icon/Icon.tsx` | 7 novos caminhos de ícone adicionados |
+| `src/components/InlineEdit/InlineEdit.tsx` | Suporte a tipo de campo relation |
+| `src/components/index.ts` | Novos exports para componentes da Fase 3 |
+| `src/AppRouter.tsx` | Novas rotas de criação + conexão do botão "Novo" |
+| `src/pages/ContactDetailPage.tsx` | Botão excluir + modo de edição completo |
+| `src/pages/CompanyDetailPage.tsx` | Botão excluir + modo de edição completo |
+| `src/pages/DealDetailPage.tsx` | Botão excluir + modo de edição completo |
+| `src/pages/ContactsListPage.tsx` | Botão "Novo Contato" no cabeçalho |
+| `src/pages/CompaniesListPage.tsx` | Botão "Nova Empresa" no cabeçalho |
+| `src/pages/DealsListPage.tsx` | Botão "Nova Oportunidade" no cabeçalho |
 
 ---
 
-## Definition of Done
+## Definição de Pronto
 
-A feature is considered complete when:
+Uma funcionalidade é considerada pronta quando:
 
-1. All CRUD operations work via the same GraphQL API as Twenty standard frontend
-2. Form validation prevents invalid submissions (required fields, format checks)
-3. Components use only EDS design tokens — no hard-coded colors or spacings
-4. Accessibility: keyboard navigable, ARIA attributes correct, screen-reader tested
-5. Responsive: works on tablet (768px) and desktop (1280px+)
-6. Relationship fields use live-search Combobox with correct data binding
-7. File upload works for at least images and PDFs
-8. Delete confirmation dialog prevents accidental data loss
-9. Toast feedback shown after create/update/delete operations
-10. Routes added to AppRouter and navigation links working
-11. This document (EDS-PHASE3-CORE-CRM-ACTIONS.md) updated with any implementation deviations
-12. EDS-COMPONENTS.md updated with new component documentation
+1. Todas as operações CRUD funcionam via a mesma API GraphQL do frontend padrão do Twenty
+2. Validação de formulário previne submissões inválidas (campos obrigatórios, verificações de formato)
+3. Componentes usam apenas design tokens EDS — sem cores ou espaçamentos hardcoded
+4. Acessibilidade: navegável por teclado, atributos ARIA corretos, testado com leitor de tela
+5. Responsivo: funciona em tablet (768px) e desktop (1280px+)
+6. Campos de relacionamento usam Combobox com busca em tempo real e vínculo de dados correto
+7. Upload de arquivo funciona para pelo menos imagens e PDFs
+8. Diálogo de confirmação de exclusão previne perda acidental de dados
+9. Feedback via toast exibido após operações de criar/atualizar/excluir
+10. Rotas adicionadas ao AppRouter e links de navegação funcionando
+11. Este documento (EDS-PHASE3-CORE-CRM-ACTIONS.md) atualizado com quaisquer desvios de implementação
+12. EDS-COMPONENTS.md atualizado com documentação dos novos componentes

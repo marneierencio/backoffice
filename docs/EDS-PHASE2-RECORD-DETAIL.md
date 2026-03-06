@@ -1,65 +1,65 @@
-# EDS Phase 2 — Record Detail: Design & Implementation Plan
+# EDS Fase 2 — Detalhe de Registro: Plano de Design e Implementação
 
-This document specifies the components, behaviors, tokens, and page structure for Phase 2 of the EDS migration (Record Detail). All designs follow [SLDS 2](https://www.lightningdesignsystem.com/) principles adapted for React, using EDS design tokens (`--eds-g-*`).
+Este documento especifica os componentes, comportamentos, tokens e estrutura de página para a Fase 2 da migração EDS (Detalhe de Registro). Todos os designs seguem os princípios do [SLDS 2](https://www.lightningdesignsystem.com/) adaptados para React, usando design tokens EDS (`--eds-g-*`).
 
 ---
 
-## Table of Contents
+## Índice
 
-1. [Scope](#scope)
-2. [New Components](#new-components)
+1. [Escopo](#escopo)
+2. [Novos Componentes](#novos-componentes)
    - [Avatar](#avatar)
    - [Tabs](#tabs)
    - [Modal](#modal)
-   - [Toast (Notification System)](#toast-notification-system)
+   - [Toast (Sistema de Notificações)](#toast-sistema-de-notificações)
    - [InlineEdit](#inlineedit)
    - [RecordHeader](#recordheader)
    - [PropertyBox](#propertybox)
    - [FieldRenderer](#fieldrenderer)
    - [RelationCard](#relationcard)
    - [Timeline](#timeline)
-3. [New Hooks](#new-hooks)
+3. [Novos Hooks](#novos-hooks)
    - [useRecordDetail](#userecorddetail)
    - [useRecordUpdate](#userecordupdate)
    - [useToast](#usetoast)
-4. [New Icon Additions](#new-icon-additions)
-5. [Pages](#pages)
-   - [RecordShowPage (generic)](#recordshowpage-generic)
+4. [Novos Ícones](#novos-ícones)
+5. [Páginas](#páginas)
+   - [RecordShowPage (genérico)](#recordshowpage-genérico)
    - [ContactDetailPage](#contactdetailpage)
    - [CompanyDetailPage](#companydetailpage)
    - [DealDetailPage](#dealdetailpage)
-6. [GraphQL Queries & Mutations](#graphql-queries--mutations)
-7. [Routing Changes](#routing-changes)
-8. [Design Token Additions](#design-token-additions)
-9. [Accessibility Checklist](#accessibility-checklist)
-10. [File Structure Summary](#file-structure-summary)
-11. [Definition of Done](#definition-of-done)
+6. [Queries e Mutations GraphQL](#queries-e-mutations-graphql)
+7. [Alterações de Roteamento](#alterações-de-roteamento)
+8. [Adições de Design Tokens](#adições-de-design-tokens)
+9. [Checklist de Acessibilidade](#checklist-de-acessibilidade)
+10. [Resumo da Estrutura de Arquivos](#resumo-da-estrutura-de-arquivos)
+11. [Definição de Pronto](#definição-de-pronto)
 
 ---
 
-## Scope
+## Escopo
 
-Phase 2 delivers the **Record Detail (Show) Page** for core CRM objects. Users can:
+A Fase 2 entrega a **Página de Detalhe (Show) de Registro** para os objetos principais do CRM. Os usuários podem:
 
-- View full details of a single record (person, company, opportunity)
-- Edit fields inline (click-to-edit pattern)
-- Navigate between tabs (Details, Timeline, Notes, Tasks, Emails)
-- See related records (relations) in collapsible card sections
-- See an avatar + name in the record header with breadcrumb navigation
-- Receive toast feedback after save/error actions
-- Open modals (e.g. confirmations, future use in Phase 3)
+- Visualizar detalhes completos de um único registro (pessoa, empresa, oportunidade)
+- Editar campos inline (padrão clique-para-editar)
+- Navegar entre abas (Detalhes, Timeline, Notas, Tarefas, Emails)
+- Ver registros relacionados (relações) em seções de card colapsáveis
+- Ver avatar + nome no cabeçalho do registro com navegação breadcrumb
+- Receber feedback via toast após ações de salvar/erro
+- Abrir modais (ex: confirmações, uso futuro na Fase 3)
 
-Navigation from list pages: clicking a row in the DataTable navigates to the record detail.
+Navegação a partir das páginas de lista: clicar em uma linha no DataTable navega para o detalhe do registro.
 
 ---
 
-## New Components
+## Novos Componentes
 
 ### Avatar
 
-> SLDS 2 reference: [Avatar](https://www.lightningdesignsystem.com/components/avatar/)
+> Referência SLDS 2: [Avatar](https://www.lightningdesignsystem.com/components/avatar/)
 
-**File:** `src/components/Avatar/Avatar.tsx`
+**Arquivo:** `src/components/Avatar/Avatar.tsx`
 
 ```tsx
 type AvatarType = 'user' | 'entity';
@@ -67,37 +67,37 @@ type AvatarType = 'user' | 'entity';
 type AvatarSize = 'x-small' | 'small' | 'medium' | 'large';
 
 type AvatarProps = {
-  name: string;                      // Used for initials fallback + alt text
-  src?: string;                      // Image URL
-  type?: AvatarType;                 // 'user' (circle) or 'entity' (rounded square)
-  size?: AvatarSize;                 // default 'medium'
+  name: string;                      // Usado para iniciais de fallback + texto alt
+  src?: string;                      // URL da imagem
+  type?: AvatarType;                 // 'user' (círculo) ou 'entity' (quadrado arredondado)
+  size?: AvatarSize;                 // padrão 'medium'
   className?: string;
   style?: React.CSSProperties;
 };
 ```
 
-**Visual spec:**
-- **Sizes:** x-small=20px, small=24px, medium=32px, large=48px
-- **Shape:** `user` → `border-radius: 50%`; `entity` → `border-radius: radiusMedium` (4px)
-- **Image mode:** `<img>` fills container, `object-fit: cover`
-- **Initials fallback:** Two letters extracted from name — for user: first letters of first+last name; for entity: first two letters of single word. `backgroundColor: brandPrimary`, `color: textInverse`, `fontWeight: fontWeightBold`, centered
-- **Icon fallback:** When no name provided, render default SVG user/entity icon
-- **Focus ring:** When interactive (wrapped in button/link), standard focus ring
+**Especificação visual:**
+- **Tamanhos:** x-small=20px, small=24px, medium=32px, large=48px
+- **Forma:** `user` → `border-radius: 50%`; `entity` → `border-radius: radiusMedium` (4px)
+- **Modo imagem:** `<img>` preenche o contêiner, `object-fit: cover`
+- **Fallback iniciais:** Duas letras extraídas do nome — para user: primeiras letras do primeiro+último nome; para entity: duas primeiras letras de palavra única. `backgroundColor: brandPrimary`, `color: textInverse`, `fontWeight: fontWeightBold`, centralizado
+- **Fallback ícone:** Quando nenhum nome é fornecido, renderiza ícone SVG padrão de user/entity
+- **Anel de foco:** Quando interativo (dentro de button/link), anel de foco padrão
 
 ---
 
 ### Tabs
 
-> SLDS 2 reference: [Tabs](https://www.lightningdesignsystem.com/components/tabs/)
+> Referência SLDS 2: [Tabs](https://www.lightningdesignsystem.com/components/tabs/)
 
-**File:** `src/components/Tabs/Tabs.tsx`
+**Arquivo:** `src/components/Tabs/Tabs.tsx`
 
 ```tsx
 type TabItem = {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  badge?: number;                    // Count badge (e.g. "3" for tasks)
+  badge?: number;                    // Badge de contagem (ex: "3" para tarefas)
   disabled?: boolean;
 };
 
@@ -105,46 +105,46 @@ type TabsProps = {
   tabs: TabItem[];
   activeTab: string;
   onChange: (tabId: string) => void;
-  size?: 'default' | 'medium' | 'large';  // default 'default'
-  children?: React.ReactNode;         // Tab panel content
+  size?: 'default' | 'medium' | 'large';  // padrão 'default'
+  children?: React.ReactNode;         // Conteúdo do painel da aba
 };
 ```
 
-**Anatomy:**
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Tab Bar | `<div role="tablist">` horizontal row of tabs |
-| 2 | Tab | `<button role="tab">` individual tab button |
-| 3 | Label | Text label for the tab |
-| 4 | Icon | Optional leading icon |
-| 5 | Badge | Optional count overlay |
-| 6 | Active Indicator | Bottom border on the active tab |
-| 7 | Tab Panel | `<div role="tabpanel">` content area below tabs |
+**Anatomia:**
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Barra de Abas | `<div role="tablist">` linha horizontal de abas |
+| 2 | Aba | `<button role="tab">` botão individual de aba |
+| 3 | Label | Texto da aba |
+| 4 | Ícone | Ícone inicial opcional |
+| 5 | Badge | Overlay de contagem opcional |
+| 6 | Indicador Ativo | Borda inferior na aba ativa |
+| 7 | Painel da Aba | `<div role="tabpanel">` área de conteúdo abaixo das abas |
 
-**Visual spec:**
-- **Tab bar:** `border-bottom: 2px solid neutral2`
-- **Tab (default state):** `padding: spacingXSmall spacingMedium`, `color: textPlaceholder`, `fontSizeMedium`, no bottom border
-- **Tab (hover):** `color: textDefault`, faint underline `border-bottom: 3px solid neutral3`
-- **Tab (active):** `color: brandPrimary`, `fontWeight: fontWeightMedium`, `border-bottom: 3px solid brandPrimary`
-- **Tab (focus):** standard focus ring, tab also shows selected state
-- **Tab (disabled):** `color: textDisabled`, `cursor: not-allowed`, no hover effect
-- **Badge:** Small pill next to label, `backgroundColor: neutral2`, `color: textDefault`, `fontSize: fontSizeXSmall`, `border-radius: radiusPill`, `padding: 0 spacingXXSmall`
-- **Sizes:** default height ~40px, medium ~44px, large ~48px (affected by padding and font size)
+**Especificação visual:**
+- **Barra de abas:** `border-bottom: 2px solid neutral2`
+- **Aba (estado padrão):** `padding: spacingXSmall spacingMedium`, `color: textPlaceholder`, `fontSizeMedium`, sem borda inferior
+- **Aba (hover):** `color: textDefault`, sublinhado sutil `border-bottom: 3px solid neutral3`
+- **Aba (ativa):** `color: brandPrimary`, `fontWeight: fontWeightMedium`, `border-bottom: 3px solid brandPrimary`
+- **Aba (foco):** anel de foco padrão, aba também mostra estado selecionado
+- **Aba (desabilitada):** `color: textDisabled`, `cursor: not-allowed`, sem efeito hover
+- **Badge:** Pequena pílula ao lado do label, `backgroundColor: neutral2`, `color: textDefault`, `fontSize: fontSizeXSmall`, `border-radius: radiusPill`, `padding: 0 spacingXXSmall`
+- **Tamanhos:** default altura ~40px, medium ~44px, large ~48px (afetado por padding e tamanho de fonte)
 
-**Behaviors:**
-- Clicking a tab fires `onChange` and switches the active indicator
-- Arrow keys navigate between tabs when focused in the tablist
-- `Home`/`End` keys jump to first/last tab
-- Only the active tab is in tab order (`tabIndex={0}`); others have `tabIndex={-1}`
-- Tab content loads only when the tab is activated (lazy rendering)
+**Comportamentos:**
+- Clicar em uma aba dispara `onChange` e muda o indicador ativo
+- Setas do teclado navegam entre as abas quando focado na tablist
+- Teclas `Home`/`End` pulam para a primeira/última aba
+- Apenas a aba ativa está na ordem de tabulação (`tabIndex={0}`); as outras têm `tabIndex={-1}`
+- O conteúdo da aba carrega apenas quando a aba é ativada (renderização lazy)
 
 ---
 
 ### Modal
 
-> SLDS 2 reference: [Modals](https://www.lightningdesignsystem.com/components/modals/)
+> Referência SLDS 2: [Modals](https://www.lightningdesignsystem.com/components/modals/)
 
-**File:** `src/components/Modal/Modal.tsx`
+**Arquivo:** `src/components/Modal/Modal.tsx`
 
 ```tsx
 type ModalSize = 'small' | 'medium' | 'large';
@@ -154,55 +154,55 @@ type ModalProps = {
   onClose: () => void;
   title?: string;
   tagline?: string;
-  size?: ModalSize;                   // default 'medium'
-  children?: React.ReactNode;         // Body content
-  footer?: React.ReactNode;           // Footer with action buttons
-  closeOnOverlayClick?: boolean;      // default true
-  closeOnEscape?: boolean;            // default true
-  'aria-label'?: string;              // Required if no title
+  size?: ModalSize;                   // padrão 'medium'
+  children?: React.ReactNode;         // Conteúdo do corpo
+  footer?: React.ReactNode;           // Rodapé com botões de ação
+  closeOnOverlayClick?: boolean;      // padrão true
+  closeOnEscape?: boolean;            // padrão true
+  'aria-label'?: string;              // Obrigatório se não houver title
 };
 ```
 
-**Anatomy:**
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Backdrop | Semi-transparent overlay covering the page |
-| 2 | Container | Centered dialog with white background |
-| 3 | Header | Title + close button (×) in a flex row |
-| 4 | Tagline | Optional subtitle below title |
-| 5 | Body | Scrollable content area |
-| 6 | Footer | Right-aligned action buttons |
+**Anatomia:**
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Backdrop | Overlay semi-transparente cobrindo a página |
+| 2 | Container | Diálogo centralizado com fundo branco |
+| 3 | Cabeçalho | Título + botão fechar (×) em linha flex |
+| 4 | Tagline | Subtítulo opcional abaixo do título |
+| 5 | Corpo | Área de conteúdo com scroll |
+| 6 | Rodapé | Botões de ação alinhados à direita |
 
-**Visual spec:**
-- **Backdrop:** `backgroundColor: rgba(0,0,0,0.5)`, `position: fixed`, full viewport, `z-index: zIndexModal`
-- **Container:** `backgroundColor: neutral0`, `border-radius: radiusLarge`, `box-shadow: elevationModal`, centered vertically + horizontally
-- **Sizes:** small=min(480px, 60vw), medium=min(640px, 70vw), large=min(960px, 90vw)
-- **Max height:** `80vh`, body scrolls when overflowing
-- **Header:** `padding: spacingMedium spacingLarge`, `border-bottom: 1px solid borderDefault`
-- **Title:** `fontSize: fontSizeXLarge`, `fontWeight: fontWeightBold`, `color: textDefault`
+**Especificação visual:**
+- **Backdrop:** `backgroundColor: rgba(0,0,0,0.5)`, `position: fixed`, viewport completo, `z-index: zIndexModal`
+- **Container:** `backgroundColor: neutral0`, `border-radius: radiusLarge`, `box-shadow: elevationModal`, centralizado vertical + horizontalmente
+- **Tamanhos:** small=min(480px, 60vw), medium=min(640px, 70vw), large=min(960px, 90vw)
+- **Altura máxima:** `80vh`, corpo rola quando transborda
+- **Cabeçalho:** `padding: spacingMedium spacingLarge`, `border-bottom: 1px solid borderDefault`
+- **Título:** `fontSize: fontSizeXLarge`, `fontWeight: fontWeightBold`, `color: textDefault`
 - **Tagline:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, `marginTop: spacingXXSmall`
-- **Close button:** ghost icon button, top-right corner, `×` icon
-- **Body:** `padding: spacingLarge`, `overflow-y: auto`, `flex: 1`
-- **Footer:** `padding: spacingMedium spacingLarge`, `border-top: 1px solid borderDefault`, `text-align: right`, `gap: spacingXSmall`
+- **Botão fechar:** botão ícone ghost, canto superior direito, ícone `×`
+- **Corpo:** `padding: spacingLarge`, `overflow-y: auto`, `flex: 1`
+- **Rodapé:** `padding: spacingMedium spacingLarge`, `border-top: 1px solid borderDefault`, `text-align: right`, `gap: spacingXSmall`
 
-**Behaviors:**
-- Opens with a fade-in animation (`durationPromptly`, 200ms)
-- Closes via: close button, overlay click (if enabled), Escape key (if enabled)
-- Focus is trapped inside the modal when open (focus trap)
-- Focus moves to the first focusable element or the close button on open
-- On close, focus returns to the element that triggered the modal
-- `aria-modal="true"`, `role="dialog"`, `aria-labelledby` pointing to title
+**Comportamentos:**
+- Abre com animação fade-in (`durationPromptly`, 200ms)
+- Fecha via: botão fechar, clique no overlay (se habilitado), tecla Escape (se habilitado)
+- Foco é preso dentro do modal quando aberto (focus trap)
+- Foco move para o primeiro elemento focalizável ou o botão fechar ao abrir
+- Ao fechar, foco retorna ao elemento que acionou o modal
+- `aria-modal="true"`, `role="dialog"`, `aria-labelledby` apontando para o título
 
 ---
 
-### Toast (Notification System)
+### Toast (Sistema de Notificações)
 
-> SLDS 2 reference: [Toast](https://www.lightningdesignsystem.com/components/toast/)
+> Referência SLDS 2: [Toast](https://www.lightningdesignsystem.com/components/toast/)
 
-**Files:**
-- `src/components/Toast/Toast.tsx` — single toast component
-- `src/components/Toast/ToastContainer.tsx` — positioned container for multiple toasts
-- `src/components/Toast/ToastProvider.tsx` — React context provider
+**Arquivos:**
+- `src/components/Toast/Toast.tsx` — componente de toast individual
+- `src/components/Toast/ToastContainer.tsx` — container posicionado para múltiplos toasts
+- `src/components/Toast/ToastProvider.tsx` — provider de contexto React
 
 ```tsx
 type ToastVariant = 'success' | 'error' | 'warning' | 'info';
@@ -215,8 +215,8 @@ type ToastData = {
   message: string;
   detail?: string;
   link?: { label: string; href: string };
-  mode?: ToastMode;                    // default: based on variant
-  durationMs?: number;                 // override auto-dismiss time
+  mode?: ToastMode;                    // padrão: baseado na variante
+  durationMs?: number;                 // sobrescreve tempo de auto-dismiss
 };
 
 type ToastProps = ToastData & {
@@ -229,40 +229,40 @@ type ToastContainerProps = {
 };
 ```
 
-**Visual spec:**
-- **Container:** fixed to top center of viewport, `top: spacingLarge`, `z-index: zIndexToast`, `max-width: 640px`, stacks vertically with `gap: spacingXSmall`
-- **Toast:** flex row, `min-height: 48px`, `border-radius: radiusMedium`, `box-shadow: elevationDropdown`
-- **Variant colors:**
-  | Variant | Background | Left border (4px) | Icon color |
-  |---------|------------|-------------------|------------|
+**Especificação visual:**
+- **Container:** fixo no topo central da viewport, `top: spacingLarge`, `z-index: zIndexToast`, `max-width: 640px`, empilha verticalmente com `gap: spacingXSmall`
+- **Toast:** linha flex, `min-height: 48px`, `border-radius: radiusMedium`, `box-shadow: elevationDropdown`
+- **Cores por variante:**
+  | Variante | Fundo | Borda esquerda (4px) | Cor do ícone |
+  |----------|-------|----------------------|--------------|
   | success | `successLight` | `success` | `success` |
   | error | `errorLight` | `error` | `error` |
   | warning | `warningLight` | `warning` | `warning` |
   | info | `infoLight` | `brandPrimary` | `brandPrimary` |
-- **Icon:** Leading variant-specific icon (checkmark, error, warning, info), 20px
-- **Message:** `fontSizeMedium`, `fontWeightMedium`, `color: textDefault`
-- **Detail:** `fontSizeSmall`, `color: textLabel`, below message
-- **Close button:** ghost `×` button, right side
-- **Dismiss timing (SLDS 2 spec):**
-  | Variant | Has link? | Default mode |
-  |---------|-----------|-------------|
-  | success | No | dismissible (4.8s) |
-  | success | Yes | sticky |
+- **Ícone:** Ícone específico da variante (checkmark, erro, aviso, info), 20px
+- **Mensagem:** `fontSizeMedium`, `fontWeightMedium`, `color: textDefault`
+- **Detalhe:** `fontSizeSmall`, `color: textLabel`, abaixo da mensagem
+- **Botão fechar:** botão ghost `×`, lado direito
+- **Tempo de dismiss (spec SLDS 2):**
+  | Variante | Tem link? | Modo padrão |
+  |----------|-----------|-------------|
+  | success | Não | dismissible (4.8s) |
+  | success | Sim | sticky |
   | error | — | sticky |
   | warning | — | sticky |
   | info | — | sticky |
 
-**Animations:**
-- Enter: slide down + fade in, `durationPromptly` (200ms)
-- Exit: fade out + slide up, `durationQuickly` (100ms)
+**Animações:**
+- Entrada: slide para baixo + fade in, `durationPromptly` (200ms)
+- Saída: fade out + slide para cima, `durationQuickly` (100ms)
 
 ---
 
 ### InlineEdit
 
-**File:** `src/components/InlineEdit/InlineEdit.tsx`
+**Arquivo:** `src/components/InlineEdit/InlineEdit.tsx`
 
-A click-to-edit component that renders a read-only value and switches to an input on click/Enter.
+Um componente clique-para-editar que renderiza um valor somente leitura e alterna para um input ao clicar/Enter.
 
 ```tsx
 type FieldType =
@@ -278,51 +278,51 @@ type FieldType =
 
 type InlineEditProps = {
   value: string | number | boolean | null;
-  fieldType?: FieldType;               // default 'text'
-  label: string;                       // Accessible label
+  fieldType?: FieldType;               // padrão 'text'
+  label: string;                       // Label acessível
   placeholder?: string;
   readOnly?: boolean;
   saving?: boolean;
   error?: string;
-  options?: Array<{ value: string; label: string }>;  // For fieldType='select'
-  currencyCode?: string;               // For fieldType='currency'
+  options?: Array<{ value: string; label: string }>;  // Para fieldType='select'
+  currencyCode?: string;               // Para fieldType='currency'
   onSave: (newValue: string | number | boolean | null) => void;
   onCancel?: () => void;
 };
 ```
 
-**Visual spec (read mode):**
-- Displays formatted value text, `color: textDefault`, `fontSize: fontSizeMedium`
-- On hover: faint pencil icon appears, background changes to `neutral1`
-- `cursor: pointer` (except when `readOnly`)
-- Empty values show placeholder text in `color: textPlaceholder`
+**Especificação visual (modo leitura):**
+- Exibe texto de valor formatado, `color: textDefault`, `fontSize: fontSizeMedium`
+- Ao hover: ícone de lápis sutil aparece, fundo muda para `neutral1`
+- `cursor: pointer` (exceto quando `readOnly`)
+- Valores vazios mostram texto placeholder em `color: textPlaceholder`
 
-**Visual spec (edit mode):**
-- Renders an appropriate `<input>` (or `<select>`) matching the `fieldType`
-- Input styled matching the existing Input component tokens
-- Shows a checkmark (save) and × (cancel) icon buttons below/beside the input
-- Focus automatically placed in the input
-- `Escape` cancels edit, `Enter` saves
+**Especificação visual (modo edição):**
+- Renderiza um `<input>` (ou `<select>`) apropriado de acordo com o `fieldType`
+- Input estilizado com os mesmos tokens do componente Input existente
+- Mostra botões de ícone checkmark (salvar) e × (cancelar) abaixo/ao lado do input
+- Foco automaticamente posicionado no input
+- `Escape` cancela edição, `Enter` salva
 
-**Behaviors:**
-- Click or Enter → enter edit mode
-- Save → calls `onSave`, shows saving spinner briefly, exits edit mode
-- Cancel → reverts to read mode without saving
-- Error → shows error text below the input in edit mode
-- `readOnly` → no hover effect, no click-to-edit
+**Comportamentos:**
+- Clique ou Enter → entra no modo edição
+- Salvar → chama `onSave`, mostra spinner de salvamento brevemente, sai do modo edição
+- Cancelar → reverte para modo leitura sem salvar
+- Erro → mostra texto de erro abaixo do input no modo edição
+- `readOnly` → sem efeito hover, sem clique-para-editar
 
 ---
 
 ### RecordHeader
 
-**File:** `src/components/RecordHeader/RecordHeader.tsx`
+**Arquivo:** `src/components/RecordHeader/RecordHeader.tsx`
 
-The header section at the top of a record detail page, similar to SLDS Record Home.
+A seção de cabeçalho no topo de uma página de detalhe de registro, similar ao Record Home do SLDS.
 
 ```tsx
 type RecordHeaderProps = {
-  objectIcon?: React.ReactNode;        // Icon or emoji for the object type
-  objectLabel: string;                 // e.g. "Contact", "Company"
+  objectIcon?: React.ReactNode;        // Ícone ou emoji para o tipo de objeto
+  objectLabel: string;                 // ex: "Contato", "Empresa"
   recordName: string;
   avatar?: {
     name: string;
@@ -330,36 +330,36 @@ type RecordHeaderProps = {
     type?: 'user' | 'entity';
   };
   breadcrumbs?: Array<{ label: string; href?: string }>;
-  actions?: React.ReactNode;           // Right-side action buttons
-  children?: React.ReactNode;          // Below the header (e.g. status badge)
+  actions?: React.ReactNode;           // Botões de ação no lado direito
+  children?: React.ReactNode;          // Abaixo do cabeçalho (ex: badge de status)
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Contacts > John Doe                    [Edit] [Delete] [⋮ More]   │
+│  Contatos > João Silva                  [Editar] [Excluir] [⋮ Mais]│
 │  ┌────┐                                                             │
-│  │ JD │  John Doe                                                   │
-│  └────┘  Contact                                                    │
-│          [Active badge]                                              │
+│  │ JS │  João Silva                                                 │
+│  └────┘  Contato                                                    │
+│          [Badge ativo]                                               │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Breadcrumbs:** `fontSize: fontSizeSmall`, `color: textLink`, separated by `›`, last item is plain text
-- **Avatar:** `size: large` (48px), on the left
-- **Record Name:** `fontSize: fontSizeXXLarge` (24px), `fontWeight: fontWeightBold`
-- **Object Label:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, below name
-- **Actions:** flex row of buttons, right-aligned
+- **Breadcrumbs:** `fontSize: fontSizeSmall`, `color: textLink`, separados por `›`, último item é texto simples
+- **Avatar:** `size: large` (48px), à esquerda
+- **Nome do Registro:** `fontSize: fontSizeXXLarge` (24px), `fontWeight: fontWeightBold`
+- **Label do Objeto:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, abaixo do nome
+- **Ações:** linha flex de botões, alinhados à direita
 - **Container:** `padding: spacingLarge`, `border-bottom: 1px solid borderDefault`, `backgroundColor: neutral0`
 
 ---
 
 ### PropertyBox
 
-**File:** `src/components/PropertyBox/PropertyBox.tsx`
+**Arquivo:** `src/components/PropertyBox/PropertyBox.tsx`
 
-A vertical list of label–value pairs for record fields that can be edited inline.
+Uma lista vertical de pares label–valor para campos de registro que podem ser editados inline.
 
 ```tsx
 type PropertyItem = {
@@ -374,57 +374,57 @@ type PropertyItem = {
 type PropertyBoxProps = {
   fields: PropertyItem[];
   onFieldSave?: (fieldKey: string, newValue: string | number | boolean | null) => void;
-  saving?: Record<string, boolean>;    // Per-field saving state
-  errors?: Record<string, string>;     // Per-field error messages
-  compact?: boolean;                   // Reduce vertical spacing
+  saving?: Record<string, boolean>;    // Estado de salvamento por campo
+  errors?: Record<string, string>;     // Mensagens de erro por campo
+  compact?: boolean;                   // Reduzir espaçamento vertical
 };
 ```
 
-**Visual spec:**
-- Each field row: flex row, `min-height: 36px`, `padding: spacingXSmall 0`
+**Especificação visual:**
+- Cada linha de campo: linha flex, `min-height: 36px`, `padding: spacingXSmall 0`
 - **Label:** `width: 140px`, `flex-shrink: 0`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightMedium`, `color: textLabel`, `text-align: right`, `padding-right: spacingMedium`
-- **Value:** `flex: 1`, `max-width: 300px`, renders `InlineEdit` component
-- **Divider:** `border-bottom: 1px solid neutral2` between rows (unless compact)
-- **Compact mode:** tighter vertical padding, no dividers
+- **Valor:** `flex: 1`, `max-width: 300px`, renderiza componente `InlineEdit`
+- **Divisor:** `border-bottom: 1px solid neutral2` entre linhas (exceto compact)
+- **Modo compact:** padding vertical mais apertado, sem divisores
 
 ---
 
 ### FieldRenderer
 
-**File:** `src/components/FieldRenderer/FieldRenderer.tsx`
+**Arquivo:** `src/components/FieldRenderer/FieldRenderer.tsx`
 
-Renders a field value in read mode with proper formatting based on type.
+Renderiza um valor de campo no modo leitura com formatação adequada baseada no tipo.
 
 ```tsx
 type FieldRendererProps = {
   value: unknown;
   fieldType: FieldType;
   currencyCode?: string;
-  dateFormat?: string;                  // default locale short date
-  emptyText?: string;                  // default '—'
+  dateFormat?: string;                  // padrão data curta do locale
+  emptyText?: string;                  // padrão '—'
 };
 ```
 
-**Formatting rules:**
-| Type | Display |
-|------|---------|
-| `text` | Plain text, truncated with ellipsis if too long |
-| `email` | `<a href="mailto:...">` with link color |
-| `phone` | `<a href="tel:...">` with link color |
-| `number` | Locale-formatted number |
+**Regras de formatação:**
+| Tipo | Exibição |
+|------|----------|
+| `text` | Texto simples, truncado com reticências se muito longo |
+| `email` | `<a href="mailto:...">` com cor de link |
+| `phone` | `<a href="tel:...">` com cor de link |
+| `number` | Número formatado pelo locale |
 | `date` | `toLocaleDateString()` |
-| `currency` | Locale-formatted with currency symbol (amount in micros / 1_000_000) |
-| `url` | `<a href="..." target="_blank">` with external link icon |
-| `select` | Text or Badge depending on context |
-| `boolean` | Checkbox (read-only) or "Yes"/"No" text |
+| `currency` | Formatado pelo locale com símbolo de moeda (valor em micros / 1_000_000) |
+| `url` | `<a href="..." target="_blank">` com ícone de link externo |
+| `select` | Texto ou Badge dependendo do contexto |
+| `boolean` | Checkbox (somente leitura) ou texto "Sim"/"Não" |
 
 ---
 
 ### RelationCard
 
-**File:** `src/components/RelationCard/RelationCard.tsx`
+**Arquivo:** `src/components/RelationCard/RelationCard.tsx`
 
-A collapsible card showing related records, used in the record detail page below the fields.
+Um card colapsável mostrando registros relacionados, usado na página de detalhe do registro abaixo dos campos.
 
 ```tsx
 type RelationRecord = {
@@ -435,34 +435,34 @@ type RelationRecord = {
 };
 
 type RelationCardProps = {
-  title: string;                        // e.g. "Company", "Contacts"
+  title: string;                        // ex: "Empresa", "Contatos"
   relation: 'one' | 'many';
   records: RelationRecord[];
   loading?: boolean;
   onRecordClick?: (id: string) => void;
   emptyMessage?: string;
-  maxVisible?: number;                  // default 5 for 'many'
-  showMoreLabel?: string;               // default "Show all"
-  defaultExpanded?: boolean;            // default true
+  maxVisible?: number;                  // padrão 5 para 'many'
+  showMoreLabel?: string;               // padrão "Mostrar todos"
+  defaultExpanded?: boolean;            // padrão true
 };
 ```
 
-**Visual spec:**
-- Uses `Card` component as the outer container
-- **Header:** title with count badge for `many` relations, collapsible chevron
-- **Single relation (one):** avatar + name + subtitle, clickable
-- **Multiple relations (many):** vertical list, each item has avatar + name + subtitle
-- **Show more:** link button at the bottom when `records.length > maxVisible`
-- **Empty:** subtle message "No related records"
-- **Loading:** Spinner centered in the card body
+**Especificação visual:**
+- Usa componente `Card` como container externo
+- **Cabeçalho:** título com badge de contagem para relações `many`, chevron colapsável
+- **Relação única (one):** avatar + nome + subtítulo, clicável
+- **Múltiplas relações (many):** lista vertical, cada item tem avatar + nome + subtítulo
+- **Mostrar mais:** botão link no rodapé quando `records.length > maxVisible`
+- **Vazio:** mensagem sutil "Nenhum registro relacionado"
+- **Carregando:** Spinner centralizado no corpo do card
 
 ---
 
 ### Timeline
 
-**File:** `src/components/Timeline/Timeline.tsx`
+**Arquivo:** `src/components/Timeline/Timeline.tsx`
 
-A vertical timeline showing recent activities for a record.
+Uma timeline vertical mostrando atividades recentes de um registro.
 
 ```tsx
 type TimelineEvent = {
@@ -470,7 +470,7 @@ type TimelineEvent = {
   type: 'created' | 'updated' | 'note' | 'email' | 'task' | 'call' | 'event';
   title: string;
   description?: string;
-  timestamp: string;                    // ISO date
+  timestamp: string;                    // data ISO
   author?: { name: string; avatarUrl?: string };
   icon?: React.ReactNode;
 };
@@ -478,37 +478,37 @@ type TimelineEvent = {
 type TimelineProps = {
   events: TimelineEvent[];
   loading?: boolean;
-  maxVisible?: number;                  // default 10
+  maxVisible?: number;                  // padrão 10
   onShowMore?: () => void;
   emptyMessage?: string;
 };
 ```
 
-**Visual spec:**
-- Vertical line: `2px solid neutral2`, left margin at 20px
-- Each event: dot (8px circle, `brandPrimary` or type-specific color) on the line + content card to the right
-- **Content:** `fontSize: fontSizeMedium`, `color: textDefault`
-- **Timestamp:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`, formatted as relative time ("2 hours ago", "Yesterday")
-- **Author:** small avatar (x-small) + name inline with timestamp
-- **Loading:** spinner at the bottom
-- **Empty:** EmptyState component with "No activity yet" message
+**Especificação visual:**
+- Linha vertical: `2px solid neutral2`, margem esquerda em 20px
+- Cada evento: ponto (círculo 8px, `brandPrimary` ou cor específica do tipo) na linha + card de conteúdo à direita
+- **Conteúdo:** `fontSize: fontSizeMedium`, `color: textDefault`
+- **Timestamp:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`, formatado como tempo relativo ("2 horas atrás", "Ontem")
+- **Autor:** avatar pequeno (x-small) + nome inline com timestamp
+- **Carregando:** spinner na parte inferior
+- **Vazio:** componente EmptyState com mensagem "Nenhuma atividade ainda"
 
 ---
 
-## New Hooks
+## Novos Hooks
 
 ### useRecordDetail
 
-**File:** `src/hooks/useRecordDetail.ts`
+**Arquivo:** `src/hooks/useRecordDetail.ts`
 
-Fetches a single record by ID using the Twenty workspace GraphQL API.
+Busca um único registro por ID usando a API GraphQL de workspace do Twenty.
 
 ```tsx
 type UseRecordDetailOptions = {
-  objectNameSingular: string;          // e.g. 'person', 'company', 'opportunity'
-  objectNamePlural: string;            // e.g. 'people', 'companies', 'opportunities'
+  objectNameSingular: string;          // ex: 'person', 'company', 'opportunity'
+  objectNamePlural: string;            // ex: 'people', 'companies', 'opportunities'
   recordId: string;
-  fields: string;                      // GraphQL field selection
+  fields: string;                      // Seleção de campos GraphQL
 };
 
 type UseRecordDetailReturn<TRecord> = {
@@ -519,19 +519,19 @@ type UseRecordDetailReturn<TRecord> = {
 };
 ```
 
-**Implementation:**
-- Builds a dynamic GraphQL query: `query FindOne<Object>($id: UUID!) { <singular>(filter: { id: { eq: $id } }) { ...fields } }`
-- Calls `gqlWorkspace` on mount and when `recordId` changes
-- Returns strongly-typed record or null
-- Exposes refresh function for re-fetching after mutations
+**Implementação:**
+- Constrói uma query GraphQL dinâmica: `query FindOne<Object>($id: UUID!) { <singular>(filter: { id: { eq: $id } }) { ...fields } }`
+- Chama `gqlWorkspace` na montagem e quando `recordId` muda
+- Retorna registro tipado ou null
+- Expõe função refresh para re-buscar após mutations
 
 ---
 
 ### useRecordUpdate
 
-**File:** `src/hooks/useRecordUpdate.ts`
+**Arquivo:** `src/hooks/useRecordUpdate.ts`
 
-Mutation hook for updating a single field on a record.
+Hook de mutation para atualizar um único campo de um registro.
 
 ```tsx
 type UseRecordUpdateOptions = {
@@ -549,18 +549,18 @@ type UseRecordUpdateReturn = {
 };
 ```
 
-**Implementation:**
-- Builds a mutation: `mutation Update<Object>($id: UUID!, $input: <Object>UpdateInput!) { update<Object>(id: $id, data: $input) { id } }`
-- The `fieldName` can be a nested path (e.g. `name.firstName`) — the hook builds the proper nested input object
-- Returns success/error result for the calling component to show toast feedback
+**Implementação:**
+- Constrói uma mutation: `mutation Update<Object>($id: UUID!, $input: <Object>UpdateInput!) { update<Object>(id: $id, data: $input) { id } }`
+- O `fieldName` pode ser um caminho aninhado (ex: `name.firstName`) — o hook constrói o objeto de input aninhado adequado
+- Retorna resultado sucesso/erro para o componente consumidor mostrar feedback via toast
 
 ---
 
 ### useToast
 
-**File:** `src/hooks/useToast.ts`
+**Arquivo:** `src/hooks/useToast.ts`
 
-Hook that provides access to the toast notification system via React context.
+Hook que fornece acesso ao sistema de notificações toast via contexto React.
 
 ```tsx
 type UseToastReturn = {
@@ -572,89 +572,89 @@ type UseToastReturn = {
 };
 ```
 
-**Implementation:**
-- Consumed from `ToastProvider` context
-- `showToast` generates a unique ID and adds the toast to state
-- Convenience methods map to specific variants
-- Auto-dismiss timers managed internally by the provider
+**Implementação:**
+- Consumido do contexto do `ToastProvider`
+- `showToast` gera um ID único e adiciona o toast ao estado
+- Métodos de conveniência mapeiam para variantes específicas
+- Timers de auto-dismiss gerenciados internamente pelo provider
 
 ---
 
-## New Icon Additions
+## Novos Ícones
 
-The following icons need to be added to the existing `Icon` component:
+Os seguintes ícones precisam ser adicionados ao componente `Icon` existente:
 
-| Icon Name | Usage | SVG Source |
-|-----------|-------|-----------|
-| `edit` | Inline edit pencil indicator | Pencil icon |
-| `save` | Save action in inline edit | Checkmark circle icon |
-| `cancel` | Cancel action in inline edit | X circle icon |
-| `user` | Default user avatar fallback | Person silhouette |
-| `company` | Default entity avatar fallback | Building icon |
-| `chevron-up` | Collapsible section toggle | Upward chevron |
-| `external-link` | URL field links | Arrow pointing out of box |
-| `more` | More actions menu | Three horizontal dots |
-| `email` | Email timeline event | Envelope icon |
-| `phone-icon` | Phone field / call event | Phone handset icon |
-| `note` | Note timeline event | Document icon |
-| `task` | Task timeline event | Checkbox/task icon |
-| `calendar` | Calendar event | Calendar icon |
-| `clock` | Timestamp display | Clock icon |
-| `info` | Info toast variant icon | Info circle |
-| `warning` | Warning toast variant icon | Warning triangle |
-| `error-icon` | Error toast variant icon | Error circle |
-| `success` | Success toast variant icon | Checkmark circle |
-| `arrow-left` | Back navigation | Left arrow |
+| Nome do Ícone | Uso | Fonte SVG |
+|---------------|-----|-----------|
+| `edit` | Indicador de lápis para edição inline | Ícone de lápis |
+| `save` | Ação salvar na edição inline | Ícone checkmark circular |
+| `cancel` | Ação cancelar na edição inline | Ícone X circular |
+| `user` | Fallback padrão de avatar de usuário | Silhueta de pessoa |
+| `company` | Fallback padrão de avatar de entidade | Ícone de prédio |
+| `chevron-up` | Toggle de seção colapsável | Chevron para cima |
+| `external-link` | Links de campo URL | Seta saindo de uma caixa |
+| `more` | Menu de mais ações | Três pontos horizontais |
+| `email` | Evento de email na timeline | Ícone de envelope |
+| `phone-icon` | Campo de telefone / evento de chamada | Ícone de telefone |
+| `note` | Evento de nota na timeline | Ícone de documento |
+| `task` | Evento de tarefa na timeline | Ícone de checkbox/tarefa |
+| `calendar` | Evento de calendário | Ícone de calendário |
+| `clock` | Exibição de timestamp | Ícone de relógio |
+| `info` | Ícone de variante info do toast | Círculo com info |
+| `warning` | Ícone de variante warning do toast | Triângulo de aviso |
+| `error-icon` | Ícone de variante error do toast | Círculo de erro |
+| `success` | Ícone de variante success do toast | Círculo com checkmark |
+| `arrow-left` | Navegação para trás | Seta para esquerda |
 
 ---
 
-## Pages
+## Páginas
 
-### RecordShowPage (generic)
+### RecordShowPage (genérico)
 
-**File:** `src/pages/RecordShowPage.tsx`
+**Arquivo:** `src/pages/RecordShowPage.tsx`
 
-A generic wrapper that resolves the `objectNameSingular` and `recordId` from the URL, then renders the appropriate detail component.
+Um wrapper genérico que resolve o `objectNameSingular` e `recordId` da URL, e então renderiza o componente de detalhe apropriado.
 
 ```tsx
-// Route: /contacts/:recordId, /companies/:recordId, /deals/:recordId
-// The page determines which detail view to render based on the matched route.
+// Rota: /contacts/:recordId, /companies/:recordId, /deals/:recordId
+// A página determina qual visualização de detalhe renderizar baseado na rota correspondente.
 ```
 
 ### ContactDetailPage
 
-**File:** `src/pages/ContactDetailPage.tsx`
+**Arquivo:** `src/pages/ContactDetailPage.tsx`
 
-**Object:** `person` / `people`
+**Objeto:** `person` / `people`
 
-**Header fields:**
-- Avatar: `name.firstName + name.lastName` initials, type `user`
-- Record Name: `name.firstName + name.lastName`
-- Object Label: "Contact"
+**Campos do cabeçalho:**
+- Avatar: iniciais de `name.firstName + name.lastName`, tipo `user`
+- Nome do Registro: `name.firstName + name.lastName`
+- Label do Objeto: "Contato"
 
-**Detail tab — fields:**
-| Label | Field Path | Type | Editable |
-|-------|-----------|------|----------|
-| First Name | `name.firstName` | text | Yes |
-| Last Name | `name.lastName` | text | Yes |
-| Email | `emails.primaryEmail` | email | Yes |
-| Phone | `phones.primaryPhoneNumber` | phone | Yes |
-| City | `city` | text | Yes |
-| Job Title | `jobTitle` | text | Yes |
-| Created | `createdAt` | date | No |
+**Aba Detalhes — campos:**
+| Label | Caminho do Campo | Tipo | Editável |
+|-------|-----------------|------|----------|
+| Primeiro Nome | `name.firstName` | text | Sim |
+| Último Nome | `name.lastName` | text | Sim |
+| Email | `emails.primaryEmail` | email | Sim |
+| Telefone | `phones.primaryPhoneNumber` | phone | Sim |
+| Cidade | `city` | text | Sim |
+| Cargo | `jobTitle` | text | Sim |
+| Criado em | `createdAt` | date | Não |
 
-**Relations:**
-- Company (one-to-one via `company`)
+**Relações:**
+- Empresa (um-para-um via `company`)
 
-**Tabs:**
-| Tab | Content |
-|-----|---------|
-| Details | PropertyBox + RelationCard (Company) |
-| Timeline | Timeline component (future: populated with activities) |
-| Notes | Placeholder for Phase 3 |
-| Tasks | Placeholder for Phase 3 |
+**Abas:**
+| Aba | Conteúdo |
+|-----|----------|
+| Detalhes | PropertyBox + RelationCard (Empresa) |
+| Timeline | Componente Timeline (futuro: populado com atividades) |
+| Notas | Placeholder para Fase 3 |
+| Tarefas | Placeholder para Fase 3 |
 
-**GraphQL fields:**
+**Campos GraphQL:**
 ```graphql
 id
 name { firstName lastName }
@@ -672,36 +672,36 @@ updatedAt
 
 ### CompanyDetailPage
 
-**File:** `src/pages/CompanyDetailPage.tsx`
+**Arquivo:** `src/pages/CompanyDetailPage.tsx`
 
-**Object:** `company` / `companies`
+**Objeto:** `company` / `companies`
 
-**Header fields:**
-- Avatar: company `name`, type `entity`
-- Record Name: `name`
-- Object Label: "Company"
+**Campos do cabeçalho:**
+- Avatar: `name` da empresa, tipo `entity`
+- Nome do Registro: `name`
+- Label do Objeto: "Empresa"
 
-**Detail tab — fields:**
-| Label | Field Path | Type | Editable |
-|-------|-----------|------|----------|
-| Name | `name` | text | Yes |
-| Domain | `domainName.primaryLinkUrl` | url | Yes |
-| Employees | `employees` | number | Yes |
-| Address | `address.addressCity` | text | Yes |
-| Created | `createdAt` | date | No |
+**Aba Detalhes — campos:**
+| Label | Caminho do Campo | Tipo | Editável |
+|-------|-----------------|------|----------|
+| Nome | `name` | text | Sim |
+| Domínio | `domainName.primaryLinkUrl` | url | Sim |
+| Funcionários | `employees` | number | Sim |
+| Endereço | `address.addressCity` | text | Sim |
+| Criado em | `createdAt` | date | Não |
 
-**Relations:**
-- Contacts (one-to-many via `people`)
+**Relações:**
+- Contatos (um-para-muitos via `people`)
 
-**Tabs:**
-| Tab | Content |
-|-----|---------|
-| Details | PropertyBox + RelationCard (Contacts) |
-| Timeline | Timeline component |
-| Notes | Placeholder |
-| Tasks | Placeholder |
+**Abas:**
+| Aba | Conteúdo |
+|-----|----------|
+| Detalhes | PropertyBox + RelationCard (Contatos) |
+| Timeline | Componente Timeline |
+| Notas | Placeholder |
+| Tarefas | Placeholder |
 
-**GraphQL fields:**
+**Campos GraphQL:**
 ```graphql
 id
 name
@@ -726,36 +726,36 @@ people {
 
 ### DealDetailPage
 
-**File:** `src/pages/DealDetailPage.tsx`
+**Arquivo:** `src/pages/DealDetailPage.tsx`
 
-**Object:** `opportunity` / `opportunities`
+**Objeto:** `opportunity` / `opportunities`
 
-**Header fields:**
-- Avatar: deal `name`, type `entity`
-- Record Name: `name`
-- Object Label: "Deal"
+**Campos do cabeçalho:**
+- Avatar: `name` da oportunidade, tipo `entity`
+- Nome do Registro: `name`
+- Label do Objeto: "Oportunidade"
 
-**Detail tab — fields:**
-| Label | Field Path | Type | Editable |
-|-------|-----------|------|----------|
-| Name | `name` | text | Yes |
-| Amount | `amount.amountMicros` | currency | Yes |
-| Stage | `stage` | select | Yes |
-| Close Date | `closeDate` | date | Yes |
-| Created | `createdAt` | date | No |
+**Aba Detalhes — campos:**
+| Label | Caminho do Campo | Tipo | Editável |
+|-------|-----------------|------|----------|
+| Nome | `name` | text | Sim |
+| Valor | `amount.amountMicros` | currency | Sim |
+| Estágio | `stage` | select | Sim |
+| Data de Fechamento | `closeDate` | date | Sim |
+| Criado em | `createdAt` | date | Não |
 
-**Relations:**
-- Company (one-to-one via `company`)
+**Relações:**
+- Empresa (um-para-um via `company`)
 
-**Tabs:**
-| Tab | Content |
-|-----|---------|
-| Details | PropertyBox + RelationCard (Company) |
-| Timeline | Timeline component |
-| Notes | Placeholder |
-| Tasks | Placeholder |
+**Abas:**
+| Aba | Conteúdo |
+|-----|----------|
+| Detalhes | PropertyBox + RelationCard (Empresa) |
+| Timeline | Componente Timeline |
+| Notas | Placeholder |
+| Tarefas | Placeholder |
 
-**GraphQL fields:**
+**Campos GraphQL:**
 ```graphql
 id
 name
@@ -769,9 +769,9 @@ company { id name }
 
 ---
 
-## GraphQL Queries & Mutations
+## Queries e Mutations GraphQL
 
-### Find One Record
+### Buscar Um Registro
 
 ```graphql
 query FindOnePerson($filter: PersonFilterInput) {
@@ -782,7 +782,7 @@ query FindOnePerson($filter: PersonFilterInput) {
 # filter: { id: { eq: $recordId } }
 ```
 
-### Update Record
+### Atualizar Registro
 
 ```graphql
 mutation UpdatePerson($idToUpdate: ID!, $input: PersonUpdateInput!) {
@@ -792,13 +792,13 @@ mutation UpdatePerson($idToUpdate: ID!, $input: PersonUpdateInput!) {
 }
 ```
 
-The update hook builds the mutation dynamically per object type (e.g. `updatePerson`, `updateCompany`, `updateOpportunity`).
+O hook de update constrói a mutation dinamicamente por tipo de objeto (ex: `updatePerson`, `updateCompany`, `updateOpportunity`).
 
 ---
 
-## Routing Changes
+## Alterações de Roteamento
 
-Update `AppRouter.tsx` to add detail routes:
+Atualizar `AppRouter.tsx` para adicionar rotas de detalhe:
 
 ```tsx
 { path: '/contacts/:recordId', element: <ProtectedLayout><ContactDetailPage /></ProtectedLayout> },
@@ -806,7 +806,7 @@ Update `AppRouter.tsx` to add detail routes:
 { path: '/deals/:recordId',     element: <ProtectedLayout><DealDetailPage /></ProtectedLayout> },
 ```
 
-Update list pages to navigate to detail on row click:
+Atualizar páginas de lista para navegar ao detalhe no clique da linha:
 
 ```tsx
 onRowClick={(record) => navigate(`#/contacts/${record.id}`)}
@@ -814,77 +814,77 @@ onRowClick={(record) => navigate(`#/contacts/${record.id}`)}
 
 ---
 
-## Design Token Additions
+## Adições de Design Tokens
 
-No new CSS custom properties needed. All components use existing tokens with these composite mappings:
+Nenhuma nova CSS custom property necessária. Todos os componentes usam tokens existentes com estes mapeamentos compostos:
 
-| Usage | Tokens Used |
-|-------|-------------|
-| Avatar initials bg | `brandPrimary` |
-| Avatar initials text | `textInverse` |
-| Tab active indicator | `brandPrimary` (3px bottom border) |
-| Tab hover indicator | `neutral3` (3px bottom border) |
-| Tab bar border | `neutral2` (2px bottom border) |
-| Modal backdrop | `rgba(0,0,0,0.5)` |
-| Modal shadow | `elevationModal` |
-| Toast success bg | `successLight` / left border `success` |
-| Toast error bg | `errorLight` / left border `error` |
-| Toast warning bg | `warningLight` / left border `warning` |
-| Toast info bg | `infoLight` / left border `brandPrimary` |
-| InlineEdit hover bg | `neutral1` |
-| Property label color | `textLabel` |
-| Timeline line | `neutral2` (2px) |
-| Timeline dot | `brandPrimary` (8px circle) |
-| Breadcrumb separator | `textPlaceholder` |
-| Breadcrumb link | `textLink` |
+| Uso | Tokens Utilizados |
+|-----|-------------------|
+| Fundo iniciais do Avatar | `brandPrimary` |
+| Texto iniciais do Avatar | `textInverse` |
+| Indicador ativo da Aba | `brandPrimary` (borda inferior 3px) |
+| Indicador hover da Aba | `neutral3` (borda inferior 3px) |
+| Borda da barra de Abas | `neutral2` (borda inferior 2px) |
+| Backdrop do Modal | `rgba(0,0,0,0.5)` |
+| Sombra do Modal | `elevationModal` |
+| Fundo toast success | `successLight` / borda esquerda `success` |
+| Fundo toast error | `errorLight` / borda esquerda `error` |
+| Fundo toast warning | `warningLight` / borda esquerda `warning` |
+| Fundo toast info | `infoLight` / borda esquerda `brandPrimary` |
+| Fundo hover do InlineEdit | `neutral1` |
+| Cor do label de propriedade | `textLabel` |
+| Linha da Timeline | `neutral2` (2px) |
+| Ponto da Timeline | `brandPrimary` (círculo 8px) |
+| Separador do breadcrumb | `textPlaceholder` |
+| Link do breadcrumb | `textLink` |
 
 ---
 
-## Accessibility Checklist
+## Checklist de Acessibilidade
 
-Per SLDS 2 guidelines and WCAG 2.1 AA:
+Conforme diretrizes SLDS 2 e WCAG 2.1 AA:
 
 ### Tabs
-- [ ] `role="tablist"` on container, `role="tab"` on each tab, `role="tabpanel"` on content
-- [ ] `aria-selected="true"` on active tab, `"false"` on others
-- [ ] `aria-controls` on tab pointing to panel, `aria-labelledby` on panel pointing to tab
-- [ ] Arrow key navigation between tabs
-- [ ] Only active tab in tab order (`tabIndex={0}`)
-- [ ] `aria-disabled="true"` on disabled tabs
+- [ ] `role="tablist"` no container, `role="tab"` em cada aba, `role="tabpanel"` no conteúdo
+- [ ] `aria-selected="true"` na aba ativa, `"false"` nas demais
+- [ ] `aria-controls` na aba apontando para o painel, `aria-labelledby` no painel apontando para a aba
+- [ ] Navegação por setas entre as abas
+- [ ] Apenas aba ativa na ordem de tabulação (`tabIndex={0}`)
+- [ ] `aria-disabled="true"` em abas desabilitadas
 
 ### Modal
-- [ ] `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing to title
-- [ ] Focus trapped inside modal when open
-- [ ] Focus moves to first focusable element on open
-- [ ] Focus returns to trigger element on close
-- [ ] Escape key closes modal
-- [ ] Backdrop prevents interaction with background
+- [ ] `role="dialog"`, `aria-modal="true"`, `aria-labelledby` apontando para o título
+- [ ] Foco preso dentro do modal quando aberto
+- [ ] Foco move para o primeiro elemento focalizável ao abrir
+- [ ] Foco retorna ao elemento que acionou ao fechar
+- [ ] Tecla Escape fecha o modal
+- [ ] Backdrop impede interação com o fundo
 
 ### Toast
-- [ ] `role="status"` and `aria-live="polite"` on toast container
-- [ ] `aria-atomic="true"` so screen readers announce the whole toast
-- [ ] Close button has `aria-label="Close notification"`
-- [ ] Auto-dismiss timers pause on hover/focus
+- [ ] `role="status"` e `aria-live="polite"` no container do toast
+- [ ] `aria-atomic="true"` para que leitores de tela anunciem o toast completo
+- [ ] Botão fechar tem `aria-label="Fechar notificação"`
+- [ ] Timers de auto-dismiss pausam ao hover/foco
 
 ### Avatar
-- [ ] `alt` text derived from `name` prop (or empty if decorative)
-- [ ] When interactive (button/link), the wrapping element has proper role/label
+- [ ] Texto `alt` derivado da prop `name` (ou vazio se decorativo)
+- [ ] Quando interativo (button/link), o elemento envolvente tem role/label adequado
 
 ### InlineEdit
-- [ ] `role="button"` in read mode with `aria-label="Edit {label}"`
-- [ ] Input has `aria-label` matching the field label
-- [ ] Save/Cancel buttons have descriptive `aria-label`
-- [ ] Error messages linked via `aria-describedby`
+- [ ] `role="button"` no modo leitura com `aria-label="Editar {label}"`
+- [ ] Input tem `aria-label` correspondendo ao label do campo
+- [ ] Botões Salvar/Cancelar têm `aria-label` descritivo
+- [ ] Mensagens de erro vinculadas via `aria-describedby`
 
-### Record Page
-- [ ] `<h1>` for record name
-- [ ] Breadcrumbs use `<nav aria-label="Breadcrumb">` + `<ol>`
-- [ ] All interactive elements keyboard-accessible
-- [ ] Color contrast 4.5:1 minimum
+### Página de Registro
+- [ ] `<h1>` para o nome do registro
+- [ ] Breadcrumbs usam `<nav aria-label="Breadcrumb">` + `<ol>`
+- [ ] Todos os elementos interativos acessíveis por teclado
+- [ ] Contraste de cor mínimo 4.5:1
 
 ---
 
-## File Structure Summary
+## Resumo da Estrutura de Arquivos
 
 ```
 packages/twenty-eds/src/
@@ -921,63 +921,63 @@ packages/twenty-eds/src/
 │   ├── Timeline/
 │   │   ├── Timeline.tsx
 │   │   └── index.ts
-│   └── index.ts            ← updated barrel
+│   └── index.ts            ← barrel atualizado
 ├── hooks/
 │   ├── useAuth.tsx
 │   ├── useRecordList.ts
-│   ├── useRecordDetail.ts  ← new
-│   ├── useRecordUpdate.ts  ← new
-│   └── useToast.ts         ← new
+│   ├── useRecordDetail.ts  ← novo
+│   ├── useRecordUpdate.ts  ← novo
+│   └── useToast.ts         ← novo
 ├── pages/
 │   ├── ContactsListPage.tsx
 │   ├── CompaniesListPage.tsx
 │   ├── DealsListPage.tsx
-│   ├── ContactDetailPage.tsx   ← new
-│   ├── CompanyDetailPage.tsx   ← new
-│   ├── DealDetailPage.tsx      ← new
+│   ├── ContactDetailPage.tsx   ← novo
+│   ├── CompanyDetailPage.tsx   ← novo
+│   ├── DealDetailPage.tsx      ← novo
 │   ├── DashboardPage.tsx
 │   ├── LoginPage.tsx
 │   └── ProfileSettingsPage.tsx
 ├── utils/
 │   └── api.ts
-└── AppRouter.tsx            ← updated
+└── AppRouter.tsx            ← atualizado
 ```
 
 ---
 
-## Definition of Done (Per EDS-MIGRATION.md)
+## Definição de Pronto (Conforme EDS-MIGRATION.md)
 
-1. ✅ All data loaded via GraphQL (same API as Twenty)
-2. ✅ Field editing via inline edit (saves via GraphQL mutations)
-3. ✅ Components use only EDS design tokens
-4. ✅ Accessibility: keyboard navigable, ARIA attributes correct
-5. ✅ Responsive: works on tablet (768px) and desktop (1280px+)
-6. ✅ Routes added to AppRouter
-7. ✅ Documented in EDS-COMPONENTS.md
-8. ✅ Toast feedback on save/error actions
-9. ✅ Navigation from list pages to detail pages
+1. ✅ Todos os dados carregados via GraphQL (mesma API do Twenty)
+2. ✅ Edição de campos via edição inline (salva via mutations GraphQL)
+3. ✅ Componentes usam apenas design tokens EDS
+4. ✅ Acessibilidade: navegável por teclado, atributos ARIA corretos
+5. ✅ Responsivo: funciona em tablet (768px) e desktop (1280px+)
+6. ✅ Rotas adicionadas ao AppRouter
+7. ✅ Documentado no EDS-COMPONENTS.md
+8. ✅ Feedback via toast em ações de salvar/erro
+9. ✅ Navegação das páginas de lista para as páginas de detalhe
 
 ---
 
-## Implementation Order
+## Ordem de Implementação
 
-The recommended implementation sequence (component dependencies):
+A sequência de implementação recomendada (dependências de componentes):
 
-1. **Icons** — new icons needed by all subsequent components
-2. **Avatar** — standalone, used by RecordHeader and RelationCard
-3. **Tabs** — standalone, used by all detail pages
-4. **Modal** — standalone, foundation for future phases
-5. **Toast + ToastProvider + useToast** — notification system
-6. **FieldRenderer** — read-only field display
-7. **InlineEdit** — inline editing (depends on FieldRenderer)
-8. **PropertyBox** — field list (depends on InlineEdit)
-9. **RecordHeader** — page header (depends on Avatar)
-10. **RelationCard** — related records display (depends on Avatar, Card)
-11. **Timeline** — activity timeline (depends on Avatar)
-12. **useRecordDetail** — data fetching hook
-13. **useRecordUpdate** — mutation hook
-14. **ContactDetailPage** — first detail page (integrates all)
-15. **CompanyDetailPage** — second detail page
-16. **DealDetailPage** — third detail page
-17. **AppRouter + list page updates** — routing and navigation
-18. **EDS-COMPONENTS.md update** — documentation
+1. **Ícones** — novos ícones necessários para todos os componentes subsequentes
+2. **Avatar** — independente, usado por RecordHeader e RelationCard
+3. **Tabs** — independente, usado por todas as páginas de detalhe
+4. **Modal** — independente, base para fases futuras
+5. **Toast + ToastProvider + useToast** — sistema de notificações
+6. **FieldRenderer** — exibição de campo somente leitura
+7. **InlineEdit** — edição inline (depende de FieldRenderer)
+8. **PropertyBox** — lista de campos (depende de InlineEdit)
+9. **RecordHeader** — cabeçalho de página (depende de Avatar)
+10. **RelationCard** — exibição de registros relacionados (depende de Avatar, Card)
+11. **Timeline** — timeline de atividades (depende de Avatar)
+12. **useRecordDetail** — hook de busca de dados
+13. **useRecordUpdate** — hook de mutation
+14. **ContactDetailPage** — primeira página de detalhe (integra todos)
+15. **CompanyDetailPage** — segunda página de detalhe
+16. **DealDetailPage** — terceira página de detalhe
+17. **AppRouter + atualização das páginas de lista** — roteamento e navegação
+18. **Atualização do EDS-COMPONENTS.md** — documentação

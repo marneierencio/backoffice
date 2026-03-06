@@ -1,13 +1,13 @@
-# EDS Phase 4 — Navigation & Productivity: Design & Implementation Plan
+# EDS Fase 4 — Navegação e Produtividade: Plano de Design e Implementação
 
-This document specifies the components, behaviors, tokens, and page structure for Phase 4 of the EDS migration (Navigation & Productivity). All designs follow [SLDS 2](https://www.lightningdesignsystem.com/) principles adapted for React, using EDS design tokens (`--eds-g-*`).
+Este documento especifica os componentes, comportamentos, tokens e estrutura de página para a Fase 4 da migração EDS (Navegação e Produtividade). Todos os designs seguem os princípios do [SLDS 2](https://www.lightningdesignsystem.com/) adaptados para React, usando design tokens EDS (`--eds-g-*`).
 
 ---
 
-## Table of Contents
+## Índice
 
-1. [Scope](#scope)
-2. [New Components](#new-components)
+1. [Escopo](#escopo)
+2. [Novos Componentes](#novos-componentes)
    - [CommandMenu](#commandmenu)
    - [GlobalSearch](#globalsearch)
    - [NotificationPanel](#notificationpanel)
@@ -20,50 +20,50 @@ This document specifies the components, behaviors, tokens, and page structure fo
    - [Popover](#popover)
    - [DropdownMenu](#dropdownmenu)
    - [Pill](#pill)
-3. [New Icons](#new-icons)
-4. [New Hooks](#new-hooks)
+3. [Novos Ícones](#novos-ícones)
+4. [Novos Hooks](#novos-hooks)
    - [useCommandMenu](#usecommandmenu)
    - [useGlobalSearch](#useglobalsearch)
    - [useNotifications](#usenotifications)
    - [useCalendarEvents](#usecalendarevents)
    - [useKanbanBoard](#usekanbanboard)
    - [useKeyboardShortcut](#usekeyboardshortcut)
-5. [Pages](#pages)
+5. [Páginas](#páginas)
    - [CalendarPage](#calendarpage)
    - [KanbanDealsPage](#kanbandealspage)
-6. [GraphQL Queries & Mutations](#graphql-queries--mutations)
-7. [Routing Changes](#routing-changes)
-8. [Design Token Additions](#design-token-additions)
-9. [Shell Integration](#shell-integration)
-10. [Accessibility Checklist](#accessibility-checklist)
-11. [File Structure Summary](#file-structure-summary)
-12. [Definition of Done](#definition-of-done)
+6. [Queries e Mutations GraphQL](#queries-e-mutations-graphql)
+7. [Alterações de Roteamento](#alterações-de-roteamento)
+8. [Adições de Design Tokens](#adições-de-design-tokens)
+9. [Integração com o Shell](#integração-com-o-shell)
+10. [Checklist de Acessibilidade](#checklist-de-acessibilidade)
+11. [Resumo da Estrutura de Arquivos](#resumo-da-estrutura-de-arquivos)
+12. [Definição de Pronto](#definição-de-pronto)
 
 ---
 
-## Scope
+## Escopo
 
-Phase 4 delivers **Navigation & Productivity** features:
+A Fase 4 entrega funcionalidades de **Navegação e Produtividade**:
 
-- **Command Menu**: A keyboard-driven command palette (Ctrl+K / ⌘K) for fast navigation, record search, and action execution
-- **Global Search**: A persistent search input in the top navigation bar that searches across all record types (contacts, companies, deals)
-- **Notifications Panel**: A popover panel in the top bar showing system notifications (record changes, mentions, reminders)
-- **Calendar View**: A monthly calendar grid displaying calendar events and deal close dates
-- **Kanban View**: A drag-and-drop board for managing deals/opportunities by pipeline stage
+- **Command Menu**: Uma paleta de comandos dirigida por teclado (Ctrl+K / ⌘K) para navegação rápida, busca de registros e execução de ações
+- **Busca Global**: Um input de busca persistente na barra de navegação superior que busca em todos os tipos de registro (contatos, empresas, oportunidades)
+- **Painel de Notificações**: Um painel popover na barra superior mostrando notificações do sistema (mudanças em registros, menções, lembretes)
+- **Visualização de Calendário**: Um grid de calendário mensal exibindo eventos de calendário e datas de fechamento de oportunidades
+- **Visualização Kanban**: Um quadro com arrastar-e-soltar para gerenciar oportunidades por estágio do pipeline
 
-These features enhance navigation speed, discoverability, and visual pipeline management.
+Essas funcionalidades melhoram a velocidade de navegação, descoberta e gerenciamento visual do pipeline.
 
 ---
 
-## New Components
+## Novos Componentes
 
 ### CommandMenu
 
-> SLDS 2 reference: [Combobox](https://www.lightningdesignsystem.com/components/combobox/) (adapted as command palette overlay)
+> Referência SLDS 2: [Combobox](https://www.lightningdesignsystem.com/components/combobox/) (adaptado como overlay de paleta de comandos)
 
-**File:** `src/components/CommandMenu/CommandMenu.tsx`
+**Arquivo:** `src/components/CommandMenu/CommandMenu.tsx`
 
-A modal overlay triggered by Ctrl+K / ⌘K that provides fast navigation, record search, and action shortcuts.
+Um overlay modal acionado por Ctrl+K / ⌘K que fornece navegação rápida, busca de registros e atalhos de ação.
 
 ```tsx
 type CommandType = 'navigate' | 'create' | 'action' | 'record';
@@ -74,11 +74,11 @@ type CommandItem = {
   description?: string;
   type: CommandType;
   icon?: IconName;
-  shortcut?: string[];        // e.g. ['⌘', 'N'] for display
-  href?: string;              // for navigate commands
-  onClick?: () => void;       // for action commands
-  objectType?: string;        // for record items (person, company, opportunity)
-  keywords?: string[];        // additional search terms
+  shortcut?: string[];        // ex: ['⌘', 'N'] para exibição
+  href?: string;              // para comandos de navegação
+  onClick?: () => void;       // para comandos de ação
+  objectType?: string;        // para itens de registro (person, company, opportunity)
+  keywords?: string[];        // termos de busca adicionais
 };
 
 type CommandGroup = {
@@ -97,59 +97,59 @@ type CommandMenuProps = {
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Backdrop | Semi-transparent overlay, covers entire viewport |
-| 2 | Container | Centered modal panel, `maxWidth: 640px`, `maxHeight: 480px` |
-| 3 | Search Input | Auto-focused input with search icon, full width |
-| 4 | Group Headers | Category labels (Navigation, Actions, Recent Records, Search Results) |
-| 5 | Command Items | Selectable rows: icon + label + description + shortcut badge |
-| 6 | Active Indicator | Background highlight on keyboard-focused item |
-| 7 | Footer | Hint line: "↑↓ to navigate · Enter to select · Esc to close" |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Backdrop | Overlay semi-transparente, cobre toda a viewport |
+| 2 | Container | Painel modal centralizado, `maxWidth: 640px`, `maxHeight: 480px` |
+| 3 | Input de Busca | Input com foco automático e ícone de busca, largura total |
+| 4 | Cabeçalhos de Grupo | Labels de categoria (Navegação, Ações, Registros Recentes, Resultados de Busca) |
+| 5 | Itens de Comando | Linhas selecionáveis: ícone + label + descrição + badge de atalho |
+| 6 | Indicador Ativo | Destaque de fundo no item com foco do teclado |
+| 7 | Rodapé | Linha de dica: "↑↓ para navegar · Enter para selecionar · Esc para fechar" |
 
-**Visual spec:**
+**Especificação visual:**
 
 - **Backdrop:** `backgroundColor: rgba(0,0,0,0.5)`, `zIndex: zIndexModal`
 - **Container:** `backgroundColor: neutral0`, `borderRadius: radiusLarge`, `boxShadow: elevationModal`, `overflow: hidden`, `border: 1px solid neutral2`
-- **Search input:** `height: 48px`, `padding: 0 spacingMedium`, `fontSize: fontSizeBase`, `border: none`, `borderBottom: 1px solid neutral2`, `backgroundColor: neutral0`, no outline
-- **Search icon:** 16px, `color: textPlaceholder`, left of input
-- **Group header:** `padding: spacingXXSmall spacingMedium`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightMedium`, `color: textPlaceholder`, `textTransform: uppercase`, `letterSpacing: 0.05em`, `backgroundColor: neutral1`
-- **Command item (default):** `padding: spacingXSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `cursor: pointer`
-- **Command item (active/hover):** `backgroundColor: brandPrimaryLight`, `color: textDefault`
-- **Item icon:** 16px, `color: textPlaceholder`, active: `color: brandPrimary`
-- **Item label:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightRegular`, `color: textDefault`
-- **Item description:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, `marginLeft: auto`
-- **Shortcut badge:** `display: inline-flex`, `gap: 2px`, each key in `padding: 1px 6px`, `backgroundColor: neutral1`, `border: 1px solid neutral2`, `borderRadius: radiusSmall`, `fontSize: fontSizeXSmall`, `fontWeight: fontWeightMedium`, `color: textLabel`
-- **Footer:** `padding: spacingXXSmall spacingMedium`, `borderTop: 1px solid neutral2`, `fontSize: fontSizeXSmall`, `color: textPlaceholder`, `backgroundColor: neutral1`
-- **Empty state:** Centered text "No results found", `color: textPlaceholder`, `padding: spacingLarge`
-- **Loading:** Small spinner centered below search input
+- **Input de busca:** `height: 48px`, `padding: 0 spacingMedium`, `fontSize: fontSizeBase`, `border: none`, `borderBottom: 1px solid neutral2`, `backgroundColor: neutral0`, sem outline
+- **Ícone de busca:** 16px, `color: textPlaceholder`, à esquerda do input
+- **Cabeçalho do grupo:** `padding: spacingXXSmall spacingMedium`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightMedium`, `color: textPlaceholder`, `textTransform: uppercase`, `letterSpacing: 0.05em`, `backgroundColor: neutral1`
+- **Item de comando (padrão):** `padding: spacingXSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `cursor: pointer`
+- **Item de comando (ativo/hover):** `backgroundColor: brandPrimaryLight`, `color: textDefault`
+- **Ícone do item:** 16px, `color: textPlaceholder`, ativo: `color: brandPrimary`
+- **Label do item:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightRegular`, `color: textDefault`
+- **Descrição do item:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, `marginLeft: auto`
+- **Badge de atalho:** `display: inline-flex`, `gap: 2px`, cada tecla em `padding: 1px 6px`, `backgroundColor: neutral1`, `border: 1px solid neutral2`, `borderRadius: radiusSmall`, `fontSize: fontSizeXSmall`, `fontWeight: fontWeightMedium`, `color: textLabel`
+- **Rodapé:** `padding: spacingXXSmall spacingMedium`, `borderTop: 1px solid neutral2`, `fontSize: fontSizeXSmall`, `color: textPlaceholder`, `backgroundColor: neutral1`
+- **Estado vazio:** Texto centralizado "Nenhum resultado encontrado", `color: textPlaceholder`, `padding: spacingLarge`
+- **Carregando:** Pequeno spinner centralizado abaixo do input de busca
 
-**Behaviors:**
+**Comportamentos:**
 
-- Opens on `Ctrl+K` (Windows/Linux) or `⌘K` (macOS), or when trigger button in top bar is clicked
-- Search input is auto-focused on open
-- Typing filters command items by label, description, and keywords (case-insensitive)
-- `↑`/`↓` arrow keys navigate between items; active item scrolls into view
-- `Enter` selects the active item (triggers navigation or action)
-- `Escape` closes the menu; focus returns to previous element
-- Clicking backdrop closes the menu
-- Groups with zero matching items are hidden
-- When search is non-empty and no static commands match, a live search is triggered against the GraphQL API (debounced 300ms)
-- Record results show the object type icon and record name
-- Max 5 items per group in search results to prevent overwhelm
-- `aria-role="dialog"`, `aria-modal="true"`, `aria-label="Command menu"`
+- Abre com `Ctrl+K` (Windows/Linux) ou `⌘K` (macOS), ou quando o botão trigger na barra superior é clicado
+- Input de busca recebe foco automático ao abrir
+- Digitar filtra os itens de comando por label, descrição e keywords (insensível a maiúsculas)
+- Setas `↑`/`↓` navegam entre os itens; item ativo faz scroll para ficar visível
+- `Enter` seleciona o item ativo (aciona navegação ou ação)
+- `Escape` fecha o menu; foco retorna ao elemento anterior
+- Clicar no backdrop fecha o menu
+- Grupos com zero itens correspondentes são ocultados
+- Quando a busca não está vazia e nenhum comando estático corresponde, uma busca em tempo real é acionada contra a API GraphQL (debounce 300ms)
+- Resultados de registros exibem o ícone do tipo de objeto e o nome do registro
+- Máximo 5 itens por grupo nos resultados de busca para evitar sobrecarga
+- `aria-role="dialog"`, `aria-modal="true"`, `aria-label="Menu de comandos"`
 
 ---
 
 ### GlobalSearch
 
-> SLDS 2 reference: [Input — Search type](https://www.lightningdesignsystem.com/components/input/)
+> Referência SLDS 2: [Input — tipo Search](https://www.lightningdesignsystem.com/components/input/)
 
-**File:** `src/components/GlobalSearch/GlobalSearch.tsx`
+**Arquivo:** `src/components/GlobalSearch/GlobalSearch.tsx`
 
-A persistent search input embedded in the Shell top bar that provides quick access to the full CommandMenu or shows inline quick results.
+Um input de busca persistente embutido na barra superior do Shell que fornece acesso rápido ao CommandMenu completo ou exibe resultados rápidos inline.
 
 ```tsx
 type SearchResult = {
@@ -161,50 +161,50 @@ type SearchResult = {
 };
 
 type GlobalSearchProps = {
-  onOpenCommandMenu: () => void;    // Opens full command menu
+  onOpenCommandMenu: () => void;    // Abre o menu de comandos completo
   placeholder?: string;
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Search Container | Compact input wrapper in top bar |
-| 2 | Search Icon | Left-aligned search icon |
-| 3 | Input | Text input with placeholder |
-| 4 | Shortcut Hint | "⌘K" hint badge on the right side of input |
-| 5 | Results Dropdown | Quick results popover (max 8 items, grouped by type) |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Container de Busca | Wrapper compacto de input na barra superior |
+| 2 | Ícone de Busca | Ícone de busca alinhado à esquerda |
+| 3 | Input | Input de texto com placeholder |
+| 4 | Dica de Atalho | Badge "⌘K" no lado direito do input |
+| 5 | Dropdown de Resultados | Popover de resultados rápidos (máx 8 itens, agrupados por tipo) |
 
-**Visual spec:**
+**Especificação visual:**
 
 - **Container:** `width: 280px`, `height: 32px`, `display: flex`, `alignItems: center`, `backgroundColor: rgba(255,255,255,0.1)`, `borderRadius: radiusMedium`, `padding: 0 spacingSmall`, `border: 1px solid transparent`, `transition: all durationPromptly`
-- **Container (focus):** `backgroundColor: neutral0`, `border: 1px solid borderFocus`, `width: 360px`
-- **Search icon:** 14px, `color: neutral4` (unfocused), `color: textPlaceholder` (focused)
-- **Input:** `background: none`, `border: none`, `outline: none`, `color: textInverse` (unfocused), `color: textDefault` (focused), `fontSize: fontSizeSmall`, `flex: 1`
-- **Shortcut hint:** Uses same style as CommandMenu shortcut badge, visible when input is empty
-- **Results dropdown:** Like CommandMenu container but smaller, `maxWidth: 400px`, `position: absolute`, `top: calc(100% + 4px)`, `right: 0`, `boxShadow: elevationDropdown`, `zIndex: zIndexDropdown`
+- **Container (foco):** `backgroundColor: neutral0`, `border: 1px solid borderFocus`, `width: 360px`
+- **Ícone de busca:** 14px, `color: neutral4` (sem foco), `color: textPlaceholder` (com foco)
+- **Input:** `background: none`, `border: none`, `outline: none`, `color: textInverse` (sem foco), `color: textDefault` (com foco), `fontSize: fontSizeSmall`, `flex: 1`
+- **Dica de atalho:** Usa mesmo estilo do badge de atalho do CommandMenu, visível quando o input está vazio
+- **Dropdown de resultados:** Como o container do CommandMenu mas menor, `maxWidth: 400px`, `position: absolute`, `top: calc(100% + 4px)`, `right: 0`, `boxShadow: elevationDropdown`, `zIndex: zIndexDropdown`
 
-**Behaviors:**
+**Comportamentos:**
 
-- Clicking the search bar or pressing the shortcut opens the value in the full CommandMenu
-- On focus, the input expands from 280px to 360px with transition
-- Typing shows a quick results dropdown (debounced 300ms)
-- Each result shows icon + label + object type badge
-- Clicking a result navigates to the record detail page
-- Pressing `Enter` with text opens the CommandMenu with the search pre-filled
-- Pressing `Escape` or blur closes the dropdown and resets width
-- On mobile/narrow viewports, the search input collapses to just the icon, expanding on click
+- Clicar na barra de busca ou pressionar o atalho abre o valor no CommandMenu completo
+- Ao focar, o input expande de 280px para 360px com transição
+- Digitar exibe um dropdown de resultados rápidos (debounce 300ms)
+- Cada resultado exibe ícone + label + badge de tipo de objeto
+- Clicar em um resultado navega para a página de detalhe do registro
+- Pressionar `Enter` com texto abre o CommandMenu com a busca pré-preenchida
+- Pressionar `Escape` ou blur fecha o dropdown e reseta a largura
+- Em mobile/viewports estreitos, o input de busca colapsa para apenas o ícone, expandindo ao clicar
 
 ---
 
 ### NotificationPanel
 
-> SLDS 2 reference: adapted from [Popover](https://v1.lightningdesignsystem.com/components/popovers/) + notification list pattern
+> Referência SLDS 2: adaptado de [Popover](https://v1.lightningdesignsystem.com/components/popovers/) + padrão de lista de notificações
 
-**File:** `src/components/NotificationPanel/NotificationPanel.tsx`
+**Arquivo:** `src/components/NotificationPanel/NotificationPanel.tsx`
 
-A popover panel attached to a bell icon in the top bar that shows system notifications.
+Um painel popover anexado a um ícone de sino na barra superior que exibe notificações do sistema.
 
 ```tsx
 type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'mention' | 'reminder';
@@ -216,7 +216,7 @@ type NotificationData = {
   message: string;
   timestamp: string;           // ISO 8601
   read: boolean;
-  href?: string;               // link to related record
+  href?: string;               // link para o registro relacionado
   actor?: {
     name: string;
     avatarUrl?: string;
@@ -235,44 +235,44 @@ type NotificationPanelProps = {
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Trigger (Bell icon) | In top bar, shows unread badge |
-| 2 | Panel container | Popover, anchored below bell icon |
-| 3 | Header | "Notifications" title + "Mark all read" link |
-| 4 | Notification list | Scrollable list of NotificationItem |
-| 5 | Empty state | "No notifications" message when list is empty |
-| 6 | Footer | Optional "View all" link |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Trigger (ícone de sino) | Na barra superior, exibe badge de não lidas |
+| 2 | Container do painel | Popover, ancorado abaixo do ícone de sino |
+| 3 | Cabeçalho | Título "Notificações" + link "Marcar todas como lidas" |
+| 4 | Lista de notificações | Lista com scroll de NotificationItem |
+| 5 | Estado vazio | Mensagem "Sem notificações" quando a lista está vazia |
+| 6 | Rodapé | Link opcional "Ver todas" |
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Trigger (bell icon):** `position: relative`, 20px icon, `color: neutral3`
-- **Unread badge:** `position: absolute`, `top: -4px`, `right: -4px`, `width: 16px`, `height: 16px`, `borderRadius: radiusCircle`, `backgroundColor: error`, `color: textInverse`, `fontSize: fontSizeXSmall`, `fontWeight: fontWeightBold`, `display: flex`, `alignItems: center`, `justifyContent: center`. If count > 9, show "9+"
-- **Panel container:** `position: absolute`, `top: calc(100% + 8px)`, `right: 0`, `width: 380px`, `maxHeight: 480px`, `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`, `overflow: hidden`, `zIndex: zIndexDropdown`
-- **Header:** `padding: spacingSmall spacingMedium`, `borderBottom: 1px solid neutral2`, `display: flex`, `justifyContent: space-between`, `alignItems: center`. Title: `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`. "Mark all read": `fontSize: fontSizeSmall`, `color: textLink`, `cursor: pointer`
-- **List area:** `maxHeight: 400px`, `overflowY: auto`
-- **Empty state:** `padding: spacingXLarge`, centered, `color: textPlaceholder`, bell icon 32px
+- **Trigger (ícone de sino):** `position: relative`, ícone 20px, `color: neutral3`
+- **Badge de não lidas:** `position: absolute`, `top: -4px`, `right: -4px`, `width: 16px`, `height: 16px`, `borderRadius: radiusCircle`, `backgroundColor: error`, `color: textInverse`, `fontSize: fontSizeXSmall`, `fontWeight: fontWeightBold`, `display: flex`, `alignItems: center`, `justifyContent: center`. Se contagem > 9, exibe "9+"
+- **Container do painel:** `position: absolute`, `top: calc(100% + 8px)`, `right: 0`, `width: 380px`, `maxHeight: 480px`, `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`, `overflow: hidden`, `zIndex: zIndexDropdown`
+- **Cabeçalho:** `padding: spacingSmall spacingMedium`, `borderBottom: 1px solid neutral2`, `display: flex`, `justifyContent: space-between`, `alignItems: center`. Título: `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`. "Marcar todas como lidas": `fontSize: fontSizeSmall`, `color: textLink`, `cursor: pointer`
+- **Área da lista:** `maxHeight: 400px`, `overflowY: auto`
+- **Estado vazio:** `padding: spacingXLarge`, centralizado, `color: textPlaceholder`, ícone de sino 32px
 
-**Behaviors:**
+**Comportamentos:**
 
-- Clicking bell icon toggles panel open/closed
-- Clicking outside the panel closes it
-- Escape closes the panel
-- Clicking a notification calls `onNotificationClick` and navigates to `href`
-- "Mark all as read" calls `onMarkAllAsRead` and visually marks all notifications
-- New notifications appear at the top of the list
-- Unread notifications have a left blue accent border
-- The panel auto-refreshes every 30 seconds (via hook polling)
+- Clicar no ícone de sino alterna o painel aberto/fechado
+- Clicar fora do painel fecha-o
+- Escape fecha o painel
+- Clicar em uma notificação chama `onNotificationClick` e navega para `href`
+- "Marcar todas como lidas" chama `onMarkAllAsRead` e visualmente marca todas as notificações
+- Novas notificações aparecem no topo da lista
+- Notificações não lidas têm uma borda de destaque azul à esquerda
+- O painel auto-atualiza a cada 30 segundos (via polling do hook)
 
 ---
 
 ### NotificationItem
 
-**File:** `src/components/NotificationPanel/NotificationItem.tsx`
+**Arquivo:** `src/components/NotificationPanel/NotificationItem.tsx`
 
-Individual notification row within the NotificationPanel.
+Linha individual de notificação dentro do NotificationPanel.
 
 ```tsx
 type NotificationItemProps = {
@@ -282,22 +282,22 @@ type NotificationItemProps = {
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
 - **Container:** `padding: spacingSmall spacingMedium`, `display: flex`, `gap: spacingSmall`, `cursor: pointer`, `borderBottom: 1px solid neutral1`, `transition: background durationQuickly`
-- **Container (unread):** `borderLeft: 3px solid brandPrimary`, `backgroundColor: brandPrimaryLight` (at 30% opacity)
+- **Container (não lida):** `borderLeft: 3px solid brandPrimary`, `backgroundColor: brandPrimaryLight` (a 30% de opacidade)
 - **Container (hover):** `backgroundColor: neutral1`
-- **Avatar/icon area:** 32px circle, left side. If actor has avatar, show it; otherwise show type icon with colored background
-- **Content area:** `flex: 1`
-- **Title:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium` (unread) or `fontWeightRegular` (read), `color: textDefault`, single line with ellipsis overflow
-- **Message:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, max 2 lines with ellipsis
-- **Timestamp:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`, relative time (e.g., "2m ago", "1h ago", "Yesterday")
-- **Mark as read button:** Small dot icon or "•", visible on hover, `color: brandPrimary`
+- **Área de avatar/ícone:** círculo 32px, lado esquerdo. Se ator tem avatar, exibe-o; caso contrário exibe ícone do tipo com fundo colorido
+- **Área de conteúdo:** `flex: 1`
+- **Título:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium` (não lida) ou `fontWeightRegular` (lida), `color: textDefault`, linha única com overflow de reticências
+- **Mensagem:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, máx 2 linhas com reticências
+- **Timestamp:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`, tempo relativo (ex: "2min atrás", "1h atrás", "Ontem")
+- **Botão marcar como lida:** Pequeno ícone de ponto ou "•", visível ao hover, `color: brandPrimary`
 
-**Type-specific icon colors:**
+**Cores de ícone por tipo:**
 
-| Type | Icon | Background |
-|------|------|------------|
+| Tipo | Ícone | Fundo |
+|------|-------|-------|
 | info | `info` | `infoLight` |
 | success | `success` | `successLight` |
 | warning | `warning` | `warningLight` |
@@ -309,133 +309,133 @@ type NotificationItemProps = {
 
 ### CalendarGrid
 
-> SLDS 2 reference: [Datepicker](https://www.lightningdesignsystem.com/components/datepicker/) (extended as full-page calendar)
+> Referência SLDS 2: [Datepicker](https://www.lightningdesignsystem.com/components/datepicker/) (estendido como calendário de página inteira)
 
-**File:** `src/components/CalendarGrid/CalendarGrid.tsx`
+**Arquivo:** `src/components/CalendarGrid/CalendarGrid.tsx`
 
-A monthly calendar grid for displaying events and date-based records.
+Um grid de calendário mensal para exibir eventos e registros baseados em data.
 
 ```tsx
 type CalendarEventData = {
   id: string;
   title: string;
-  date: string;                // ISO 8601 date/datetime
-  endDate?: string;            // for multi-day events
-  color?: string;              // override dot/badge color
+  date: string;                // data/datetime ISO 8601
+  endDate?: string;            // para eventos de múltiplos dias
+  color?: string;              // sobrescrever cor do ponto/badge
   variant?: 'default' | 'success' | 'warning' | 'error' | 'brand';
   onClick?: () => void;
 };
 
 type CalendarGridProps = {
   year: number;
-  month: number;               // 0-indexed (0=January)
+  month: number;               // indexado a partir de 0 (0=Janeiro)
   events: CalendarEventData[];
   onMonthChange: (year: number, month: number) => void;
   onDateClick?: (date: string) => void;
   onEventClick?: (event: CalendarEventData) => void;
   loading?: boolean;
   todayLabel?: string;
-  locale?: string;             // default 'en-US'
+  locale?: string;             // padrão 'pt-BR'
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Header | Month/Year title, Prev/Next/Today buttons |
-| 2 | Weekday Row | Sun–Sat column headers |
-| 3 | Day Grid | 6×7 grid of day cells |
-| 4 | Day Cell | Date number + event dots/badges |
-| 5 | Event Dot | Small colored dot per event (max 3 visible, "+N more" overflow) |
-| 6 | Event Tooltip | On hover, shows event title and time |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Cabeçalho | Título Mês/Ano, botões Anterior/Próximo/Hoje |
+| 2 | Linha dos Dias da Semana | Cabeçalhos de coluna Dom–Sáb |
+| 3 | Grid de Dias | Grid 6×7 de células de dias |
+| 4 | Célula do Dia | Número da data + pontos/badges de eventos |
+| 5 | Ponto de Evento | Pequeno ponto colorido por evento (máx 3 visíveis, overflow "+N mais") |
+| 6 | Tooltip do Evento | Ao hover, exibe título e horário do evento |
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Header:** `display: flex`, `justifyContent: space-between`, `alignItems: center`, `padding: spacingSmall spacingMedium`, `marginBottom: spacingSmall`
-- **Month title:** `fontSize: fontSizeXLarge`, `fontWeight: fontWeightBold`, `color: textDefault`
-- **Nav buttons:** `Button` component, variant `ghost`, size `small`, with `chevron-left`/`chevron-right` icons
-- **Today button:** `Button` component, variant `outline`, size `small`, label "Today"
-- **Weekday row:** `display: grid`, `gridTemplateColumns: repeat(7, 1fr)`, `textAlign: center`, `padding: spacingXXSmall 0`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightMedium`, `color: textPlaceholder`, `borderBottom: 1px solid neutral2`
-- **Day grid:** `display: grid`, `gridTemplateColumns: repeat(7, 1fr)`, `gap: 0`, each cell `minHeight: 100px`
-- **Day cell:** `padding: spacingXXSmall`, `border: 1px solid neutral1`, `cursor: pointer`, `position: relative`
-- **Day cell (hover):** `backgroundColor: neutral1`
-- **Day cell (today):** Date number has `backgroundColor: brandPrimary`, `color: textInverse`, `borderRadius: radiusCircle`, `width: 24px`, `height: 24px`, centered
-- **Day cell (other month):** `color: textDisabled`, `backgroundColor: neutral1` at 50% opacity
-- **Day cell (selected):** `outline: 2px solid brandPrimary`, `outlineOffset: -2px`
-- **Date number:** `fontSize: fontSizeSmall`, `fontWeight: fontWeightRegular`, `color: textDefault`, `display: flex`, `justifyContent: center`, `width: 24px`, `height: 24px`, `lineHeight: 24px`, `marginBottom: spacingXXXSmall`
-- **Event dot:** `width: 6px`, `height: 6px`, `borderRadius: radiusCircle`, inline, `marginRight: 2px`
-- **Event badge (when ≤3):** `display: flex`, `alignItems: center`, `gap: 2px`, `fontSize: fontSizeXSmall`, `padding: 1px 4px`, `borderRadius: radiusSmall`, truncated text
-- **"+N more":** `fontSize: fontSizeXSmall`, `color: textLink`, `cursor: pointer`
+- **Cabeçalho:** `display: flex`, `justifyContent: space-between`, `alignItems: center`, `padding: spacingSmall spacingMedium`, `marginBottom: spacingSmall`
+- **Título do mês:** `fontSize: fontSizeXLarge`, `fontWeight: fontWeightBold`, `color: textDefault`
+- **Botões de navegação:** componente `Button`, variante `ghost`, tamanho `small`, com ícones `chevron-left`/`chevron-right`
+- **Botão hoje:** componente `Button`, variante `outline`, tamanho `small`, label "Hoje"
+- **Linha dos dias da semana:** `display: grid`, `gridTemplateColumns: repeat(7, 1fr)`, `textAlign: center`, `padding: spacingXXSmall 0`, `fontSize: fontSizeSmall`, `fontWeight: fontWeightMedium`, `color: textPlaceholder`, `borderBottom: 1px solid neutral2`
+- **Grid de dias:** `display: grid`, `gridTemplateColumns: repeat(7, 1fr)`, `gap: 0`, cada célula `minHeight: 100px`
+- **Célula do dia:** `padding: spacingXXSmall`, `border: 1px solid neutral1`, `cursor: pointer`, `position: relative`
+- **Célula do dia (hover):** `backgroundColor: neutral1`
+- **Célula do dia (hoje):** Número da data tem `backgroundColor: brandPrimary`, `color: textInverse`, `borderRadius: radiusCircle`, `width: 24px`, `height: 24px`, centralizado
+- **Célula do dia (outro mês):** `color: textDisabled`, `backgroundColor: neutral1` a 50% de opacidade
+- **Célula do dia (selecionada):** `outline: 2px solid brandPrimary`, `outlineOffset: -2px`
+- **Número da data:** `fontSize: fontSizeSmall`, `fontWeight: fontWeightRegular`, `color: textDefault`, `display: flex`, `justifyContent: center`, `width: 24px`, `height: 24px`, `lineHeight: 24px`, `marginBottom: spacingXXXSmall`
+- **Ponto de evento:** `width: 6px`, `height: 6px`, `borderRadius: radiusCircle`, inline, `marginRight: 2px`
+- **Badge de evento (quando ≤3):** `display: flex`, `alignItems: center`, `gap: 2px`, `fontSize: fontSizeXSmall`, `padding: 1px 4px`, `borderRadius: radiusSmall`, texto truncado
+- **"+N mais":** `fontSize: fontSizeXSmall`, `color: textLink`, `cursor: pointer`
 
-**Event dot variants:**
+**Variantes de ponto de evento:**
 
-| Variant | Color |
-|---------|-------|
+| Variante | Cor |
+|----------|-----|
 | default | `neutral5` |
 | brand | `brandPrimary` |
 | success | `success` |
 | warning | `warning` |
 | error | `error` |
 
-**Behaviors:**
+**Comportamentos:**
 
-- Prev/Next buttons change the displayed month
-- "Today" button navigates to the current month and highlights today
-- Clicking a day cell triggers `onDateClick` with the ISO date string
-- Clicking an event dot/badge triggers `onEventClick`
-- Hovering over an event shows a tooltip with title and time
-- Days outside the current month are dimmed but still clickable
-- Keyboard: `←`/`→` navigate days, `↑`/`↓` navigate weeks, `Home`/`End` first/last day of week, `PageUp`/`PageDown` change months
-- The grid is aria-labeled as `role="grid"` with `aria-label="Calendar"`
-- Each day cell is `role="gridcell"` with `aria-label="January 15, 2026"` (full date)
-- The active/focused date has `tabIndex={0}`, all others `tabIndex={-1}`
+- Botões Anterior/Próximo mudam o mês exibido
+- Botão "Hoje" navega para o mês atual e destaca hoje
+- Clicar em uma célula de dia aciona `onDateClick` com a string de data ISO
+- Clicar em um ponto/badge de evento aciona `onEventClick`
+- Hover sobre um evento exibe tooltip com título e horário
+- Dias fora do mês atual estão esmaecidos mas ainda clicáveis
+- Teclado: `←`/`→` navegam dias, `↑`/`↓` navegam semanas, `Home`/`End` primeiro/último dia da semana, `PageUp`/`PageDown` mudam meses
+- O grid é anotado com `role="grid"` com `aria-label="Calendário"`
+- Cada célula de dia é `role="gridcell"` com `aria-label="15 de janeiro de 2026"` (data completa)
+- A data ativa/focada tem `tabIndex={0}`, todas as outras `tabIndex={-1}`
 
 ---
 
 ### CalendarEvent
 
-**File:** `src/components/CalendarGrid/CalendarEvent.tsx`
+**Arquivo:** `src/components/CalendarGrid/CalendarEvent.tsx`
 
-Small event indicator rendered inside a CalendarGrid day cell.
+Pequeno indicador de evento renderizado dentro de uma célula do CalendarGrid.
 
 ```tsx
 type CalendarEventProps = {
   title: string;
-  time?: string;                // e.g., "10:00 AM"
+  time?: string;                // ex: "10:00"
   variant?: 'default' | 'success' | 'warning' | 'error' | 'brand';
   onClick?: () => void;
-  compact?: boolean;            // dot only (for small cells)
+  compact?: boolean;            // apenas ponto (para células pequenas)
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Normal mode (compact=false):** `display: flex`, `alignItems: center`, `gap: 4px`, `padding: 1px 4px`, `borderRadius: radiusSmall`, `fontSize: fontSizeXSmall`, `cursor: pointer`, `whiteSpace: nowrap`, `overflow: hidden`, `textOverflow: ellipsis`
-- **Background:** Each variant uses its light color with 20% opacity
-- **Left dot:** `4px` circle with variant full color
-- **Text:** `color: textDefault`, truncated
-- **Compact mode (compact=true):** Just the 6px dot, no text
-- **Hover:** `backgroundColor` at full light variant, tooltip appears
+- **Modo normal (compact=false):** `display: flex`, `alignItems: center`, `gap: 4px`, `padding: 1px 4px`, `borderRadius: radiusSmall`, `fontSize: fontSizeXSmall`, `cursor: pointer`, `whiteSpace: nowrap`, `overflow: hidden`, `textOverflow: ellipsis`
+- **Fundo:** Cada variante usa sua cor clara com 20% de opacidade
+- **Ponto esquerdo:** círculo `4px` com cor completa da variante
+- **Texto:** `color: textDefault`, truncado
+- **Modo compact (compact=true):** Apenas o ponto de 6px, sem texto
+- **Hover:** `backgroundColor` na variante clara completa, tooltip aparece
 
 ---
 
 ### KanbanBoard
 
-> SLDS 2 reference: Adapted from [Cards](https://www.lightningdesignsystem.com/components/cards/) in a columnar layout (Kanban/Board pattern), leveraging SLDS 2 visual language
+> Referência SLDS 2: Adaptado de [Cards](https://www.lightningdesignsystem.com/components/cards/) em layout colunar (padrão Kanban/Board), aproveitando a linguagem visual do SLDS 2
 
-**File:** `src/components/KanbanBoard/KanbanBoard.tsx`
+**Arquivo:** `src/components/KanbanBoard/KanbanBoard.tsx`
 
-A horizontal scrollable board of columns, each representing a pipeline stage, with draggable cards.
+Um quadro horizontal com scroll de colunas, cada uma representando um estágio do pipeline, com cards arrastáveis.
 
 ```tsx
 type KanbanColumnData<TRecord extends { id: string }> = {
   id: string;
   title: string;
-  color?: string;               // accent color for column header
+  color?: string;               // cor de destaque para o cabeçalho da coluna
   records: TRecord[];
-  aggregateValue?: string;      // e.g., "$45,000" sum
-  aggregateLabel?: string;      // e.g., "Total"
+  aggregateValue?: string;      // ex: "R$ 45.000" soma
+  aggregateLabel?: string;      // ex: "Total"
 };
 
 type KanbanBoardProps<TRecord extends { id: string }> = {
@@ -449,59 +449,59 @@ type KanbanBoardProps<TRecord extends { id: string }> = {
 };
 ```
 
-**Anatomy:**
+**Anatomia:**
 
-| # | Element | Description |
-|---|---------|-------------|
-| 1 | Board container | Horizontal scroll container |
-| 2 | Columns | Vertical lists, one per stage |
-| 3 | Column header | Stage name + count badge + aggregate |
-| 4 | Column body | Scrollable list of cards |
-| 5 | Cards | Individual deal/record cards |
-| 6 | Drop indicator | Visual guide showing where a dragged card will land |
-| 7 | Add button | "+" at bottom of each column |
+| # | Elemento | Descrição |
+|---|---------|-----------|
+| 1 | Container do quadro | Container com scroll horizontal |
+| 2 | Colunas | Listas verticais, uma por estágio |
+| 3 | Cabeçalho da coluna | Nome do estágio + badge de contagem + agregado |
+| 4 | Corpo da coluna | Lista com scroll de cards |
+| 5 | Cards | Cards individuais de oportunidade/registro |
+| 6 | Indicador de soltar | Guia visual mostrando onde um card arrastado será inserido |
+| 7 | Botão adicionar | "+" no rodapé de cada coluna |
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Board container:** `display: flex`, `gap: spacingSmall`, `overflowX: auto`, `padding: spacingSmall`, `height: 100%`, `alignItems: flex-start`
-- **Column:** `width: 280px`, `minWidth: 280px`, `flexShrink: 0`, `backgroundColor: neutral1`, `borderRadius: radiusMedium`, `display: flex`, `flexDirection: column`, `maxHeight: 100%`
-- **Column header:** `padding: spacingSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `borderBottom: 2px solid` (column color or neutral3)
-- **Column title:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textDefault`, `flex: 1`
-- **Count badge:** `Badge` component, variant `default`, size `small`, showing record count
-- **Aggregate line:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, below title (e.g., "Total: $45,000")
-- **Column body:** `padding: spacingXSmall`, `overflowY: auto`, `flex: 1`, `display: flex`, `flexDirection: column`, `gap: spacingXSmall`
-- **Add button:** `width: 100%`, `padding: spacingXSmall`, `border: 1px dashed neutral3`, `borderRadius: radiusMedium`, `color: textPlaceholder`, `cursor: pointer`, `textAlign: center`, `fontSize: fontSizeSmall`
-- **Add button (hover):** `backgroundColor: neutral0`, `borderColor: brandPrimary`, `color: brandPrimary`
-- **Drop indicator:** `height: 2px`, `backgroundColor: brandPrimary`, `borderRadius: 1px`, `margin: spacingXXXSmall 0`, animated opacity
+- **Container do quadro:** `display: flex`, `gap: spacingSmall`, `overflowX: auto`, `padding: spacingSmall`, `height: 100%`, `alignItems: flex-start`
+- **Coluna:** `width: 280px`, `minWidth: 280px`, `flexShrink: 0`, `backgroundColor: neutral1`, `borderRadius: radiusMedium`, `display: flex`, `flexDirection: column`, `maxHeight: 100%`
+- **Cabeçalho da coluna:** `padding: spacingSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `borderBottom: 2px solid` (cor da coluna ou neutral3)
+- **Título da coluna:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textDefault`, `flex: 1`
+- **Badge de contagem:** componente `Badge`, variante `default`, tamanho `small`, exibindo contagem de registros
+- **Linha de agregado:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, abaixo do título (ex: "Total: R$ 45.000")
+- **Corpo da coluna:** `padding: spacingXSmall`, `overflowY: auto`, `flex: 1`, `display: flex`, `flexDirection: column`, `gap: spacingXSmall`
+- **Botão adicionar:** `width: 100%`, `padding: spacingXSmall`, `border: 1px dashed neutral3`, `borderRadius: radiusMedium`, `color: textPlaceholder`, `cursor: pointer`, `textAlign: center`, `fontSize: fontSizeSmall`
+- **Botão adicionar (hover):** `backgroundColor: neutral0`, `borderColor: brandPrimary`, `color: brandPrimary`
+- **Indicador de soltar:** `height: 2px`, `backgroundColor: brandPrimary`, `borderRadius: 1px`, `margin: spacingXXXSmall 0`, opacidade animada
 
-**Behaviors:**
+**Comportamentos:**
 
-- Drag a card by grabbing it (cursor changes to `grabbing`)
-- While dragging, the dragged card has reduced opacity (0.5), and a 2px blue drop indicator appears between cards
-- Dropping a card in a different column calls `onCardMove` with the new columnId and position
-- Cards within a column can be reordered via drag
-- Horizontal scroll via `overflowX: auto` or shift+scroll
-- Each column body independently scrolls vertically
-- Clicking the "+" button at column bottom calls `onAddClick(columnId)`
-- Keyboard: Tab into a card, Space/Enter to "pick up", Arrow keys to move, Space/Enter to drop, Escape to cancel
-- Screen reader: Cards announce their column and position (e.g., "Deal X, column Qualification, position 2 of 5")
-- `role="list"` on column body, `role="listitem"` on each card
-- Dragging implemented with native HTML5 Drag and Drop API (no external dependency)
+- Arrastar um card segurando-o (cursor muda para `grabbing`)
+- Enquanto arrasta, o card arrastado tem opacidade reduzida (0.5), e um indicador azul de soltar de 2px aparece entre os cards
+- Soltar um card em uma coluna diferente chama `onCardMove` com o novo columnId e posição
+- Cards dentro de uma coluna podem ser reordenados via arraste
+- Scroll horizontal via `overflowX: auto` ou shift+scroll
+- Cada corpo de coluna faz scroll vertical independentemente
+- Clicar no botão "+" no rodapé da coluna chama `onAddClick(columnId)`
+- Teclado: Tab para entrar em um card, Espaço/Enter para "pegar", setas para mover, Espaço/Enter para soltar, Escape para cancelar
+- Leitor de tela: Cards anunciam sua coluna e posição (ex: "Oportunidade X, coluna Qualificação, posição 2 de 5")
+- `role="list"` no corpo da coluna, `role="listitem"` em cada card
+- Arraste implementado com API nativa HTML5 Drag and Drop (sem dependência externa)
 
 ---
 
 ### KanbanCard
 
-**File:** `src/components/KanbanBoard/KanbanCard.tsx`
+**Arquivo:** `src/components/KanbanBoard/KanbanCard.tsx`
 
-A card rendered within a KanbanBoard column. Used as the default render when no custom `renderCard` is provided, but also exported for use in custom renderers.
+Um card renderizado dentro de uma coluna do KanbanBoard. Usado como renderização padrão quando nenhum `renderCard` customizado é fornecido, mas também exportado para uso em renderizadores customizados.
 
 ```tsx
 type KanbanCardProps = {
   title: string;
   subtitle?: string;
-  amount?: string;              // formatted currency
-  date?: string;                // formatted date
+  amount?: string;              // moeda formatada
+  date?: string;                // data formatada
   avatarName?: string;
   avatarUrl?: string;
   tags?: { label: string; variant: BadgeVariant }[];
@@ -511,27 +511,27 @@ type KanbanCardProps = {
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
 - **Container:** `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `border: 1px solid neutral2`, `padding: spacingSmall`, `cursor: pointer`
 - **Container (hover):** `boxShadow: elevationRaised`, `borderColor: neutral3`
-- **Container (dragging):** `opacity: 0.5`, `boxShadow: elevationDropdown`
-- **Title:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textDefault`, `marginBottom: spacingXXXSmall`, single line ellipsis
-- **Subtitle:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, single line ellipsis
-- **Amount:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightBold`, `color: textDefault`, `marginTop: spacingXXSmall`
-- **Date:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`
-- **Tags row:** `display: flex`, `gap: spacingXXXSmall`, `marginTop: spacingXSmall`, `flexWrap: wrap`
-- **Avatar:** 20px circle, positioned bottom-right of card
+- **Container (arrastando):** `opacity: 0.5`, `boxShadow: elevationDropdown`
+- **Título:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightMedium`, `color: textDefault`, `marginBottom: spacingXXXSmall`, linha única com reticências
+- **Subtítulo:** `fontSize: fontSizeSmall`, `color: textPlaceholder`, linha única com reticências
+- **Valor:** `fontSize: fontSizeMedium`, `fontWeight: fontWeightBold`, `color: textDefault`, `marginTop: spacingXXSmall`
+- **Data:** `fontSize: fontSizeXSmall`, `color: textPlaceholder`
+- **Linha de tags:** `display: flex`, `gap: spacingXXXSmall`, `marginTop: spacingXSmall`, `flexWrap: wrap`
+- **Avatar:** círculo 20px, posicionado no canto inferior direito do card
 
 ---
 
 ### Popover
 
-> SLDS 2 reference: [Popover](https://v1.lightningdesignsystem.com/components/popovers/) (used by GlobalSearch and NotificationPanel)
+> Referência SLDS 2: [Popover](https://v1.lightningdesignsystem.com/components/popovers/) (usado por GlobalSearch e NotificationPanel)
 
-**File:** `src/components/Popover/Popover.tsx`
+**Arquivo:** `src/components/Popover/Popover.tsx`
 
-A generic floating content container that anchors to a trigger element.
+Um container de conteúdo flutuante genérico que ancora a um elemento trigger.
 
 ```tsx
 type PopoverPlacement = 'bottom-start' | 'bottom-end' | 'bottom-center' | 'top-start' | 'top-end' | 'top-center';
@@ -550,30 +550,30 @@ type PopoverProps = {
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Container:** `position: fixed` (calculated from anchor position), `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`, `zIndex: zIndexDropdown`, `overflow: hidden`
-- **Animation:** Fade in + slide from anchor direction, `durationPromptly`
-- **Nub/Arrow (optional):** 8px CSS triangle pointing toward anchor
+- **Container:** `position: fixed` (calculado a partir da posição do anchor), `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`, `zIndex: zIndexDropdown`, `overflow: hidden`
+- **Animação:** Fade in + slide a partir da direção do anchor, `durationPromptly`
+- **Nub/Seta (opcional):** Triângulo CSS de 8px apontando para o anchor
 
-**Behaviors:**
+**Comportamentos:**
 
-- Positioned relative to the anchor element using `getBoundingClientRect()`
-- Recalculates position on scroll/resize (via `ResizeObserver` + scroll listener)
-- Click outside closes (default)
-- Escape closes (default)
-- Focus is trapped inside the popover when open
-- `role="dialog"`, `aria-modal="false"` (non-modal popover)
+- Posicionado relativo ao elemento anchor usando `getBoundingClientRect()`
+- Recalcula posição ao scroll/resize (via `ResizeObserver` + listener de scroll)
+- Clique fora fecha (padrão)
+- Escape fecha (padrão)
+- Foco é preso dentro do popover quando aberto
+- `role="dialog"`, `aria-modal="false"` (popover não-modal)
 
 ---
 
 ### DropdownMenu
 
-> SLDS 2 reference: [Menu](https://www.lightningdesignsystem.com/components/menu/)
+> Referência SLDS 2: [Menu](https://www.lightningdesignsystem.com/components/menu/)
 
-**File:** `src/components/DropdownMenu/DropdownMenu.tsx`
+**Arquivo:** `src/components/DropdownMenu/DropdownMenu.tsx`
 
-A context menu or action dropdown, used for view switcher, filter actions, etc.
+Um menu de contexto ou dropdown de ações, usado para alternador de visualização, ações de filtro, etc.
 
 ```tsx
 type MenuItemData = {
@@ -582,7 +582,7 @@ type MenuItemData = {
   icon?: IconName;
   disabled?: boolean;
   destructive?: boolean;
-  divider?: boolean;           // render divider before this item
+  divider?: boolean;           // renderizar divisor antes deste item
   onClick?: () => void;
 };
 
@@ -597,85 +597,85 @@ type DropdownMenuProps = {
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
-- **Container:** Popover-like, `minWidth: 180px`, `maxWidth: 320px`, `padding: spacingXXXSmall 0`, `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`
-- **Menu item:** `padding: spacingXSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `fontSize: fontSizeMedium`, `color: textDefault`, `cursor: pointer`
-- **Menu item (hover/focus):** `backgroundColor: neutral1`
-- **Menu item (destructive):** `color: error`
-- **Menu item (disabled):** `color: textDisabled`, `cursor: not-allowed`
-- **Divider:** `height: 1px`, `backgroundColor: neutral2`, `margin: spacingXXXSmall 0`
-- **Icon:** 16px, `color: textPlaceholder`
+- **Container:** Tipo popover, `minWidth: 180px`, `maxWidth: 320px`, `padding: spacingXXXSmall 0`, `backgroundColor: neutral0`, `borderRadius: radiusMedium`, `boxShadow: elevationDropdown`, `border: 1px solid neutral2`
+- **Item do menu:** `padding: spacingXSmall spacingMedium`, `display: flex`, `alignItems: center`, `gap: spacingSmall`, `fontSize: fontSizeMedium`, `color: textDefault`, `cursor: pointer`
+- **Item do menu (hover/foco):** `backgroundColor: neutral1`
+- **Item do menu (destrutivo):** `color: error`
+- **Item do menu (desabilitado):** `color: textDisabled`, `cursor: not-allowed`
+- **Divisor:** `height: 1px`, `backgroundColor: neutral2`, `margin: spacingXXXSmall 0`
+- **Ícone:** 16px, `color: textPlaceholder`
 
-**Behaviors:**
+**Comportamentos:**
 
-- `↑`/`↓` arrow keys navigate items, wrapping at ends
-- `Enter`/`Space` selects the focused item
-- `Escape` closes the menu
-- `role="menu"`, items have `role="menuitem"`
-- Focus moves into menu on open; restored to trigger on close
+- Setas `↑`/`↓` navegam os itens, retornando ao início/fim
+- `Enter`/`Espaço` seleciona o item focado
+- `Escape` fecha o menu
+- `role="menu"`, itens têm `role="menuitem"`
+- Foco move para dentro do menu ao abrir; restaurado ao trigger ao fechar
 
 ---
 
 ### Pill
 
-> SLDS 2 reference: [Pills](https://www.lightningdesignsystem.com/components/pills/)
+> Referência SLDS 2: [Pills](https://www.lightningdesignsystem.com/components/pills/)
 
-**File:** `src/components/Pill/Pill.tsx`
+**Arquivo:** `src/components/Pill/Pill.tsx`
 
-A removable tag/label used in search filters, selected items.
+Uma tag/label removível usada em filtros de busca, itens selecionados.
 
 ```tsx
 type PillProps = {
   label: string;
   icon?: IconName;
-  avatarName?: string;                // show avatar instead of icon
+  avatarName?: string;                // exibir avatar ao invés de ícone
   onRemove?: () => void;
   disabled?: boolean;
   variant?: 'default' | 'brand' | 'error';
 };
 ```
 
-**Visual spec:**
+**Especificação visual:**
 
 - **Container:** `display: inline-flex`, `alignItems: center`, `gap: spacingXXXSmall`, `padding: 2px spacingXSmall 2px spacingXXXSmall`, `borderRadius: radiusPill`, `border: 1px solid neutral3`, `backgroundColor: neutral0`, `fontSize: fontSizeSmall`, `lineHeight: '1.5'`
 - **Container (brand):** `border: 1px solid brandPrimary`, `backgroundColor: brandPrimaryLight`
-- **Icon/Avatar:** 16px, left aligned
+- **Ícone/Avatar:** 16px, alinhado à esquerda
 - **Label:** `color: textDefault`, `whiteSpace: nowrap`
-- **Remove button:** 16px close icon, `color: textPlaceholder`, `cursor: pointer`, hover: `color: textDefault`
-- **Disabled:** `opacity: 0.5`, no remove button
+- **Botão remover:** ícone fechar 16px, `color: textPlaceholder`, `cursor: pointer`, hover: `color: textDefault`
+- **Desabilitado:** `opacity: 0.5`, sem botão remover
 
 ---
 
-## New Icons
+## Novos Ícones
 
-The following icons must be added to `src/components/Icon/Icon.tsx`:
+Os seguintes ícones devem ser adicionados a `src/components/Icon/Icon.tsx`:
 
-| Icon Name | Usage | Path Description |
-|-----------|-------|-----------------|
-| `bell` | Notification trigger | Bell outline |
-| `bell-filled` | Active notifications | Filled bell |
-| `command` | Command menu trigger | ⌘ symbol |
-| `keyboard` | Shortcut hints | Keyboard outline |
-| `kanban` | View switcher | Vertical columns |
-| `calendar-view` | View switcher | Calendar grid |
-| `list-view` | View switcher | Horizontal lines |
-| `grip-vertical` | Drag handle for kanban | 6 dots (grip) |
-| `globe` | Global search | Globe outline |
-| `notification` | Notification types | Bell with circle |
-| `arrow-right` | Navigation arrows | Right arrow |
-| `eye` | Mark as read | Eye outline |
-| `eye-off` | Mark as unread | Eye with strike |
+| Nome do Ícone | Uso | Descrição do Path |
+|---------------|-----|-------------------|
+| `bell` | Trigger de notificações | Contorno de sino |
+| `bell-filled` | Notificações ativas | Sino preenchido |
+| `command` | Trigger do menu de comandos | Símbolo ⌘ |
+| `keyboard` | Dicas de atalho | Contorno de teclado |
+| `kanban` | Alternador de visualização | Colunas verticais |
+| `calendar-view` | Alternador de visualização | Grid de calendário |
+| `list-view` | Alternador de visualização | Linhas horizontais |
+| `grip-vertical` | Handle de arraste para kanban | 6 pontos (grip) |
+| `globe` | Busca global | Contorno de globo |
+| `notification` | Tipos de notificação | Sino com círculo |
+| `arrow-right` | Setas de navegação | Seta para direita |
+| `eye` | Marcar como lida | Contorno de olho |
+| `eye-off` | Marcar como não lida | Olho com risco |
 
 ---
 
-## New Hooks
+## Novos Hooks
 
 ### useCommandMenu
 
-**File:** `src/hooks/useCommandMenu.ts`
+**Arquivo:** `src/hooks/useCommandMenu.ts`
 
-Manages command menu state: open/close, search filtering, item navigation, and command execution.
+Gerencia o estado do menu de comandos: abrir/fechar, filtragem de busca, navegação de itens e execução de comandos.
 
 ```tsx
 type UseCommandMenuReturn = {
@@ -693,19 +693,19 @@ type UseCommandMenuReturn = {
 };
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Static commands are defined in the hook: Navigate (Dashboard, Contacts, Companies, Deals, Settings), Create (New Contact, New Company, New Deal)
-- When `searchQuery` is non-empty and exceeds 2 characters, the hook fires a multi-object GraphQL search across people, companies, and opportunities (debounced 300ms)
-- Results are grouped by type: "Navigation", "Actions", "People", "Companies", "Deals"
-- The hook manages keyboard navigation index, wrapping at list boundaries
-- Uses `useKeyboardShortcut` to register Ctrl+K / ⌘K globally
+- Comandos estáticos são definidos no hook: Navegar (Dashboard, Contatos, Empresas, Oportunidades, Configurações), Criar (Novo Contato, Nova Empresa, Nova Oportunidade)
+- Quando `searchQuery` não está vazia e excede 2 caracteres, o hook dispara uma busca GraphQL multi-objeto em people, companies e opportunities (debounce 300ms)
+- Resultados são agrupados por tipo: "Navegação", "Ações", "Pessoas", "Empresas", "Oportunidades"
+- O hook gerencia o índice de navegação por teclado, retornando aos limites da lista
+- Usa `useKeyboardShortcut` para registrar Ctrl+K / ⌘K globalmente
 
 ### useGlobalSearch
 
-**File:** `src/hooks/useGlobalSearch.ts`
+**Arquivo:** `src/hooks/useGlobalSearch.ts`
 
-Provides quick multi-object search results for the top bar GlobalSearch component.
+Fornece resultados rápidos de busca multi-objeto para o componente GlobalSearch da barra superior.
 
 ```tsx
 type UseGlobalSearchReturn = {
@@ -717,19 +717,19 @@ type UseGlobalSearchReturn = {
 };
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Uses `gqlWorkspace` to search across `people`, `companies`, `opportunities`
-- Search filter: `{ or: [{ name: { like: "%query%" } }, ...] }`
-- Limit: 3 results per object type, max 9 total
-- Debounced at 300ms
-- Clears results when query is empty
+- Usa `gqlWorkspace` para buscar em `people`, `companies`, `opportunities`
+- Filtro de busca: `{ or: [{ name: { like: "%query%" } }, ...] }`
+- Limite: 3 resultados por tipo de objeto, máx 9 total
+- Debounce em 300ms
+- Limpa resultados quando a query está vazia
 
 ### useNotifications
 
-**File:** `src/hooks/useNotifications.ts`
+**Arquivo:** `src/hooks/useNotifications.ts`
 
-Fetches and manages notifications from the backend via polling.
+Busca e gerencia notificações do backend via polling.
 
 ```tsx
 type UseNotificationsReturn = {
@@ -742,19 +742,19 @@ type UseNotificationsReturn = {
 };
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Polls `/metadata` endpoint every 30 seconds with a `getNotifications` query
-- Falls back to local mock data if the backend doesn't support notifications yet (graceful degradation)
-- `markAsRead` and `markAllAsRead` optimistically update state and call mutation if available
-- Notifications are sorted by timestamp descending (newest first)
-- Max 50 notifications retained (trimmed from oldest)
+- Faz polling no endpoint `/metadata` a cada 30 segundos com uma query `getNotifications`
+- Faz fallback para dados mock locais se o backend ainda não suporta notificações (degradação graciosa)
+- `markAsRead` e `markAllAsRead` atualizam o estado otimisticamente e chamam mutation se disponível
+- Notificações são ordenadas por timestamp decrescente (mais recentes primeiro)
+- Máximo de 50 notificações retidas (cortadas das mais antigas)
 
 ### useCalendarEvents
 
-**File:** `src/hooks/useCalendarEvents.ts`
+**Arquivo:** `src/hooks/useCalendarEvents.ts`
 
-Fetches calendar events for a given month.
+Busca eventos de calendário para um determinado mês.
 
 ```tsx
 type UseCalendarEventsReturn = {
@@ -765,19 +765,19 @@ type UseCalendarEventsReturn = {
 };
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Queries `calendarEvents` for the given month range using workspace GraphQL
-- Falls back to querying `opportunities` with `closeDate` in the given month range (as deal close dates are the primary calendar content for a CRM)
-- Maps opportunity data to `CalendarEventData`: title = deal name, date = closeDate, variant based on stage
-- Merges actual calendar events + opportunity close dates
-- Re-fetches when year/month changes
+- Consulta `calendarEvents` para o intervalo do mês fornecido usando GraphQL de workspace
+- Faz fallback para consultar `opportunities` com `closeDate` no intervalo do mês fornecido (visto que datas de fechamento de oportunidades são o conteúdo principal de calendário para um CRM)
+- Mapeia dados de oportunidade para `CalendarEventData`: title = nome da oportunidade, date = closeDate, variant baseado no estágio
+- Mescla eventos reais de calendário + datas de fechamento de oportunidades
+- Re-busca quando ano/mês muda
 
 ### useKanbanBoard
 
-**File:** `src/hooks/useKanbanBoard.ts`
+**Arquivo:** `src/hooks/useKanbanBoard.ts`
 
-Fetches and manages kanban board data for opportunities grouped by stage.
+Busca e gerencia dados do quadro kanban para oportunidades agrupadas por estágio.
 
 ```tsx
 type UseKanbanBoardReturn = {
@@ -799,25 +799,25 @@ type OpportunityRecord = {
 };
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Fetches all opportunities with `gqlWorkspace` using relay pagination (fetches all pages)
-- Groups records by `stage` field value
-- Predefined column order: `['LEAD', 'QUALIFICATION', 'MEETING', 'PROPOSAL', 'CLOSED_WON', 'CLOSED_LOST']`
-- Each column calculates aggregate: `SUM(amount)` for won stages, `COUNT` for others
-- `moveCard` calls `updateOpportunity` mutation to change the `stage` field
-- Optimistically updates local state before mutation completes
-- On mutation failure, reverts to previous state and shows error toast
+- Busca todas as oportunidades com `gqlWorkspace` usando paginação relay (busca todas as páginas)
+- Agrupa registros pelo valor do campo `stage`
+- Ordem predefinida de colunas: `['LEAD', 'QUALIFICATION', 'MEETING', 'PROPOSAL', 'CLOSED_WON', 'CLOSED_LOST']`
+- Cada coluna calcula agregado: `SUM(amount)` para estágios ganhos, `COUNT` para os demais
+- `moveCard` chama mutation `updateOpportunity` para mudar o campo `stage`
+- Atualiza o estado local otimisticamente antes da mutation completar
+- Em caso de falha na mutation, reverte para o estado anterior e exibe toast de erro
 
 ### useKeyboardShortcut
 
-**File:** `src/hooks/useKeyboardShortcut.ts`
+**Arquivo:** `src/hooks/useKeyboardShortcut.ts`
 
-A utility hook for registering global keyboard shortcuts.
+Um hook utilitário para registrar atalhos de teclado globais.
 
 ```tsx
 type UseKeyboardShortcutOptions = {
-  key: string;                   // e.g., 'k'
+  key: string;                   // ex: 'k'
   ctrlKey?: boolean;
   metaKey?: boolean;
   shiftKey?: boolean;
@@ -832,81 +832,81 @@ const useKeyboardShortcut = (
 ) => void;
 ```
 
-**Implementation notes:**
+**Notas de implementação:**
 
-- Attaches `keydown` listener to `document`
-- Checks modifier keys (Ctrl/Meta, Shift, Alt) match
-- For `ctrlKey`, also matches `metaKey` and vice versa (cross-platform Ctrl+K / ⌘K)
-- Calls `preventDefault()` on match to avoid browser default behavior
-- Cleans up listener on unmount
-- Can be disabled via `enabled` flag
+- Anexa listener `keydown` ao `document`
+- Verifica se as teclas modificadoras (Ctrl/Meta, Shift, Alt) correspondem
+- Para `ctrlKey`, também faz match com `metaKey` e vice-versa (Ctrl+K / ⌘K cross-platform)
+- Chama `preventDefault()` no match para evitar comportamento padrão do navegador
+- Limpa listener ao desmontar
+- Pode ser desabilitado via flag `enabled`
 
 ---
 
-## Pages
+## Páginas
 
 ### CalendarPage
 
-**File:** `src/pages/CalendarPage.tsx`
+**Arquivo:** `src/pages/CalendarPage.tsx`
 
-Displays a monthly calendar view with deal close dates and calendar events.
+Exibe uma visualização de calendário mensal com datas de fechamento de oportunidades e eventos de calendário.
 
-**Structure:**
+**Estrutura:**
 ```
 PageHeader
-  title="Calendar"
-  actions=[Today, Prev, Next]
+  title="Calendário"
+  actions=[Hoje, Anterior, Próximo]
 CalendarGrid
-  year={currentYear}
-  month={currentMonth}
-  events={events from useCalendarEvents}
+  year={anoAtual}
+  month={mesAtual}
+  events={eventos do useCalendarEvents}
 ```
 
-**Features:**
-- Month navigation with Prev/Next buttons and "Today" button
-- Events sourced from opportunities (close dates) + calendar events
-- Clicking an event navigates to the deal/event detail page
-- Clicking a day with no events opens the create deal form with that date pre-filled
-- Loading state shows Spinner overlay
+**Funcionalidades:**
+- Navegação por mês com botões Anterior/Próximo e botão "Hoje"
+- Eventos originados de oportunidades (datas de fechamento) + eventos de calendário
+- Clicar em um evento navega para a página de detalhe da oportunidade/evento
+- Clicar em um dia sem eventos abre o formulário de criação de oportunidade com aquela data pré-preenchida
+- Estado de carregamento exibe overlay com Spinner
 
 ---
 
 ### KanbanDealsPage
 
-**File:** `src/pages/KanbanDealsPage.tsx`
+**Arquivo:** `src/pages/KanbanDealsPage.tsx`
 
-Displays opportunities in a Kanban board grouped by pipeline stage.
+Exibe oportunidades em um quadro Kanban agrupadas por estágio do pipeline.
 
-**Structure:**
+**Estrutura:**
 ```
 PageHeader
-  title="Deals Pipeline"
-  actions=[New Deal button, View Switcher (List | Kanban | Calendar)]
+  title="Pipeline de Oportunidades"
+  actions=[Botão Nova Oportunidade, Alternador de Visualização (Lista | Kanban | Calendário)]
 KanbanBoard
-  columns={columns from useKanbanBoard}
+  columns={colunas do useKanbanBoard}
   renderCard={KanbanDealCard}
   onCardMove={moveCard}
 ```
 
 **KanbanDealCard (inline):**
-Shows: deal name, company name (subtitle), formatted amount, close date, stage badge
+Exibe: nome da oportunidade, nome da empresa (subtítulo), valor formatado, data de fechamento, badge de estágio
 
-**Features:**
-- View switcher button group: List (current DealsListPage), Kanban, Calendar
-- Drag-and-drop to change deal stage
-- Click card to navigate to deal detail page
-- "+" in column creates a new deal with that stage pre-selected
-- Aggregate shows total amount per column (formatted as currency)
-- Columns for `CLOSED_WON` have green header accent; `CLOSED_LOST` have gray/red
+**Funcionalidades:**
+- Grupo de botões alternador de visualização: Lista (DealsListPage atual), Kanban, Calendário
+- Arrastar-e-soltar para mudar estágio da oportunidade
+- Clicar no card navega para página de detalhe da oportunidade
+- "+" na coluna cria nova oportunidade com aquele estágio pré-selecionado
+- Agregado exibe valor total por coluna (formatado como moeda)
+- Colunas de `CLOSED_WON` têm destaque verde no cabeçalho; `CLOSED_LOST` têm cinza/vermelho
 
 ---
 
-## GraphQL Queries & Mutations
+## Queries e Mutations GraphQL
 
-### Multi-Object Search (for CommandMenu and GlobalSearch)
+### Busca Multi-Objeto (para CommandMenu e GlobalSearch)
 
 ```graphql
-# Search People
+# Buscar Pessoas
 query SearchPeople($filter: PersonFilterInput, $first: Int) {
   people(filter: $filter, first: $first) {
     edges {
@@ -920,7 +920,7 @@ query SearchPeople($filter: PersonFilterInput, $first: Int) {
   }
 }
 
-# Search Companies
+# Buscar Empresas
 query SearchCompanies($filter: CompanyFilterInput, $first: Int) {
   companies(filter: $filter, first: $first) {
     edges {
@@ -933,7 +933,7 @@ query SearchCompanies($filter: CompanyFilterInput, $first: Int) {
   }
 }
 
-# Search Opportunities
+# Buscar Oportunidades
 query SearchOpportunities($filter: OpportunityFilterInput, $first: Int) {
   opportunities(filter: $filter, first: $first) {
     edges {
@@ -948,7 +948,7 @@ query SearchOpportunities($filter: OpportunityFilterInput, $first: Int) {
 }
 ```
 
-### Calendar Events
+### Eventos de Calendário
 
 ```graphql
 query CalendarEventsForMonth($filter: CalendarEventFilterInput, $first: Int) {
@@ -967,7 +967,7 @@ query CalendarEventsForMonth($filter: CalendarEventFilterInput, $first: Int) {
 }
 ```
 
-Fallback — Opportunities by close date:
+Fallback — Oportunidades por data de fechamento:
 
 ```graphql
 query OpportunitiesByCloseDate($filter: OpportunityFilterInput) {
@@ -986,9 +986,9 @@ query OpportunitiesByCloseDate($filter: OpportunityFilterInput) {
 }
 ```
 
-### Kanban — Update Stage
+### Kanban — Atualizar Estágio
 
-Reuses the existing `useRecordUpdate` hook mutation pattern:
+Reutiliza o padrão de mutation do hook `useRecordUpdate` existente:
 
 ```graphql
 mutation UpdateOpportunityStage($idToUpdate: ID!, $input: OpportunityUpdateInput!) {
@@ -999,10 +999,10 @@ mutation UpdateOpportunityStage($idToUpdate: ID!, $input: OpportunityUpdateInput
 }
 ```
 
-### Notifications
+### Notificações
 
 ```graphql
-# If backend supports notifications:
+# Se o backend suportar notificações:
 query GetNotifications($first: Int) {
   notifications(first: $first, orderBy: { createdAt: DESC }) {
     edges {
@@ -1035,49 +1035,49 @@ mutation MarkAllNotificationsAsRead {
 }
 ```
 
-> **Note:** If the Twenty backend does not yet expose a notifications API, the `useNotifications` hook will fall back to local mock data and the component will be rendered in "demo mode" with placeholder notifications. This allows the UI to be shipped immediately while backend support is developed.
+> **Nota:** Se o backend do Twenty ainda não expor uma API de notificações, o hook `useNotifications` fará fallback para dados mock locais e o componente será renderizado em "modo demo" com notificações de placeholder. Isso permite que a UI seja entregue imediatamente enquanto o suporte do backend é desenvolvido.
 
 ---
 
-## Routing Changes
+## Alterações de Roteamento
 
-### New Routes
+### Novas Rotas
 
-| Path | Page | Description |
-|------|------|-------------|
-| `/calendar` | `CalendarPage` | Monthly calendar view |
-| `/deals/kanban` | `KanbanDealsPage` | Kanban pipeline view |
+| Caminho | Página | Descrição |
+|---------|--------|-----------|
+| `/calendar` | `CalendarPage` | Visualização de calendário mensal |
+| `/deals/kanban` | `KanbanDealsPage` | Visualização kanban do pipeline |
 
-### Updated Shell Sidebar
+### Sidebar do Shell Atualizada
 
-Add new items to the sidebar navigation:
+Adicionar novos itens à navegação da sidebar:
 
 ```tsx
 const sidebarSections = [
   {
-    label: 'Main',
+    label: 'Principal',
     items: [
       { id: 'dashboard', label: 'Dashboard', href: '#/', icon: '⊞' },
-      { id: 'contacts', label: 'Contacts', href: '#/contacts', icon: '👥' },
-      { id: 'companies', label: 'Companies', href: '#/companies', icon: '🏢' },
-      { id: 'deals', label: 'Deals', href: '#/deals', icon: '💼' },
-      { id: 'calendar', label: 'Calendar', href: '#/calendar', icon: '📅' },
+      { id: 'contacts', label: 'Contatos', href: '#/contacts', icon: '👥' },
+      { id: 'companies', label: 'Empresas', href: '#/companies', icon: '🏢' },
+      { id: 'deals', label: 'Oportunidades', href: '#/deals', icon: '💼' },
+      { id: 'calendar', label: 'Calendário', href: '#/calendar', icon: '📅' },
     ],
   },
   // ...
 ];
 ```
 
-The Kanban view is accessed from the Deals page via a view switcher, not a separate sidebar item.
+A visualização Kanban é acessada a partir da página de Oportunidades via um alternador de visualização, não um item separado na sidebar.
 
 ---
 
-## Design Token Additions
+## Adições de Design Tokens
 
-### New Color Tokens (in tokens.ts)
+### Novos Tokens de Cor (em tokens.ts)
 
 ```typescript
-// Kanban stage colors
+// Cores de estágio do Kanban
 colorTokens.stageLeadBg = 'var(--eds-g-color-neutral-base-10, #e5e5e5)';
 colorTokens.stageQualificationBg = 'var(--eds-g-color-info-container, #d8edff)';
 colorTokens.stageMeetingBg = 'var(--eds-g-color-warning-container, #fdefc8)';
@@ -1086,10 +1086,10 @@ colorTokens.stageWonBg = 'var(--eds-g-color-success-container, #cdefc4)';
 colorTokens.stageLostBg = 'var(--eds-g-color-error-container, #fddde3)';
 ```
 
-### New CSS Custom Properties (in global.css)
+### Novas CSS Custom Properties (em global.css)
 
 ```css
-/* Phase 4 — Stage colors */
+/* Fase 4 — Cores de estágio */
 --eds-g-color-stage-lead: #706e6b;
 --eds-g-color-stage-qualification: #0176d3;
 --eds-g-color-stage-meeting: #dd7a01;
@@ -1097,78 +1097,78 @@ colorTokens.stageLostBg = 'var(--eds-g-color-error-container, #fddde3)';
 --eds-g-color-stage-won: #2e844a;
 --eds-g-color-stage-lost: #ba0517;
 
-/* Command menu backdrop */
+/* Backdrop do menu de comandos */
 --eds-g-color-backdrop: rgba(0, 0, 0, 0.5);
 ```
 
 ---
 
-## Shell Integration
+## Integração com o Shell
 
-The Shell component (`src/components/Layout/Shell.tsx`) needs the following updates:
+O componente Shell (`src/components/Layout/Shell.tsx`) precisa das seguintes atualizações:
 
-### Top Bar Additions
+### Adições na Barra Superior
 
-1. **GlobalSearch component** — Replaces/augments the existing simple app name area with a search input
-2. **Notification bell icon** — Added to the right side of top bar, before the user name
+1. **Componente GlobalSearch** — Substitui/complementa a área existente de nome do app com um input de busca
+2. **Ícone de sino de notificações** — Adicionado ao lado direito da barra superior, antes do nome do usuário
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Logo/AppName   [🔍 Search... ⌘K]       🔔(3)  User  │
+│ Logo/NomeApp   [🔍 Buscar... ⌘K]       🔔(3)  Usuário │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### CommandMenu Integration
+### Integração do CommandMenu
 
-The `CommandMenu` is rendered at the App level (in `App.tsx`), outside the Shell, so it overlays everything. The `useCommandMenu` hook manages the open/close state globally.
+O `CommandMenu` é renderizado no nível do App (em `App.tsx`), fora do Shell, para que faça overlay em tudo. O hook `useCommandMenu` gerencia o estado de abrir/fechar globalmente.
 
 ---
 
-## Accessibility Checklist
+## Checklist de Acessibilidade
 
 ### Command Menu
-- [ ] `role="dialog"`, `aria-modal="true"`, `aria-label="Command menu"`
-- [ ] Auto-focus on search input when opened
-- [ ] `↑`/`↓` navigate items, `Enter` selects, `Escape` closes
-- [ ] Focus returns to previous element on close
-- [ ] `aria-activedescendant` on input references the focused item
-- [ ] Each item has `role="option"` within `role="listbox"`
-- [ ] Loading state announced with `aria-live="polite"`
+- [ ] `role="dialog"`, `aria-modal="true"`, `aria-label="Menu de comandos"`
+- [ ] Foco automático no input de busca ao abrir
+- [ ] `↑`/`↓` navegam itens, `Enter` seleciona, `Escape` fecha
+- [ ] Foco retorna ao elemento anterior ao fechar
+- [ ] `aria-activedescendant` no input referencia o item focado
+- [ ] Cada item tem `role="option"` dentro de `role="listbox"`
+- [ ] Estado de carregamento anunciado com `aria-live="polite"`
 
-### Notification Panel
-- [ ] Trigger button has `aria-label="Notifications"` and `aria-expanded`
-- [ ] Panel has `role="dialog"`, `aria-label="Notifications"`
-- [ ] Unread count announced in trigger's `aria-label`
-- [ ] Each notification is focusable and has `role="article"`
-- [ ] "Mark all as read" is keyboard accessible
-- [ ] Escape closes the panel
+### Painel de Notificações
+- [ ] Botão trigger tem `aria-label="Notificações"` e `aria-expanded`
+- [ ] Painel tem `role="dialog"`, `aria-label="Notificações"`
+- [ ] Contagem de não lidas anunciada no `aria-label` do trigger
+- [ ] Cada notificação é focalizável e tem `role="article"`
+- [ ] "Marcar todas como lidas" é acessível por teclado
+- [ ] Escape fecha o painel
 
-### Calendar Grid
-- [ ] `role="grid"`, `aria-label="Calendar, {Month} {Year}"`
-- [ ] Weekday headers have `role="columnheader"`
-- [ ] Day cells have `role="gridcell"`, `aria-label="{Full date}"`
-- [ ] Active date has `tabIndex={0}`, others `tabIndex={-1}`
-- [ ] Arrow keys navigate days/weeks, PageUp/PageDown change months
-- [ ] Today cell has `aria-current="date"`
-- [ ] Events within cells are accessible via Tab
+### Grid de Calendário
+- [ ] `role="grid"`, `aria-label="Calendário, {Mês} {Ano}"`
+- [ ] Cabeçalhos dos dias da semana têm `role="columnheader"`
+- [ ] Células dos dias têm `role="gridcell"`, `aria-label="{Data completa}"`
+- [ ] Data ativa tem `tabIndex={0}`, as demais `tabIndex={-1}`
+- [ ] Setas navegam dias/semanas, PageUp/PageDown mudam meses
+- [ ] Célula de hoje tem `aria-current="date"`
+- [ ] Eventos dentro das células são acessíveis via Tab
 
-### Kanban Board
-- [ ] Board has `role="region"`, `aria-label="Pipeline board"`
-- [ ] Each column has `role="list"`, `aria-label="{Stage name}"`
-- [ ] Cards have `role="listitem"`, `aria-roledescription="draggable"`
-- [ ] Drag instructions announced: "Press Space to grab, arrows to move"
-- [ ] Drop announced: "Moved to {column}, position {n}"
-- [ ] Focus management: focus follows the moved card
+### Quadro Kanban
+- [ ] Quadro tem `role="region"`, `aria-label="Quadro de pipeline"`
+- [ ] Cada coluna tem `role="list"`, `aria-label="{Nome do estágio}"`
+- [ ] Cards têm `role="listitem"`, `aria-roledescription="arrastável"`
+- [ ] Instruções de arraste anunciadas: "Pressione Espaço para pegar, setas para mover"
+- [ ] Soltar anunciado: "Movido para {coluna}, posição {n}"
+- [ ] Gerenciamento de foco: foco segue o card movido
 
-### Global Search
-- [ ] `role="combobox"`, `aria-expanded`, `aria-controls` the results list
-- [ ] Results list has `role="listbox"`, items have `role="option"`
-- [ ] `aria-activedescendant` tracks focused result
-- [ ] Screen reader announces result count updates
+### Busca Global
+- [ ] `role="combobox"`, `aria-expanded`, `aria-controls` a lista de resultados
+- [ ] Lista de resultados tem `role="listbox"`, itens têm `role="option"`
+- [ ] `aria-activedescendant` rastreia resultado focado
+- [ ] Leitor de tela anuncia atualizações na contagem de resultados
 
 ---
 
-## File Structure Summary
+## Resumo da Estrutura de Arquivos
 
 ```
 packages/twenty-eds/src/
@@ -1200,7 +1200,7 @@ packages/twenty-eds/src/
 │   ├── Pill/
 │   │   ├── Pill.tsx
 │   │   └── index.ts
-│   └── index.ts              (updated with Phase 4 exports)
+│   └── index.ts              (atualizado com exports da Fase 4)
 ├── hooks/
 │   ├── useCommandMenu.ts
 │   ├── useGlobalSearch.ts
@@ -1211,23 +1211,23 @@ packages/twenty-eds/src/
 ├── pages/
 │   ├── CalendarPage.tsx
 │   └── KanbanDealsPage.tsx
-└── AppRouter.tsx              (updated with new routes)
+└── AppRouter.tsx              (atualizado com novas rotas)
 ```
 
 ---
 
-## Definition of Done
+## Definição de Pronto
 
-A feature is considered complete when:
+Uma funcionalidade é considerada pronta quando:
 
-1. All components render correctly with EDS design tokens (no hard-coded values)
-2. Keyboard navigation works as specified for each component
-3. ARIA attributes are correctly set and screen reader announces state changes
-4. The CommandMenu opens with Ctrl+K / ⌘K and searches across all record types
-5. The NotificationPanel shows notifications (mock data if backend not ready)
-6. The CalendarGrid displays opportunity close dates for the current month
-7. The KanbanBoard displays opportunities grouped by stage with drag-and-drop
-8. New pages are accessible via routing and sidebar navigation
-9. No external CSS-in-JS dependencies added (inline styles + tokens + utility CSS only)
-10. Responsive: works on tablet (768px+) and desktop (1280px+)
-11. All existing pages and features continue to work (no regressions)
+1. Todos os componentes renderizam corretamente com design tokens EDS (sem valores hardcoded)
+2. Navegação por teclado funciona conforme especificado para cada componente
+3. Atributos ARIA estão definidos corretamente e leitor de tela anuncia mudanças de estado
+4. O CommandMenu abre com Ctrl+K / ⌘K e busca em todos os tipos de registro
+5. O NotificationPanel exibe notificações (dados mock se backend não estiver pronto)
+6. O CalendarGrid exibe datas de fechamento de oportunidades para o mês atual
+7. O KanbanBoard exibe oportunidades agrupadas por estágio com arrastar-e-soltar
+8. Novas páginas são acessíveis via roteamento e navegação da sidebar
+9. Nenhuma dependência externa de CSS-in-JS adicionada (inline styles + tokens + utility CSS apenas)
+10. Responsivo: funciona em tablet (768px+) e desktop (1280px+)
+11. Todas as páginas e funcionalidades existentes continuam funcionando (sem regressões)

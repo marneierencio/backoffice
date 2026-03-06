@@ -1,30 +1,30 @@
-# EDS 1.0 Component Library
+# Biblioteca de Componentes EDS 1.0
 
-This document describes the component library implemented in `packages/twenty-eds`, the Erencio Design System (EDS). Its architecture is inspired by [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/).
+Este documento descreve a biblioteca de componentes implementada em `packages/twenty-eds`, o Erencio Design System (EDS). Sua arquitetura é inspirada no [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/).
 
-## Design Principles
+## Princípios de Design
 
-1. **Accessibility-first**: All components use semantic HTML and ARIA attributes
-2. **Token-driven**: All visual values come from design tokens — no hard-coded colors or spacings
-3. **Composable**: Components accept children and slot props for flexible composition
-4. **Typed**: Strict TypeScript with named exports and descriptive generic parameters
+1. **Acessibilidade primeiro**: todos os componentes usam HTML semântico e atributos ARIA
+2. **Orientado por tokens**: todos os valores visuais vêm de design tokens — sem cores ou espaçamentos fixos no código
+3. **Composável**: componentes aceitam children e slot props para composição flexível
+4. **Tipado**: TypeScript estrito com named exports e parâmetros genéricos descritivos
 
 ## Design Tokens (`src/tokens/tokens.ts`)
 
-Design tokens are the single source of truth for all visual values.
+Os design tokens são a fonte única de verdade para todos os valores visuais.
 
-### Color Tokens
-| Token | Value | Usage |
-|-------|-------|-------|
-| `colorTokens.brandPrimary` | `var(--eds-g-color-brand-base-50)` | Primary actions, links, focus rings |
-| `colorTokens.neutral0` | `var(--eds-g-color-neutral-base-1)` | Card/surface backgrounds |
-| `colorTokens.neutral1` | `var(--eds-g-color-neutral-base-5)` | Page background |
-| `colorTokens.error` | `var(--eds-g-color-error-base-50)` | Error states |
-| `colorTokens.success` | `var(--eds-g-color-success-base-50)` | Success states |
-| `colorTokens.warning` | `var(--eds-g-color-warning-base-50)` | Warning states |
+### Tokens de Cor
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `colorTokens.brandPrimary` | `var(--eds-g-color-brand-base-50)` | Ações primárias, links, anéis de foco |
+| `colorTokens.neutral0` | `var(--eds-g-color-neutral-base-1)` | Fundos de cards/superfícies |
+| `colorTokens.neutral1` | `var(--eds-g-color-neutral-base-5)` | Fundo da página |
+| `colorTokens.error` | `var(--eds-g-color-error-base-50)` | Estados de erro |
+| `colorTokens.success` | `var(--eds-g-color-success-base-50)` | Estados de sucesso |
+| `colorTokens.warning` | `var(--eds-g-color-warning-base-50)` | Estados de alerta |
 
-### Spacing Tokens
-Based on a 4px/8px grid:
+### Tokens de Espaçamento
+Baseados em grid de 4px/8px:
 - `spacingXXSmall` = 4px
 - `spacingXSmall` = 8px
 - `spacingSmall` = 12px
@@ -32,13 +32,13 @@ Based on a 4px/8px grid:
 - `spacingLarge` = 24px
 - `spacingXLarge` = 32px
 
-### Typography Tokens
-Base font: system-ui stack (`system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif`) — following SLDS 2 pattern of using system fonts.
+### Tokens de Tipografia
+Fonte base: stack de sistema (`system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif`) — seguindo o padrão SLDS 2 de fontes do sistema.
 
-Font scale from `fontSizeXSmall` (11px / `--eds-g-font-scale-2`) to `fontSizeXXXLarge` (32px / `--eds-g-font-size-display`).
-Font weights: light (300), regular (400), semibold (600), bold (700) — matching SLDS 2 weight scale 3–7.
+Escala de fonte de `fontSizeXSmall` (11px / `--eds-g-font-scale-2`) até `fontSizeXXXLarge` (32px / `--eds-g-font-size-display`).
+Pesos: light (300), regular (400), semibold (600), bold (700) — correspondendo à escala de pesos SLDS 2 (3–7).
 
-## Component Inventory
+## Inventário de Componentes
 
 ### Button
 
@@ -46,7 +46,7 @@ Font weights: light (300), regular (400), semibold (600), bold (700) — matchin
 import { Button } from '@eds/components/Button';
 
 <Button
-  label="Save"
+  label="Salvar"
   variant="brand"   // 'brand' | 'neutral' | 'outline' | 'ghost' | 'destructive'
   size="medium"     // 'small' | 'medium' | 'large'
   loading={false}
@@ -55,12 +55,12 @@ import { Button } from '@eds/components/Button';
 />
 ```
 
-**Variants:**
-- `brand` — primary CTA, solid blue
-- `neutral` — secondary action, gray background
-- `outline` — bordered, blue text
-- `ghost` — no border, blue text
-- `destructive` — solid red, destructive actions
+**Variantes:**
+- `brand` — CTA primário, azul sólido
+- `neutral` — ação secundária, fundo cinza
+- `outline` — com borda, texto azul
+- `ghost` — sem borda, texto azul
+- `destructive` — vermelho sólido, ações destrutivas
 
 ### Input
 
@@ -69,13 +69,13 @@ import { Input } from '@eds/components/Input';
 
 <Input
   id="email"
-  label="Email address"
+  label="Endereço de e-mail"
   type="email"
   value={email}
-  placeholder="user@example.com"
+  placeholder="usuario@exemplo.com"
   required
-  error="Please enter a valid email"
-  hint="We'll never share your email"
+  error="Por favor insira um email válido"
+  hint="Nunca compartilharemos seu email"
   onChange={(e) => setEmail(e.target.value)}
 />
 ```
@@ -86,20 +86,20 @@ import { Input } from '@eds/components/Input';
 import { Card } from '@eds/components/Card';
 
 <Card
-  title="Account Info"
-  description="Your current account details"
+  title="Informações da Conta"
+  description="Detalhes atuais da sua conta"
   variant="default"   // 'default' | 'narrow' | 'highlight'
-  headerRight={<Button label="Edit" variant="neutral" size="small" />}
-  footer={<span>Last updated today</span>}
+  headerRight={<Button label="Editar" variant="neutral" size="small" />}
+  footer={<span>Última atualização hoje</span>}
 >
-  <p>Card body content</p>
+  <p>Conteúdo do corpo do card</p>
 </Card>
 ```
 
-**Variants:**
-- `default` — standard card with border and shadow
-- `narrow` — same as default (for compact layouts)
-- `highlight` — blue left border accent
+**Variantes:**
+- `default` — card padrão com borda e sombra
+- `narrow` — igual ao default (para layouts compactos)
+- `highlight` — borda azul à esquerda como destaque
 
 ### Badge
 
@@ -107,7 +107,7 @@ import { Card } from '@eds/components/Card';
 import { Badge } from '@eds/components/Badge';
 
 <Badge
-  label="Active"
+  label="Ativo"
   variant="success"   // 'default' | 'success' | 'warning' | 'error' | 'info' | 'brand'
   size="medium"       // 'small' | 'medium'
 />
@@ -122,7 +122,7 @@ import { Shell } from '@eds/components/Layout';
   appName="Erencio Backoffice"
   sidebarSections={[
     {
-      label: 'Main',
+      label: 'Principal',
       items: [
         { id: 'dashboard', label: 'Dashboard', href: '#/', icon: '⊞' },
       ],
@@ -135,68 +135,68 @@ import { Shell } from '@eds/components/Layout';
 </Shell>
 ```
 
-The Shell component renders:
-- A fixed top navigation bar (dark, 52px height)
-- A collapsible left sidebar
-- A scrollable main content area
+O componente Shell renderiza:
+- Uma barra de navegação superior fixa (escura, 52px de altura)
+- Uma sidebar colapsável à esquerda
+- Uma área de conteúdo principal com scroll
 
-## Naming Conventions
+## Convenções de Nomenclatura
 
-| Category | Convention | Example |
-|----------|-----------|---------|
-| Component files | PascalCase | `Button.tsx` |
-| Component exports | Named, PascalCase | `export const Button = ...` |
-| Props types | `<Component>Props` | `ButtonProps` |
-| Variant types | `<Component>Variant` | `ButtonVariant` |
-| Size types | `<Component>Size` | `ButtonSize` |
-| Token files | camelCase exports | `colorTokens`, `spacingTokens` |
-| Index exports | barrel file | `export { Button } from './Button'` |
+| Categoria | Convenção | Exemplo |
+|-----------|-----------|---------|
+| Arquivos de componente | PascalCase | `Button.tsx` |
+| Exports de componente | Named, PascalCase | `export const Button = ...` |
+| Tipos de props | `<Componente>Props` | `ButtonProps` |
+| Tipos de variante | `<Componente>Variant` | `ButtonVariant` |
+| Tipos de tamanho | `<Componente>Size` | `ButtonSize` |
+| Arquivos de token | exports camelCase | `colorTokens`, `spacingTokens` |
+| Index exports | arquivo barrel | `export { Button } from './Button'` |
 
-## Divergence from SLDS 2
+## Divergências do SLDS 2
 
-Where the implementation diverges from the official SLDS 2 spec, the decision is documented here:
+Onde a implementação diverge da spec oficial do SLDS 2, a decisão está documentada aqui:
 
-1. **CSS custom properties + inline styles**: EDS uses `--eds-g-*` CSS custom properties (defined in `global.css`) consumed via React inline styles and token references. This provides full theming support via CSS while keeping component code straightforward.
+1. **CSS custom properties + estilos inline**: o EDS usa CSS custom properties `--eds-g-*` (definidas em `global.css`) consumidas via estilos inline React e referências de tokens. Isso fornece suporte completo a temas via CSS mantendo o código de componentes direto.
 
-2. **Utility CSS classes**: EDS includes SLDS 2-style utility classes (`.eds-m_*`, `.eds-p_*`, `.eds-text_*`, `.eds-grid`, etc.) in `utilities.css` for rapid layout and styling.
+2. **Classes CSS utilitárias**: o EDS inclui classes utilitárias estilo SLDS 2 (`.eds-m_*`, `.eds-p_*`, `.eds-text_*`, `.eds-grid`, etc.) em `utilities.css` para layout e estilização rápidos.
 
-3. **No LWC dependency**: Official SLDS 2 is designed for Lightning Web Components. EDS adapts the design principles (tokens, component API, accessibility) to React.
+3. **Sem dependência LWC**: o SLDS 2 oficial é projetado para Lightning Web Components. O EDS adapta os princípios de design (tokens, API de componentes, acessibilidade) para React.
 
-4. **System fonts**: Following SLDS 2's recommendation, EDS uses the system font stack instead of branded fonts, for faster load times and native OS integration.
+4. **Fontes do sistema**: seguindo a recomendação do SLDS 2, o EDS usa o stack de fontes do sistema ao invés de fontes de marca, para tempos de carregamento mais rápidos e integração nativa com o SO.
 
-5. **Simplified token structure**: The full SLDS 2 spec has 500+ tokens. EDS includes the essential set with room to expand.
+5. **Estrutura de tokens simplificada**: a spec completa do SLDS 2 tem 500+ tokens. O EDS inclui o conjunto essencial com espaço para expansão.
 
 ---
 
-## Phase 1 Components (Record Listing)
+## Componentes da Fase 1 (Listagem de Registros)
 
-The following components were added in Phase 1 to support record listing pages.
+Os seguintes componentes foram adicionados na Fase 1 para suportar páginas de listagem.
 
 ### Icon
 
-A minimal inline SVG icon system with no external dependencies.
+Sistema de ícones SVG inline mínimo sem dependências externas.
 
 ```tsx
 import { Icon } from '@eds/components/Icon';
 
 <Icon
   name="search"    // 'search' | 'sort-ascending' | 'sort-descending' | 'chevron-left' | 'chevron-right' | etc.
-  size={16}        // pixel size (default 16)
+  size={16}        // tamanho em pixels (padrão 16)
   color="currentColor"
 />
 ```
 
-Available icons: `search`, `sort-ascending`, `sort-descending`, `chevron-left`, `chevron-right`, `chevron-down`, `check`, `minus`, `close`, `filter`, `refresh`, `chevron-first`, `chevron-last`.
+Ícones disponíveis: `search`, `sort-ascending`, `sort-descending`, `chevron-left`, `chevron-right`, `chevron-down`, `check`, `minus`, `close`, `filter`, `refresh`, `chevron-first`, `chevron-last`.
 
 ### Checkbox
 
-> SLDS 2 ref: [Checkbox](https://www.lightningdesignsystem.com/components/checkbox/)
+> Ref SLDS 2: [Checkbox](https://www.lightningdesignsystem.com/components/checkbox/)
 
 ```tsx
 import { Checkbox } from '@eds/components/Checkbox';
 
 <Checkbox
-  label="Select all"
+  label="Selecionar todos"
   checked={true}
   indeterminate={false}
   disabled={false}
@@ -204,11 +204,11 @@ import { Checkbox } from '@eds/components/Checkbox';
 />
 ```
 
-Custom visual checkbox with support for `indeterminate` state (used by DataTable select-all). Uses native `<input type="checkbox">` under the hood for accessibility.
+Checkbox visual customizado com suporte a estado `indeterminate` (usado pelo select-all do DataTable). Usa `<input type="checkbox">` nativo por baixo para acessibilidade.
 
 ### Select
 
-> SLDS 2 ref: [Select](https://www.lightningdesignsystem.com/components/select/)
+> Ref SLDS 2: [Select](https://www.lightningdesignsystem.com/components/select/)
 
 ```tsx
 import { Select } from '@eds/components/Select';
@@ -217,82 +217,82 @@ import { Select } from '@eds/components/Select';
   label="Status"
   value={status}
   options={[
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'active', label: 'Ativo' },
+    { value: 'inactive', label: 'Inativo' },
   ]}
-  placeholder="Select…"
+  placeholder="Selecione…"
   required
-  error="Please select a status"
+  error="Por favor selecione um status"
   onChange={(value) => setStatus(value)}
 />
 ```
 
-Uses native `<select>` element for full accessibility compliance. Label, hint, error, required decorations match the Input component style.
+Usa elemento `<select>` nativo para conformidade total de acessibilidade. Label, dica, erro e indicador de obrigatório seguem o estilo do componente Input.
 
 ### Spinner
 
-> SLDS 2 ref: [Spinners](https://www.lightningdesignsystem.com/components/spinners/)
+> Ref SLDS 2: [Spinners](https://www.lightningdesignsystem.com/components/spinners/)
 
 ```tsx
 import { Spinner } from '@eds/components/Spinner';
 
-// Overlay spinner (default)
-<Spinner size="medium" label="Loading" />
+// Spinner overlay (padrão)
+<Spinner size="medium" label="Carregando" />
 
-// Inline spinner
-<Spinner size="small" label="Loading" inline />
+// Spinner inline
+<Spinner size="small" label="Carregando" inline />
 ```
 
-**Sizes:** `x-small` (16px), `small` (24px), `medium` (32px), `large` (48px).
+**Tamanhos:** `x-small` (16px), `small` (24px), `medium` (32px), `large` (48px).
 
-CSS-only animation with a brand-colored arc spinning over a neutral track. Overlay mode adds a semi-transparent background.
+Animação apenas CSS com arco colorido da marca girando sobre trilha neutra. O modo overlay adiciona fundo semi-transparente.
 
 ### SearchBar
 
-> Based on SLDS 2 [Input — Search type](https://www.lightningdesignsystem.com/components/input/)
+> Baseado em SLDS 2 [Input — tipo Search](https://www.lightningdesignsystem.com/components/input/)
 
 ```tsx
 import { SearchBar } from '@eds/components/SearchBar';
 
 <SearchBar
   value={query}
-  placeholder="Search contacts…"
+  placeholder="Buscar contatos…"
   onChange={(value) => setQuery(value)}
   debounceMs={300}
 />
 ```
 
-Search input with a magnifying glass icon, debounced `onChange`, clear button, and Escape-to-clear keyboard support.
+Input de busca com ícone de lupa, `onChange` com debounce, botão de limpar e suporte a Escape para limpar.
 
 ### EmptyState
 
-> SLDS 2 ref: [Empty State](https://www.lightningdesignsystem.com/components/empty-state/)
+> Ref SLDS 2: [Empty State](https://www.lightningdesignsystem.com/components/empty-state/)
 
 ```tsx
 import { EmptyState } from '@eds/components/EmptyState';
 
 <EmptyState
-  title="No contacts found"
-  description="Try adjusting your search criteria"
+  title="Nenhum contato encontrado"
+  description="Tente ajustar seus critérios de busca"
   icon="👥"
-  action={<Button label="Clear filters" variant="outline" />}
+  action={<Button label="Limpar filtros" variant="outline" />}
 />
 ```
 
-Centered message displayed when a list or table has no data.
+Mensagem centralizada exibida quando uma lista ou tabela não tem dados.
 
 ### PageHeader
 
-Consistent header for list pages with title, description, search, and action slots.
+Cabeçalho consistente para páginas de lista com título, descrição, busca e slots de ação.
 
 ```tsx
 import { PageHeader } from '@eds/components/PageHeader';
 
 <PageHeader
-  title="Contacts"
-  description="Manage your contacts"
+  title="Contatos"
+  description="Gerencie seus contatos"
   icon="👥"
-  actions={<Button label="New Contact" variant="brand" />}
+  actions={<Button label="Novo Contato" variant="brand" />}
 >
   <SearchBar value={query} onChange={setQuery} />
 </PageHeader>
@@ -300,20 +300,20 @@ import { PageHeader } from '@eds/components/PageHeader';
 
 ### DataTable
 
-> SLDS 2 ref: [Data Table](https://www.lightningdesignsystem.com/components/data-tables/)
+> Ref SLDS 2: [Data Table](https://www.lightningdesignsystem.com/components/data-tables/)
 
-The primary component of Phase 1. Renders a semantic `<table>` with sortable columns, row selection, hover/striped rows, loading overlay, and empty state.
+O componente principal da Fase 1. Renderiza um `<table>` semântico com colunas ordenáveis, seleção de linhas, hover/listras, overlay de carregamento e estado vazio.
 
 ```tsx
 import { DataTable } from '@eds/components/DataTable';
 import type { ColumnDefinition } from '@eds/components/DataTable';
 
 const columns: ColumnDefinition<Contact>[] = [
-  { key: 'name', label: 'Name', accessor: 'name', sortable: true, width: '30%' },
+  { key: 'name', label: 'Nome', accessor: 'name', sortable: true, width: '30%' },
   { key: 'email', label: 'Email', accessor: 'email', sortable: true, width: '30%',
     renderCell: (val, record) => <a href={`mailto:${val}`}>{val}</a> },
-  { key: 'city', label: 'City', accessor: 'city', width: '20%' },
-  { key: 'created', label: 'Created', accessor: 'createdAt', sortable: true, width: '20%',
+  { key: 'city', label: 'Cidade', accessor: 'city', width: '20%' },
+  { key: 'created', label: 'Criado em', accessor: 'createdAt', sortable: true, width: '20%',
     renderCell: (val) => new Date(val).toLocaleDateString() },
 ];
 
@@ -332,18 +332,18 @@ const columns: ColumnDefinition<Contact>[] = [
 />
 ```
 
-**Key features:**
-- Semantic `<table>` with `<th scope="col">` and `aria-sort`
-- Select-all checkbox with indeterminate state
-- Sort toggle: click header → asc → desc → unsorted
-- Row hover highlight
-- Loading spinner overlay with `aria-busy`
-- Empty state when no data
-- Custom cell renderers via `renderCell`
+**Funcionalidades principais:**
+- `<table>` semântico com `<th scope="col">` e `aria-sort`
+- Checkbox de selecionar todos com estado indeterminate
+- Alternar ordenação: clique no cabeçalho → asc → desc → sem ordenação
+- Destaque ao passar o mouse na linha
+- Overlay de spinner de carregamento com `aria-busy`
+- Estado vazio quando não há dados
+- Renderizadores de célula customizados via `renderCell`
 
 ### Pagination
 
-Page navigation controls following SLDS 2 button group patterns.
+Controles de navegação de página seguindo padrões de grupo de botões SLDS 2.
 
 ```tsx
 import { Pagination } from '@eds/components/Pagination';
@@ -358,48 +358,48 @@ import { Pagination } from '@eds/components/Pagination';
 />
 ```
 
-Renders: record count summary, first/prev/page-numbers/next/last buttons, and a rows-per-page select. Active page is highlighted with brand color. Uses `<nav aria-label="Pagination">` for accessibility.
+Renderiza: resumo de registros, botões primeiro/anterior/números de página/próximo/último e um seletor de linhas por página. A página ativa é destacada com a cor da marca. Usa `<nav aria-label="Pagination">` para acessibilidade.
 
 ---
 
-## Phase 2 — Record Detail Components
+## Componentes da Fase 2 — Detalhe do Registro
 
-Components added in Phase 2 to support record detail pages (contact, company, deal).
+Componentes adicionados na Fase 2 para suportar páginas de detalhe de registro (contato, empresa, negócio).
 
 ### Avatar
 
-Circular (user) or rounded-square (entity) avatar with image, initials fallback, or icon fallback.
+Avatar circular (usuário) ou quadrado arredondado (entidade) com imagem, fallback de iniciais ou fallback de ícone.
 
 ```tsx
 import { Avatar } from '@eds/components/Avatar';
 
 <Avatar
-  name="John Doe"
-  src="https://example.com/avatar.jpg"
+  name="João Silva"
+  src="https://exemplo.com/avatar.jpg"
   type="user"     // 'user' | 'entity'
   size="medium"   // 'x-small' (20px) | 'small' (24px) | 'medium' (32px) | 'large' (48px)
 />
 ```
 
-**Behavior:**
-- `user` type renders as circle; `entity` renders as rounded square
-- If `src` fails to load or is not provided, renders initials extracted from `name`
-- User initials: first letter of first + last word; Entity initials: first two letters
-- Falls back to `user` or `company` icon if name is empty
-- Uses `brandPrimary` background with `textInverse` foreground for initials
+**Comportamento:**
+- Tipo `user` renderiza como círculo; `entity` renderiza como quadrado arredondado
+- Se `src` falhar ao carregar ou não for fornecido, renderiza iniciais extraídas de `name`
+- Iniciais de usuário: primeira letra do primeiro + último nome; iniciais de entidade: duas primeiras letras
+- Fallback para ícone de `user` ou `company` se o nome estiver vazio
+- Usa `brandPrimary` como fundo e `textInverse` como cor do texto para iniciais
 
 ### Tabs
 
-Horizontal tab bar with ARIA tablist/tab/tabpanel roles following SLDS 2 tab pattern.
+Barra de abas horizontal com roles ARIA tablist/tab/tabpanel seguindo o padrão de Tabs SLDS 2.
 
 ```tsx
 import { Tabs } from '@eds/components/Tabs';
 
 <Tabs
   items={[
-    { id: 'details', label: 'Details' },
-    { id: 'timeline', label: 'Timeline', badge: 3 },
-    { id: 'notes', label: 'Notes', disabled: true },
+    { id: 'details', label: 'Detalhes' },
+    { id: 'timeline', label: 'Linha do Tempo', badge: 3 },
+    { id: 'notes', label: 'Notas', disabled: true },
   ]}
   activeId="details"
   onTabChange={(id) => setActiveTab(id)}
@@ -407,15 +407,15 @@ import { Tabs } from '@eds/components/Tabs';
 />
 ```
 
-**Accessibility:**
-- `role="tablist"` on container, `role="tab"` on each tab, `role="tabpanel"` on content
-- Arrow keys navigate between tabs; Home/End jump to first/last
-- Only active tab is in tab order (`tabIndex={0}`)
-- `aria-selected`, `aria-controls`, `aria-labelledby` correctly wired
+**Acessibilidade:**
+- `role="tablist"` no container, `role="tab"` em cada aba, `role="tabpanel"` no conteúdo
+- Setas navegam entre abas; Home/End vão para primeira/última
+- Apenas a aba ativa está na ordem de tab (`tabIndex={0}`)
+- `aria-selected`, `aria-controls`, `aria-labelledby` corretamente vinculados
 
 ### Modal
 
-Dialog overlay with focus trap, backdrop, and keyboard support.
+Overlay de diálogo com foco preso (focus trap), backdrop e suporte a teclado.
 
 ```tsx
 import { Modal } from '@eds/components/Modal';
@@ -423,181 +423,181 @@ import { Modal } from '@eds/components/Modal';
 <Modal
   open={isOpen}
   onClose={() => setIsOpen(false)}
-  title="Confirm Action"
+  title="Confirmar Ação"
   size="medium"   // 'small' (480px) | 'medium' (640px) | 'large' (960px)
   footer={<Button label="OK" variant="brand" onClick={handleOk} />}
 >
-  <p>Are you sure?</p>
+  <p>Tem certeza?</p>
 </Modal>
 ```
 
-**Behavior:**
-- `role="dialog"`, `aria-modal="true"`, `aria-labelledby` linked to title
-- Focus trapped inside modal when open; Escape key closes
-- Focus moves to first focusable element on open, restores to trigger on close
-- Backdrop click closes modal
-- CSS animations: `eds-fade-in` (backdrop), `eds-slide-up` (panel)
+**Comportamento:**
+- `role="dialog"`, `aria-modal="true"`, `aria-labelledby` vinculado ao título
+- Foco preso dentro do modal quando aberto; tecla Escape fecha
+- Foco move para o primeiro elemento focável ao abrir, restaura para o gatilho ao fechar
+- Clique no backdrop fecha o modal
+- Animações CSS: `eds-fade-in` (backdrop), `eds-slide-up` (painel)
 
 ### Toast / ToastProvider
 
-Notification system with success/error/warning/info variants following SLDS 2 toast pattern.
+Sistema de notificações com variantes success/error/warning/info seguindo o padrão Toast SLDS 2.
 
 ```tsx
-// Wrap app with provider
+// Envolva a app com o provider
 import { ToastProvider } from '@eds/components/Toast';
 
 <ToastProvider>
   <App />
 </ToastProvider>
 
-// Use in any component
+// Use em qualquer componente
 import { useToast } from '@eds/hooks/useToast';
 
 const { showSuccess, showError, showWarning, showInfo } = useToast();
-showSuccess('Record saved');
-showError('Failed to update', 'Please try again');
+showSuccess('Registro salvo');
+showError('Falha ao atualizar', 'Por favor tente novamente');
 ```
 
-**Variants:** `success` (green), `error` (red), `warning` (amber), `info` (blue)
-**Auto-dismiss:** Success without detail link = 4.8s; all others = sticky (user must dismiss)
-**Accessibility:** `role="status"`, `aria-live="polite"`, `aria-atomic="true"`. Close button has `aria-label="Close notification"`.
+**Variantes:** `success` (verde), `error` (vermelho), `warning` (âmbar), `info` (azul)
+**Auto-dismiss:** Success sem link de detalhe = 4.8s; todos os outros = fixo (usuário deve dispensar)
+**Acessibilidade:** `role="status"`, `aria-live="polite"`, `aria-atomic="true"`. Botão fechar com `aria-label="Fechar notificação"`.
 
 ### FieldRenderer
 
-Read-only field display that formats values by type.
+Exibição de campo somente leitura que formata valores por tipo.
 
 ```tsx
 import { FieldRenderer } from '@eds/components/FieldRenderer';
 
 <FieldRenderer
   type="email"    // 'text' | 'email' | 'phone' | 'url' | 'number' | 'date' | 'currency' | 'boolean' | 'select'
-  value="john@example.com"
+  value="joao@exemplo.com"
   emptyPlaceholder="—"
 />
 ```
 
-**Type behaviors:**
-- `email` → renders `mailto:` link
-- `phone` → renders `tel:` link
-- `url` → renders external link with icon
-- `number` → locale-formatted with `toLocaleString()`
-- `currency` → micros/1M formatted with `Intl.NumberFormat`
-- `boolean` → "Yes" / "No"
+**Comportamento por tipo:**
+- `email` → renderiza link `mailto:`
+- `phone` → renderiza link `tel:`
+- `url` → renderiza link externo com ícone
+- `number` → formatado com locale via `toLocaleString()`
+- `currency` → micros/1M formatado com `Intl.NumberFormat`
+- `boolean` → "Sim" / "Não"
 - `date` → `toLocaleDateString()`
 
 ### InlineEdit
 
-Click-to-edit field with read/edit mode toggle. Uses FieldRenderer in read mode.
+Campo clique-para-editar com alternância entre modo leitura/edição. Usa FieldRenderer no modo leitura.
 
 ```tsx
 import { InlineEdit } from '@eds/components/InlineEdit';
 
 <InlineEdit
   type="text"
-  value="John"
-  label="First Name"
-  onSave={async (value) => { /* save to API */ }}
+  value="João"
+  label="Primeiro Nome"
+  onSave={async (value) => { /* salvar na API */ }}
   editable={true}
 />
 ```
 
-**Behavior:**
-- Read mode: displays value via FieldRenderer, pencil icon on hover
-- Edit mode: shows appropriate `<input>` type (text, email, tel, number, date, url) or `<select>`
-- Save: Enter key or checkmark button. Cancel: Escape key or × button
-- Shows loading spinner while saving, error message on failure
-- `role="button"` + `aria-label="Edit {label}"` in read mode
+**Comportamento:**
+- Modo leitura: exibe valor via FieldRenderer, ícone de lápis ao hover
+- Modo edição: mostra `<input>` apropriado (text, email, tel, number, date, url) ou `<select>`
+- Salvar: tecla Enter ou botão de check. Cancelar: tecla Escape ou botão ×
+- Mostra spinner enquanto salva, mensagem de erro em caso de falha
+- `role="button"` + `aria-label="Editar {label}"` no modo leitura
 
 ### PropertyBox
 
-Vertical list of labeled field pairs, each using InlineEdit.
+Lista vertical de pares campo-valor rotulados, cada um usando InlineEdit.
 
 ```tsx
 import { PropertyBox } from '@eds/components/PropertyBox';
 
 <PropertyBox
   fields={[
-    { label: 'Name', fieldName: 'name', type: 'text', editable: true },
+    { label: 'Nome', fieldName: 'name', type: 'text', editable: true },
     { label: 'Email', fieldName: 'email', type: 'email', editable: true },
-    { label: 'Created', fieldName: 'createdAt', type: 'date', editable: false },
+    { label: 'Criado em', fieldName: 'createdAt', type: 'date', editable: false },
   ]}
-  values={{ name: 'John', email: 'john@example.com', createdAt: '2025-01-15T00:00:00Z' }}
-  onSave={async (fieldName, value) => { /* save */ }}
+  values={{ name: 'João', email: 'joao@exemplo.com', createdAt: '2025-01-15T00:00:00Z' }}
+  onSave={async (fieldName, value) => { /* salvar */ }}
   compact={false}
 />
 ```
 
-**Layout:** Label (140px, right-aligned) + value (flex 1, max-width 300px). Dividers between rows (omitted in compact mode).
+**Layout:** Label (140px, alinhado à direita) + valor (flex 1, max-width 300px). Divisores entre linhas (omitidos no modo compacto).
 
 ### RecordHeader
 
-Page header for record detail pages with breadcrumb navigation, avatar, name, and object label.
+Cabeçalho de página para páginas de detalhe de registro com navegação breadcrumb, avatar, nome e rótulo do objeto.
 
 ```tsx
 import { RecordHeader } from '@eds/components/RecordHeader';
 
 <RecordHeader
-  avatar={<Avatar name="John Doe" type="user" size="large" />}
-  recordName="John Doe"
-  objectLabel="Contact"
+  avatar={<Avatar name="João Silva" type="user" size="large" />}
+  recordName="João Silva"
+  objectLabel="Contato"
   breadcrumbs={[
-    { label: 'Contacts', href: '#/contacts' },
-    { label: 'John Doe' },
+    { label: 'Contatos', href: '#/contacts' },
+    { label: 'João Silva' },
   ]}
-  actions={<Button label="Edit" variant="outline" />}
+  actions={<Button label="Editar" variant="outline" />}
 />
 ```
 
-**Accessibility:** `<nav aria-label="Breadcrumb">` + `<ol>` for breadcrumbs. Record name rendered as `<h1>`.
+**Acessibilidade:** `<nav aria-label="Breadcrumb">` + `<ol>` para breadcrumbs. Nome do registro renderizado como `<h1>`.
 
 ### RelationCard
 
-Collapsible card displaying related records (one-to-one or one-to-many).
+Card colapsável exibindo registros relacionados (um-para-um ou um-para-muitos).
 
 ```tsx
 import { RelationCard } from '@eds/components/RelationCard';
 
 <RelationCard
-  title="Contacts"
+  title="Contatos"
   type="many"     // 'one' | 'many'
   records={[
-    { id: '1', name: 'John Doe', subtitle: 'john@example.com', avatarUrl: '...' },
-    { id: '2', name: 'Jane Smith', subtitle: 'jane@example.com' },
+    { id: '1', name: 'João Silva', subtitle: 'joao@exemplo.com', avatarUrl: '...' },
+    { id: '2', name: 'Maria Santos', subtitle: 'maria@exemplo.com' },
   ]}
   onRecordClick={(record) => navigate(`/contacts/${record.id}`)}
   initialExpanded={true}
   maxVisible={5}
   avatarType="user"
-  emptyMessage="No contacts linked"
+  emptyMessage="Nenhum contato vinculado"
 />
 ```
 
-**Behavior:**
-- Shows count badge in title for `many` type
-- Collapsible with chevron toggle
-- "Show more" / "Show less" when records exceed `maxVisible`
-- Each record row: Avatar + name + subtitle, clickable with hover highlight
+**Comportamento:**
+- Mostra badge de contagem no título para tipo `many`
+- Colapsável com toggle de chevron
+- "Mostrar mais" / "Mostrar menos" quando registros excedem `maxVisible`
+- Cada linha de registro: Avatar + nome + subtítulo, clicável com destaque ao hover
 
 ### Timeline
 
-Vertical timeline displaying activity events with relative timestamps.
+Linha do tempo vertical exibindo eventos de atividade com timestamps relativos.
 
 ```tsx
 import { Timeline } from '@eds/components/Timeline';
 
 <Timeline
   events={[
-    { id: '1', type: 'created', title: 'Record created', timestamp: '2025-01-15T10:30:00Z' },
-    { id: '2', type: 'email', title: 'Email sent', timestamp: '2025-01-16T14:00:00Z',
-      author: { name: 'John Doe', avatarUrl: '...' } },
+    { id: '1', type: 'created', title: 'Registro criado', timestamp: '2025-01-15T10:30:00Z' },
+    { id: '2', type: 'email', title: 'Email enviado', timestamp: '2025-01-16T14:00:00Z',
+      author: { name: 'João Silva', avatarUrl: '...' } },
   ]}
   maxVisible={10}
   onShowMore={() => loadMore()}
 />
 ```
 
-**Event types:** `created`, `updated`, `note`, `email`, `task`, `call`, `event` — each with a distinct icon and color on the timeline dot.
-**Timestamps:** Relative format ("2h ago", "Yesterday", "Mar 15, 2025").
+**Tipos de evento:** `created`, `updated`, `note`, `email`, `task`, `call`, `event` — cada um com ícone e cor distintos no ponto da linha do tempo.
+**Timestamps:** Formato relativo ("2h atrás", "Ontem", "15 Mar, 2025").
 
 ---
 
@@ -605,7 +605,7 @@ import { Timeline } from '@eds/components/Timeline';
 
 ### useRecordDetail
 
-Fetches a single record by ID via the Twenty workspace GraphQL API.
+Busca um único registro por ID via API GraphQL da workspace Twenty.
 
 ```tsx
 import { useRecordDetail } from '@eds/hooks/useRecordDetail';
@@ -613,14 +613,14 @@ import { useRecordDetail } from '@eds/hooks/useRecordDetail';
 const { record, loading, error, refresh } = useRecordDetail<PersonRecord>({
   objectNameSingular: 'person',
   objectNamePlural: 'people',
-  recordId: 'uuid-here',
+  recordId: 'uuid-aqui',
   fields: 'id name { firstName lastName } emails { primaryEmail }',
 });
 ```
 
 ### useRecordUpdate
 
-Mutation hook for updating a single field on a record. Supports nested dot-path fields.
+Hook de mutation para atualizar um único campo em um registro. Suporta campos com caminho aninhado (dot-path).
 
 ```tsx
 import { useRecordUpdate } from '@eds/hooks/useRecordUpdate';
@@ -630,19 +630,18 @@ const { updateField, loading } = useRecordUpdate({
   objectNamePlural: 'people',
 });
 
-const result = await updateField('record-id', 'name.firstName', 'Jane');
-// result: { success: true } or { success: false, error: 'message' }
+const result = await updateField('record-id', 'name.firstName', 'Maria');
+// result: { success: true } ou { success: false, error: 'mensagem' }
 ```
 
 ### useToast
 
-Provides access to the toast notification system via React context.
+Fornece acesso ao sistema de notificações toast via contexto React.
 
 ```tsx
 import { useToast } from '@eds/hooks/useToast';
 
 const { showSuccess, showError, showWarning, showInfo } = useToast();
-showSuccess('Saved successfully');
-showError('An error occurred', 'Please try again later');
+showSuccess('Salvo com sucesso');
+showError('Ocorreu um erro', 'Por favor tente novamente mais tarde');
 ```
-

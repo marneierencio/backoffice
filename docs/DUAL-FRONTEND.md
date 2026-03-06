@@ -1,121 +1,96 @@
-# Dual-Frontend Architecture
+# Arquitetura Dual-Frontend
 
-This document describes the parallel frontend architecture introduced in this PR, which allows the Erencio Backoffice to serve two independent UI shells from the same backend.
+Este documento descreve a arquitetura de frontend paralelo do Erencio Backoffice, que permite servir duas interfaces (shells) independentes a partir do mesmo backend.
 
-## Overview
+## Visão Geral
 
-The system now supports two frontend experiences:
+O sistema suporta duas experiências de frontend:
 
-| Shell | Package | URL | Status |
-|-------|---------|-----|--------|
-| **Twenty** (Standard) | `packages/twenty-front` | `/` | Production |
+| Shell | Pacote | URL | Status |
+|-------|--------|-----|--------|
+| **Twenty** (Padrão) | `packages/twenty-front` | `/` | Produção |
 | **EDS** | `packages/twenty-eds` | `/eds` | Beta |
 
-Both frontends share the same:
-- NestJS backend API (`/graphql`)
-- Authentication flow (JWT tokens)
-- Data model (PostgreSQL via TypeORM)
-- Redis cache and BullMQ workers
+Ambos os frontends compartilham:
+- API backend NestJS (`/graphql`)
+- Fluxo de autenticação (tokens JWT)
+- Modelo de dados (PostgreSQL via TypeORM)
+- Cache Redis e workers BullMQ
 
-## Key Design Decisions
+## Decisões de Design
 
-### Why a separate package (not theming)?
-The EDS frontend implements a fundamentally different component architecture inspired by [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/). A pure theme would not allow structural differences in layout, interaction patterns, and accessibility patterns. A separate Vite + React package gives full independence while sharing the API.
+### Por que um pacote separado (e não apenas temas)?
+O frontend EDS implementa uma arquitetura de componentes fundamentalmente diferente, inspirada no [Salesforce Lightning Design System 2 (SLDS 2)](https://www.lightningdesignsystem.com/). Um tema puro não permitiria diferenças estruturais em layout, padrões de interação e acessibilidade. Um pacote Vite + React separado garante total independência, compartilhando a API.
 
-### Bootstrap Resolution Order
+### Ordem de Resolução do Frontend
 
-When the application loads, the effective frontend is determined in this order:
+Quando a aplicação carrega, o frontend efetivo é determinado nesta ordem:
 
-```
-1. Workspace Policy (highest priority)
-   ├── FORCE_TWENTY → always load Twenty
-   ├── FORCE_EDS  → always load EDS
-   └── ALLOW_USER_CHOICE → proceed to step 2
 
-2. User Preference (from user.frontendPreference)
-   ├── TWENTY → load Twenty
-   └── EDS  → load EDS
 
-3. System Default → TWENTY
-```
+Esta lógica está implementada em:
+- **Hook no frontend**: `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts`
+- **Entidade no backend**: `UserEntity.frontendPreference` + `WorkspaceEntity.frontendPolicy`
 
-This logic is implemented in:
-- **Frontend hook**: `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts`
-- **Backend entity**: `UserEntity.frontendPreference` + `WorkspaceEntity.frontendPolicy`
-
-## Data Model Changes
+## Alterações no Modelo de Dados
 
 ### UserEntity (`core.user`)
 
-New column:
-```sql
-frontendPreference user_frontendPreference_enum NOT NULL DEFAULT 'TWENTY'
-```
+Nova coluna:
 
-Possible values: `TWENTY`, `EDS`
+
+Valores possíveis: `TWENTY`, `EDS`
 
 ### WorkspaceEntity (`core.workspace`)
 
-New column:
-```sql
-frontendPolicy workspace_frontendPolicy_enum NOT NULL DEFAULT 'ALLOW_USER_CHOICE'
-```
+Nova coluna:
 
-Possible values: `ALLOW_USER_CHOICE`, `FORCE_TWENTY`, `FORCE_EDS`
 
-### Migration
+Valores possíveis: `ALLOW_USER_CHOICE`, `FORCE_TWENTY`, `FORCE_EDS`
 
-File: `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts`
+### Migrações
 
-Verified:
-- Migration file exists at `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts` and creates the `frontendPreference` and `frontendPolicy` columns.
-- The frontend hook `packages/twenty-front/src/modules/workspace/hooks/useFrontendShell.ts` is implemented and resolves the effective frontend based on workspace policy and user preference; it includes a `redirectToEdsIfNeeded` helper that performs a client redirect to `/eds` when appropriate.
-- The feature-flag key `IS_EDS_ENABLED` is defined in `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts` and the feature-flag service/guard exist, but there is no direct client-side check for that flag inside `useFrontendShell`.
-- The server registers and will serve the EDS build when present (`packages/twenty-server/src/app.module.ts` registers `/eds`).
+Arquivos:
+- `packages/twenty-server/src/database/typeorm/core/migrations/common/1772000000000-add-frontend-preference-and-policy.ts`
+- `packages/twenty-server/src/database/typeorm/core/migrations/common/1772100000000-rename-sfds2-to-eds-frontend-enums.ts`
 
-Action note: the docs' statement that EDS is "gated by the workspace feature flag `IS_EDS_ENABLED`" is correct in intent (the flag exists), but the current client redirect logic relies on `workspace.frontendPolicy` and `user.frontendPreference`; enabling the workspace feature flag is handled by the backend's feature-flag system. If you want the client hook to prevent redirects when the flag is disabled, we should add an explicit check to `useFrontendShell` that queries the workspace's feature flags.
+Verificado:
+- O arquivo de migração cria as colunas `frontendPreference` e `frontendPolicy`.
+- A segunda migração renomeia `SFDS2 → EDS` e `FORCE_SFDS2 → FORCE_EDS`.
+- O hook `useFrontendShell.ts` está implementado e resolve o frontend efetivo com base na política da workspace e preferência do usuário; inclui um helper `redirectToEdsIfNeeded` que faz redirect do cliente para `/eds` quando apropriado.
+- A feature flag `IS_EDS_ENABLED` está definida em `feature-flag-key.enum.ts` e o serviço/guard de feature flag existem.
+- O servidor registra e serve o build do EDS quando presente (`app.module.ts` registra `/eds`).
 
 ## API
 
-### Update User Frontend Preference
+### Atualizar Preferência de Frontend do Usuário
 
-```graphql
-mutation UpdateUserFrontendPreference($frontendPreference: FrontendPreference!) {
-  updateUserFrontendPreference(frontendPreference: $frontendPreference)
-}
-```
 
-Requires: authenticated user + workspace session.
 
-### Update Workspace Frontend Policy
+Requer: usuário autenticado + sessão de workspace.
 
-```graphql
-mutation UpdateWorkspace($data: UpdateWorkspaceInput!) {
-  updateWorkspace(data: $data) {
-    id
-    frontendPolicy
-  }
-}
-```
+### Atualizar Política de Frontend da Workspace
 
-Where `$data = { frontendPolicy: "FORCE_EDS" }`. Requires workspace admin or `WORKSPACE` permission.
+
+
+Onde ` = { frontendPolicy: "FORCE_EDS" }`. Requer admin da workspace ou permissão `WORKSPACE`.
 
 ## Feature Flag
 
-The EDS shell is gated by the workspace feature flag `IS_EDS_ENABLED`. Even if a user has a preference for EDS, the redirect will only happen when this flag is enabled for the workspace.
+O shell EDS é controlado pela feature flag `IS_EDS_ENABLED` da workspace. Mesmo que um usuário tenha preferência pelo EDS, o redirecionamento só acontecer quando esta flag estiver habilitada para a workspace.
 
-To enable via admin panel:
-1. Go to Admin Panel → Workspace → Feature Flags
-2. Toggle `IS_EDS_ENABLED` to `true`
+Para habilitar via painel de administração:
+1. Acesse Painel Admin → Workspace → Feature Flags
+2. Ative `IS_EDS_ENABLED` para `true`
 
-## Component Architecture
+## Arquitetura de Componentes
 
-See [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) for detailed component documentation.
+Veja [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) para documentação detalhada dos componentes.
 
-## Migration Plan
+## Plano de Migração
 
-See [EDS-MIGRATION.md](./EDS-MIGRATION.md) for the incremental migration plan.
+Veja [EDS-MIGRATION.md](./EDS-MIGRATION.md) para o plano de migração incremental.
 
-## Contributing
+## Contribuindo
 
-See [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) for contribution guidelines.
+Veja [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) para guia de contribuição.

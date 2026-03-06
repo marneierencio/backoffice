@@ -17,6 +17,13 @@ import { DealsListPage } from '@eds/pages/DealsListPage';
 import { KanbanDealsPage } from '@eds/pages/KanbanDealsPage';
 import { LoginPage } from '@eds/pages/LoginPage';
 import { ProfileSettingsPage } from '@eds/pages/ProfileSettingsPage';
+import { SettingsApiKeysPage } from '@eds/pages/settings/SettingsApiKeysPage';
+import { SettingsBillingPage } from '@eds/pages/settings/SettingsBillingPage';
+import { SettingsDataModelPage } from '@eds/pages/settings/SettingsDataModelPage';
+import { SettingsMemberDetailPage } from '@eds/pages/settings/SettingsMemberDetailPage';
+import { SettingsMembersPage } from '@eds/pages/settings/SettingsMembersPage';
+import { SettingsRolesPage } from '@eds/pages/settings/SettingsRolesPage';
+import { SettingsWorkspacePage } from '@eds/pages/settings/SettingsWorkspacePage';
 import { tokens } from '@eds/tokens';
 import React from 'react';
 import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom';
@@ -61,6 +68,17 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
       label: 'User',
       items: [
         { id: 'profile', label: 'Profile Settings', href: '#/settings/profile', icon: '⚙️' },
+      ],
+    },
+    {
+      label: 'Administration',
+      items: [
+        { id: 'settings-workspace', label: 'Workspace', href: '#/settings/workspace', icon: '🏠' },
+        { id: 'settings-members', label: 'Members', href: '#/settings/members', icon: '👥' },
+        { id: 'settings-roles', label: 'Roles', href: '#/settings/roles', icon: '🛡️' },
+        { id: 'settings-data-model', label: 'Data Model', href: '#/settings/data-model', icon: '🗄️' },
+        { id: 'settings-api-keys', label: 'API Keys', href: '#/settings/api-keys', icon: '🔑' },
+        { id: 'settings-billing', label: 'Billing', href: '#/settings/billing', icon: '💳' },
       ],
     },
   ];
@@ -217,6 +235,70 @@ const router = createHashRouter([
     element: (
       <ProtectedLayout>
         <ProfileSettingsPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <ProtectedLayout>
+        <Navigate to="/settings/workspace" replace />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/workspace',
+    element: (
+      <ProtectedLayout>
+        <SettingsWorkspacePage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/members',
+    element: (
+      <ProtectedLayout>
+        <SettingsMembersPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/members/:memberId',
+    element: (
+      <ProtectedLayout>
+        <SettingsMemberDetailPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/roles',
+    element: (
+      <ProtectedLayout>
+        <SettingsRolesPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/data-model',
+    element: (
+      <ProtectedLayout>
+        <SettingsDataModelPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/api-keys',
+    element: (
+      <ProtectedLayout>
+        <SettingsApiKeysPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/billing',
+    element: (
+      <ProtectedLayout>
+        <SettingsBillingPage />
       </ProtectedLayout>
     ),
   },

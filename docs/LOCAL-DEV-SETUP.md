@@ -1,30 +1,30 @@
-# Local Development Setup (Windows + VS Code)
+# Configuração do Ambiente de Desenvolvimento Local (Windows + VS Code)
 
-This guide is for contributors who want to validate changes locally before opening a PR.
+Este guia é para contribuidores que desejam validar alterações localmente antes de abrir um PR.
 
-## 1) Install prerequisites
+## 1) Instalar pré-requisitos
 
-### Required software
+### Software necessário
 
-1. Install **Git**
-2. Install **Docker Desktop** (with WSL2 backend enabled)
-3. Install **VS Code**
-4. Install **WSL2 + Ubuntu** (recommended on Windows)
+1. Instalar **Git**
+2. Instalar **Docker Desktop** (com backend WSL2 habilitado)
+3. Instalar **VS Code**
+4. Instalar **WSL2 + Ubuntu** (recomendado no Windows)
 
-> Why WSL2: this repo uses shell scripts and task shells (`/bin/zsh`) that are Unix-oriented.
+> Por que WSL2: este repositório utiliza shell scripts e task shells (`/bin/zsh`) orientados a Unix.
 
-### VS Code extensions
+### Extensões do VS Code
 
-Install at least:
+Instale ao menos:
 
 - ESLint
 - Prettier
 - EditorConfig
 - Docker
 
-## 2) Open the repo in WSL
+## 2) Abrir o repositório no WSL
 
-From Ubuntu (WSL terminal):
+No Ubuntu (terminal WSL):
 
 ```bash
 cd /mnt/d/src/Erencio.com
@@ -33,87 +33,87 @@ cd backoffice
 code .
 ```
 
-If the repository is already cloned on `D:\src\Erencio.com\backoffice`, just:
+Se o repositório já estiver clonado em `D:\src\Erencio.com\backoffice`:
 
 ```bash
 cd /mnt/d/src/Erencio.com/backoffice
 code .
 ```
 
-## 3) Install Node and Yarn versions used by the repo
+## 3) Instalar as versões do Node e Yarn usadas pelo repositório
 
-This workspace enforces:
+Este workspace exige:
 
 - Node: `^24.5.0`
 - Yarn: `4.9.2`
 
-In WSL Ubuntu:
+No WSL Ubuntu:
 
 ```bash
-# install nvm (if needed)
+# instalar nvm (se necessário)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 source ~/.nvm/nvm.sh
 
-# install and use Node 24
+# instalar e usar Node 24
 nvm install 24
 nvm use 24
 
-# enable corepack and activate Yarn 4.9.2
+# habilitar corepack e ativar Yarn 4.9.2
 corepack enable
 corepack prepare yarn@4.9.2 --activate
 
-# verify
+# verificar
 node -v
 corepack yarn -v
 ```
 
-## 4) Install dependencies
+## 4) Instalar dependências
 
-At repository root:
+Na raiz do repositório:
 
 ```bash
 cd /mnt/d/src/Erencio.com/backoffice
 corepack yarn install
 ```
 
-If you see peer dependency warnings (`YN0060`, `YN0002`), they are expected in this monorepo.
+Se aparecerem avisos de peer dependency (`YN0060`, `YN0002`), são esperados neste monorepo.
 
-## 5) Start infrastructure (Postgres + Redis)
+## 5) Iniciar a infraestrutura (Postgres + Redis)
 
-From root:
+Na raiz:
 
 ```bash
 docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis
 ```
 
-Confirm services are healthy:
+Confirme que os serviços estão saudáveis:
 
 ```bash
 docker ps
 ```
 
-## 6) Generate local env files and databases
+## 6) Gerar arquivos de ambiente e bancos de dados locais
 
-Run:
+Execute:
 
 ```bash
 bash packages/twenty-utils/setup-dev-env.sh
 ```
 
-This command:
+Este comando:
 
-- Resets env for `twenty-front` and `twenty-server`
-- Creates PostgreSQL databases `default` and `test` (if they do not exist)
+- Reseta o ambiente para `twenty-front` e `twenty-server`
+- Cria os bancos PostgreSQL `default` e `test` (se ainda não existirem)
 
-## 7) Run the app locally
+## 7) Rodar a aplicação localmente
 
-From root:
+Na raiz:
 
 ```bash
 corepack yarn start
 ```
 
-Alternative split mode:
+Modo separado (cada serviço em um terminal):
 
 ```bash
 npx nx start twenty-front
@@ -121,27 +121,27 @@ npx nx start twenty-server
 npx nx run twenty-server:worker
 ```
 
-### Fast startup flows (EDS login validation)
+### Fluxos de inicialização rápida (validação de login EDS)
 
-Before running the commands below, ensure **Docker Desktop is open**.
+Antes de rodar os comandos abaixo, certifique-se que o **Docker Desktop está aberto**.
 
-#### Option A — WSL (recommended)
+#### Opção A — WSL (recomendado)
 
-Run in a WSL terminal:
+Execute em um terminal WSL:
 
 ```bash
 set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start twenty-eds
 ```
 
-#### Option B — Git Bash on Windows
+#### Opção B — Git Bash no Windows
 
-Run in Git Bash from repository root (`D:/src/Erencio.com/backoffice`):
+Execute no Git Bash a partir da raiz do repositório (`D:/src/Erencio.com/backoffice`):
 
 ```bash
 set -e && cd /d/src/Erencio.com/backoffice && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh
 ```
 
-Then start in 2 terminals:
+Depois inicie em 2 terminais:
 
 Terminal 1 (backend):
 
@@ -149,26 +149,26 @@ Terminal 1 (backend):
 cd /d/src/Erencio.com/backoffice/packages/twenty-server && npx nest start --watch
 ```
 
-If you prefer backend in Docker (instead of local Nest), run:
+Se preferir o backend via Docker (em vez de Nest local):
 
 ```bash
 cd /d/src/Erencio.com/backoffice && SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local docker compose -f packages/twenty-docker/docker-compose.yml up -d server
 ```
 
-Terminal 2 (EDS frontend):
+Terminal 2 (frontend EDS):
 
 ```bash
 cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start twenty-eds
 ```
 
-Use this login in EDS:
+Use este login no EDS:
 
 - Email: `tim@apple.dev`
-- Password: `tim@apple.dev`
+- Senha: `tim@apple.dev`
 
-## 8) Pre-push validation checklist (recommended)
+## 8) Checklist de validação pré-push (recomendado)
 
-Run only what is relevant to your change:
+Execute apenas o que é relevante para a sua alteração:
 
 ```bash
 # Frontend
@@ -179,64 +179,64 @@ npx nx typecheck twenty-front
 npx nx lint:diff-with-main twenty-server
 npx nx typecheck twenty-server
 
-# Targeted tests (preferred over full suite)
+# Testes direcionados (preferível ao suite completo)
 npx jest path/to/test.test.ts --config=packages/PROJECT/jest.config.mjs
 ```
 
-When changing GraphQL schema:
+Ao alterar schema GraphQL:
 
 ```bash
 npx nx run twenty-front:graphql:generate
 ```
 
-When changing entities/migrations:
+Ao alterar entidades/migrações:
 
 ```bash
-npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/<migration-name> -d src/database/typeorm/core/core.datasource.ts
+npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/<nome-da-migracao> -d src/database/typeorm/core/core.datasource.ts
 ```
 
-## 9) EDS-specific check (for this branch context)
+## 9) Verificação específica do EDS
 
-If your changes touch EDS, validate both frontends:
+Se suas mudanças tocam o EDS, valide ambos os frontends:
 
 ```bash
 npx nx build twenty-front
 npx nx build twenty-eds
 ```
 
-`twenty-eds` uses Vite. Ensure `packages/twenty-eds/src/vite-env.d.ts` exists with:
+O `twenty-eds` usa Vite. Certifique-se que `packages/twenty-eds/src/vite-env.d.ts` existe com:
 
 ```ts
 /// <reference types="vite/client" />
 ```
 
-This avoids TypeScript errors on `import.meta.env` during build.
+Isso evita erros de TypeScript no `import.meta.env` durante o build.
 
-## 10) Troubleshooting
+## 10) Solução de Problemas
 
-- **Error: Node version doesn't match `^24.5.0`**
-  Switch Node: `nvm use 24`
+- **Erro: versão do Node não corresponde a `^24.5.0`**
+  Troque o Node: `nvm use 24`
 
-- **`yarn` command not found**
-  Use Corepack form: `corepack yarn ...`
+- **Comando `yarn` não encontrado**
+  Use a forma Corepack: `corepack yarn ...`
 
-- **`psql` command not found while running setup script**
-  Install PostgreSQL client inside WSL: `sudo apt-get update && sudo apt-get install -y postgresql-client`
+- **`psql` não encontrado ao rodar o script de setup**
+  Instale o cliente PostgreSQL no WSL: `sudo apt-get update && sudo apt-get install -y postgresql-client`
 
-- **Docker DB not reachable on localhost:5432**
-  Check container status and port mapping:
+- **Banco Docker não acessível em localhost:5432**
+  Verifique status e mapeamento de portas:
   `docker compose -f packages/twenty-docker/docker-compose.yml ps`
 
-- **`POST /graphql` fails on Windows with connection aborted/empty reply**
-  Prefer IPv4 loopback (`127.0.0.1`) instead of `localhost` for local backend URL.
-  When running backend via Docker, include:
+- **`POST /graphql` falha no Windows com conexão abortada/resposta vazia**
+  Prefira o loopback IPv4 (`127.0.0.1`) ao invés de `localhost` para URL do backend local.
+  Quando rodar o backend via Docker, inclua:
   `SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local`
 
-- **`npx nx start twenty-server` fails on Windows with `'NODE_ENV' is not recognized`**
-  Use backend fallback command instead:
+- **`npx nx start twenty-server` falha no Windows com `'NODE_ENV' is not recognized`**
+  Use o comando alternativo para o backend:
   `cd packages/twenty-server && npx nest start --watch`
 
-- **Need a clean restart**
+- **Precisa de um restart limpo**
   ```bash
   npx nx reset
   docker compose -f packages/twenty-docker/docker-compose.yml down
@@ -244,7 +244,7 @@ This avoids TypeScript errors on `import.meta.env` during build.
   bash packages/twenty-utils/setup-dev-env.sh
   ```
 
-## 11) Daily quick start
+## 11) Início rápido diário
 
 ```bash
 cd /mnt/d/src/Erencio.com/backoffice
