@@ -30,11 +30,211 @@ import { SettingsRolesPage } from '@eds/pages/settings/SettingsRolesPage';
 import { SettingsSecurityPage } from '@eds/pages/settings/SettingsSecurityPage';
 import { SettingsWorkspacePage } from '@eds/pages/settings/SettingsWorkspacePage';
 import { tokens } from '@eds/tokens';
-import React from 'react';
-import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { createHashRouter, Navigate, RouterProvider, useLocation } from 'react-router-dom';
+
+// ── Setup Dropdown ────────────────────────────────────────────────────────────
+const DROPDOWN_MENU_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  top: 'calc(100% + 4px)',
+  right: 0,
+  backgroundColor: tokens.color.neutral0,
+  borderRadius: tokens.radius.radiusMedium,
+  boxShadow: tokens.elevation.elevationDropdown,
+  border: `1px solid ${tokens.color.borderDefault}`,
+  zIndex: tokens.zIndex.zIndexDropdown,
+  overflow: 'hidden',
+};
+
+const HEADER_BTN_STYLE: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: tokens.spacing.spacingXXSmall,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: tokens.color.textInverse,
+  padding: `${tokens.spacing.spacingXXSmall} ${tokens.spacing.spacingXSmall}`,
+  borderRadius: tokens.radius.radiusMedium,
+  fontSize: tokens.typography.fontSizeMedium,
+  fontFamily: 'inherit',
+};
+
+const MENU_ITEM_STYLE: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  textAlign: 'left',
+  padding: `${tokens.spacing.spacingXSmall} ${tokens.spacing.spacingMedium}`,
+  fontSize: tokens.typography.fontSizeMedium,
+  color: tokens.color.textDefault,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  textDecoration: 'none',
+};
+
+const MENU_DIVIDER_STYLE: React.CSSProperties = {
+  height: '1px',
+  backgroundColor: tokens.color.borderDefault,
+  margin: `${tokens.spacing.spacingXXSmall} 0`,
+};
+
+function useClickOutside(ref: React.RefObject<HTMLDivElement | null>, open: boolean, onClose: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [ref, open, onClose]);
+}
+
+const SetupDropdown = () => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, open, () => setOpen(false));
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label="Setup"
+        style={HEADER_BTN_STYLE}
+      >
+        {/* Gear icon */}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+        <span>Setup</span>
+        {/* Chevron */}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && (
+        <div role="menu" style={{ ...DROPDOWN_MENU_STYLE, minWidth: '200px' }}>
+          <a
+            href="#/settings/workspace"
+            target="_blank"
+            rel="noreferrer"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = tokens.color.neutral1; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = ''; }}
+            style={MENU_ITEM_STYLE}
+          >
+            Setup
+          </a>
+          <div style={MENU_DIVIDER_STYLE} />
+          <div role="menuitem" aria-disabled="true" style={{ ...MENU_ITEM_STYLE, color: tokens.color.textDisabled, cursor: 'not-allowed' }}>Object Manager</div>
+          <div role="menuitem" aria-disabled="true" style={{ ...MENU_ITEM_STYLE, color: tokens.color.textDisabled, cursor: 'not-allowed' }}>Sandboxes</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── User Profile Dropdown ─────────────────────────────────────────────────────
+type UserProfileDropdownProps = {
+  user: { firstName: string; lastName: string; email: string };
+  logout: () => void;
+};
+
+const UserProfileDropdown = ({ user, logout }: UserProfileDropdownProps) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, open, () => setOpen(false));
+
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  const avatarStyle = (size: number): React.CSSProperties => ({
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: '50%',
+    backgroundColor: tokens.color.brandPrimary,
+    color: tokens.color.textInverse,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: size >= 40 ? tokens.typography.fontSizeMedium : tokens.typography.fontSizeSmall,
+    fontWeight: tokens.typography.fontWeightBold,
+    flexShrink: 0,
+  });
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label="View profile menu"
+        style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing.spacingXXSmall, background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: tokens.radius.radiusPill, fontFamily: 'inherit' }}
+      >
+        <div style={avatarStyle(32)}>{initials}</div>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={tokens.color.textInverse} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && (
+        <div role="menu" style={{ ...DROPDOWN_MENU_STYLE, minWidth: '260px' }}>
+          {/* Identity header */}
+          <div style={{ padding: tokens.spacing.spacingMedium, borderBottom: `1px solid ${tokens.color.borderDefault}`, display: 'flex', alignItems: 'center', gap: tokens.spacing.spacingSmall }}>
+            <div style={avatarStyle(40)}>{initials}</div>
+            <div style={{ overflow: 'hidden' }}>
+              <a
+                href="#/settings/profile"
+                onClick={() => setOpen(false)}
+                style={{ display: 'block', fontSize: tokens.typography.fontSizeMedium, fontWeight: tokens.typography.fontWeightMedium, color: tokens.color.brandPrimary, textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {displayName}
+              </a>
+              <span style={{ display: 'block', fontSize: tokens.typography.fontSizeSmall, color: tokens.color.textPlaceholder, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.email}
+              </span>
+            </div>
+          </div>
+          {/* Switch Account — inactive */}
+          <div style={{ padding: `${tokens.spacing.spacingXSmall} ${tokens.spacing.spacingMedium}`, borderBottom: `1px solid ${tokens.color.borderDefault}` }}>
+            <div style={{ fontSize: tokens.typography.fontSizeXSmall, fontWeight: tokens.typography.fontWeightMedium, color: tokens.color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: tokens.spacing.spacingXXSmall }}>
+              Switch Account
+            </div>
+            <div aria-disabled="true" style={{ fontSize: tokens.typography.fontSizeMedium, color: tokens.color.textDisabled, cursor: 'not-allowed', padding: '2px 0' }}>
+              No other accounts
+            </div>
+          </div>
+          {/* Display Density — coming soon */}
+          <div
+            aria-disabled="true"
+            style={{ padding: `${tokens.spacing.spacingXSmall} ${tokens.spacing.spacingMedium}`, borderBottom: `1px solid ${tokens.color.borderDefault}`, fontSize: tokens.typography.fontSizeMedium, color: tokens.color.textDisabled, cursor: 'not-allowed' }}
+          >
+            Display Density{' '}
+            <span style={{ fontSize: tokens.typography.fontSizeXSmall }}>(coming soon)</span>
+          </div>
+          {/* Log Out */}
+          <button
+            role="menuitem"
+            onClick={() => { setOpen(false); logout(); }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = tokens.color.neutral1; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = ''; }}
+            style={MENU_ITEM_STYLE}
+          >
+            Log Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading, logout } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -57,81 +257,59 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const sidebarSections = [
-    {
-      label: 'Main',
-      items: [
-        { id: 'dashboard', label: 'Dashboard', href: '#/', icon: '⊞' },
-        { id: 'contacts', label: 'Contacts', href: '#/contacts', icon: '👥' },
-        { id: 'companies', label: 'Companies', href: '#/companies', icon: '🏢' },
-        { id: 'deals', label: 'Deals', href: '#/deals', icon: '💼' },
-        { id: 'deals-kanban', label: 'Deals Pipeline', href: '#/deals/kanban', icon: '📊' },
-        { id: 'activities', label: 'Activities', href: '#/activities', icon: '✅' },
-        { id: 'calendar', label: 'Calendar', href: '#/calendar', icon: '📅' },
-      ],
-    },
-    {
-      label: 'User',
-      items: [
-        { id: 'profile', label: 'Profile Settings', href: '#/settings/profile', icon: '⚙️' },
-      ],
-    },
-    {
-      label: 'Administration',
-      items: [
-        { id: 'settings-workspace', label: 'Workspace', href: '#/settings/workspace', icon: '🏠' },
-        { id: 'settings-members', label: 'Members', href: '#/settings/members', icon: '👥' },
-        { id: 'settings-roles', label: 'Roles', href: '#/settings/roles', icon: '🛡️' },
-        { id: 'settings-accounts', label: 'Accounts', href: '#/settings/accounts', icon: '🔗' },
-        { id: 'settings-data-model', label: 'Data Model', href: '#/settings/data-model', icon: '🗄️' },
-        { id: 'settings-developers', label: 'Developers', href: '#/settings/developers', icon: '⚙️' },
-        { id: 'settings-api-keys', label: 'API Keys', href: '#/settings/api-keys', icon: '🔑' },
-        { id: 'settings-security', label: 'Security', href: '#/settings/security', icon: '🛡️' },
-        { id: 'settings-billing', label: 'Billing', href: '#/settings/billing', icon: '💳' },
-      ],
-    },
+  // Derive active nav item from current route
+  const activeItemId = (() => {
+    const p = location.pathname;
+    if (p === '/') return 'home';
+    if (p.startsWith('/contacts')) return 'contacts';
+    if (p.startsWith('/companies')) return 'companies';
+    if (p.startsWith('/deals/kanban')) return 'deals-pipeline';
+    if (p.startsWith('/deals')) return 'deals';
+    if (p.startsWith('/activities')) return 'activities';
+    if (p.startsWith('/calendar')) return 'calendar';
+    return undefined;
+  })();
+
+  // App Navigation Bar items — module-level tabs, no icons (SLDS 2 style)
+  const navItems = [
+    { id: 'home', label: 'Home', href: '#/' },
+    { id: 'contacts', label: 'Contacts', href: '#/contacts' },
+    { id: 'companies', label: 'Companies', href: '#/companies' },
+    { id: 'deals', label: 'Deals', href: '#/deals' },
+    { id: 'deals-pipeline', label: 'Deals Pipeline', href: '#/deals/kanban' },
+    { id: 'activities', label: 'Activities', href: '#/activities' },
+    { id: 'calendar', label: 'Calendar', href: '#/calendar' },
   ];
 
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
 
-  const topBarRight = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing.spacingSmall }}>
-      <GlobalSearch
-        onResultClick={(result) => { window.location.hash = result.href; }}
-        onOpenCommandMenu={() => {}}
-      />
+  const headerSearch = (
+    <GlobalSearch
+      onResultClick={(result) => { window.location.hash = result.href; }}
+      onOpenCommandMenu={() => {}}
+    />
+  );
+
+  const headerRight = (
+    <>
+      <SetupDropdown />
       <NotificationPanel
         notifications={notifications}
         onNotificationClick={(n) => { if (n.href) window.location.hash = n.href; }}
         onMarkAsRead={(id) => markAsRead(id)}
         onMarkAllAsRead={markAllAsRead}
       />
-      <span style={{ color: tokens.color.neutral3, fontSize: tokens.typography.fontSizeSmall }}>
-        {user.firstName || user.email}
-      </span>
-      <button
-        onClick={logout}
-        style={{
-          background: 'none',
-          border: `1px solid ${tokens.color.neutral3}`,
-          color: tokens.color.neutral3,
-          borderRadius: tokens.radius.radiusMedium,
-          padding: `${tokens.spacing.spacingXXXSmall} ${tokens.spacing.spacingXSmall}`,
-          cursor: 'pointer',
-          fontSize: tokens.typography.fontSizeSmall,
-          fontFamily: tokens.typography.fontFamilyBase,
-        }}
-      >
-        Sign out
-      </button>
-    </div>
+      <UserProfileDropdown user={user} logout={logout} />
+    </>
   );
 
   return (
     <Shell
       appName="Erencio Backoffice"
-      sidebarSections={sidebarSections}
-      topBarRight={topBarRight}
+      navItems={navItems}
+      activeItemId={activeItemId}
+      headerSearch={headerSearch}
+      headerRight={headerRight}
     >
       {children}
     </Shell>

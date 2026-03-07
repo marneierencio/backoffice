@@ -11,7 +11,7 @@ export { Badge } from './Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from './Badge';
 
 export { Shell } from './Layout';
-export type { ShellProps, SidebarItem, SidebarSection } from './Layout';
+export type { NavItem, ShellProps } from './Layout';
 
 export { Icon } from './Icon';
 export type { IconName, IconProps } from './Icon';

@@ -1,224 +1,215 @@
 import { tokens } from '@eds/tokens';
-import React, { useState } from 'react';
+import React from 'react';
 
-export type SidebarItem = {
+// SLDS 2 App Navigation Bar item
+export type NavItem = {
   id: string;
   label: string;
-  icon?: React.ReactNode;
   href?: string;
   onClick?: () => void;
-  badge?: string;
-};
-
-export type SidebarSection = {
-  label?: string;
-  items: SidebarItem[];
 };
 
 export type ShellProps = {
   children: React.ReactNode;
   appName?: string;
   logoUrl?: string;
-  sidebarSections?: SidebarSection[];
-  topBarRight?: React.ReactNode;
+  // App Navigation Bar items (horizontal tabs below Global Header)
+  navItems?: NavItem[];
+  // Slot for the search bar in the Global Header center
+  headerSearch?: React.ReactNode;
+  // Slot for utilities on the right of the Global Header (notifications, avatar, etc.)
+  headerRight?: React.ReactNode;
   activeItemId?: string;
 };
+
+// SLDS 2 Global Header color — navy blue, distinct from the dark neutral used previously
+const GLOBAL_HEADER_BG = '#16325c';
 
 export const Shell = ({
   children,
   appName = 'Backoffice',
   logoUrl,
-  sidebarSections = [],
-  topBarRight,
+  navItems = [],
+  headerSearch,
+  headerRight,
   activeItemId,
-}: ShellProps) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  const shellStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    fontFamily: tokens.typography.fontFamilyBase,
-    backgroundColor: tokens.color.neutral1,
-  };
-
-  const topBarStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '52px',
-    padding: `0 ${tokens.spacing.spacingLarge}`,
-    backgroundColor: tokens.color.neutral9,
-    color: tokens.color.textInverse,
-    boxShadow: tokens.elevation.elevationRaised,
-    zIndex: tokens.zIndex.zIndexRaised,
-    flexShrink: 0,
-  };
-
-  const logoAreaStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.spacingSmall,
-  };
-
-  const appNameStyle: React.CSSProperties = {
-    fontSize: tokens.typography.fontSizeLarge,
-    fontWeight: tokens.typography.fontWeightBold,
-    color: tokens.color.textInverse,
-  };
-
-  const mainAreaStyle: React.CSSProperties = {
-    display: 'flex',
-    flex: 1,
-    overflow: 'hidden',
-  };
-
-  const sidebarStyle: React.CSSProperties = {
-    width: sidebarCollapsed ? '52px' : '220px',
-    backgroundColor: tokens.color.neutral0,
-    borderRight: `1px solid ${tokens.color.borderDefault}`,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    transition: 'width 0.2s ease',
-    flexShrink: 0,
-  };
-
-  const contentStyle: React.CSSProperties = {
-    flex: 1,
-    overflow: 'auto',
-    padding: tokens.spacing.spacingLarge,
-  };
-
-  return (
-    <div style={shellStyle}>
-      <header style={topBarStyle} aria-label={appName}>
-        <div style={logoAreaStyle}>
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt={appName}
-              style={{ height: '28px', width: 'auto' }}
-            />
-          )}
-          {!sidebarCollapsed && <span style={appNameStyle}>{appName}</span>}
-          {sidebarCollapsed && (
-            <span className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
-              {appName}
-            </span>
-          )}
-        </div>
-        {topBarRight}
-      </header>
-      <div style={mainAreaStyle}>
-        {sidebarSections.length > 0 && (
-          <aside style={sidebarStyle}>
-            <button
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: tokens.spacing.spacingSmall,
-                textAlign: 'right',
-                cursor: 'pointer',
-                fontSize: '1.2rem',
-                color: tokens.color.textLabel,
-                alignSelf: 'flex-end',
-              }}
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={sidebarCollapsed ? 'Expand' : 'Collapse'}
-            >
-              {sidebarCollapsed ? '›' : '‹'}
-            </button>
-            <nav style={{ flex: 1, overflowY: 'auto' }}>
-              {sidebarSections.map((section, sectionIdx) => (
-                <div key={sectionIdx}>
-                  {section.label && !sidebarCollapsed && (
-                    <div
-                      style={{
-                        padding: `${tokens.spacing.spacingXSmall} ${tokens.spacing.spacingMedium}`,
-                        fontSize: tokens.typography.fontSizeXSmall,
-                        fontWeight: tokens.typography.fontWeightBold,
-                        color: tokens.color.textPlaceholder,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                      }}
-                    >
-                      {section.label}
-                    </div>
-                  )}
-                  {section.items.map((item) => {
-                    const isActive = item.id === activeItemId;
-                    const itemStyle: React.CSSProperties = {
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: tokens.spacing.spacingXSmall,
-                      padding: `${tokens.spacing.spacingXSmall} ${tokens.spacing.spacingMedium}`,
-                      cursor: 'pointer',
-                      color: isActive ? tokens.color.brandPrimary : tokens.color.textLabel,
-                      backgroundColor: isActive ? tokens.color.brandPrimaryLight : 'transparent',
-                      borderLeft: isActive ? `3px solid ${tokens.color.brandPrimary}` : '3px solid transparent',
-                      fontSize: tokens.typography.fontSizeMedium,
-                      fontWeight: isActive ? tokens.typography.fontWeightBold : tokens.typography.fontWeightRegular,
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                    };
-
-                    const content = (
-                      <>
-                        {item.icon && <span style={{ flexShrink: 0 }}>{item.icon}</span>}
-                        {!sidebarCollapsed && <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
-                        {!sidebarCollapsed && item.badge && (
-                          <span
-                            style={{
-                              padding: `0 ${tokens.spacing.spacingXXSmall}`,
-                              borderRadius: tokens.radius.radiusPill,
-                              backgroundColor: tokens.color.brandPrimary,
-                              color: tokens.color.textInverse,
-                              fontSize: tokens.typography.fontSizeXSmall,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </>
-                    );
-
-                    if (item.href) {
-                      return (
-                        <a
-                          key={item.id}
-                          href={item.href}
-                          style={itemStyle}
-                        >
-                          {content}
-                        </a>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={item.id}
-                        style={itemStyle}
-                        onClick={item.onClick}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => e.key === 'Enter' && item.onClick?.()}
-                        aria-current={isActive ? 'page' : undefined}
-                      >
-                        {content}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </nav>
-          </aside>
+}: ShellProps) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      fontFamily: tokens.typography.fontFamilyBase,
+    }}
+  >
+    {/* ── Global Header ──────────────────────────────────────────── */}
+    <header
+      role="banner"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        height: '52px',
+        padding: `0 ${tokens.spacing.spacingMedium}`,
+        backgroundColor: GLOBAL_HEADER_BG,
+        color: tokens.color.textInverse,
+        boxShadow: tokens.elevation.elevationRaised,
+        zIndex: tokens.zIndex.zIndexRaised,
+        flexShrink: 0,
+        gap: tokens.spacing.spacingMedium,
+      }}
+    >
+      {/* Left: logo + app name */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: tokens.spacing.spacingSmall,
+          flexShrink: 0,
+        }}
+      >
+        {logoUrl ? (
+          <img src={logoUrl} alt={appName} style={{ height: '28px', width: 'auto' }} />
+        ) : (
+          <div
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: tokens.radius.radiusMedium,
+              backgroundColor: tokens.color.brandPrimary,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: tokens.color.textInverse,
+              fontSize: tokens.typography.fontSizeSmall,
+              fontWeight: tokens.typography.fontWeightBold,
+              flexShrink: 0,
+            }}
+          >
+            {appName.charAt(0).toUpperCase()}
+          </div>
         )}
-        <main style={contentStyle}>{children}</main>
+        <span
+          style={{
+            fontSize: tokens.typography.fontSizeLarge,
+            fontWeight: tokens.typography.fontWeightBold,
+            color: tokens.color.textInverse,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {appName}
+        </span>
       </div>
-    </div>
-  );
-};
+
+      {/* Center: search */}
+      {headerSearch && (
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            maxWidth: '560px',
+            margin: '0 auto',
+          }}
+        >
+          {headerSearch}
+        </div>
+      )}
+
+      {/* Right: utilities */}
+      {headerRight && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: tokens.spacing.spacingSmall,
+            flexShrink: 0,
+            marginLeft: 'auto',
+          }}
+        >
+          {headerRight}
+        </div>
+      )}
+    </header>
+
+    {/* ── App Navigation Bar ──────────────────────────────────────── */}
+    {navItems.length > 0 && (
+      <nav
+        aria-label="App navigation"
+        style={{
+          display: 'flex',
+          alignItems: 'stretch',
+          height: '48px',
+          backgroundColor: tokens.color.neutral0,
+          borderBottom: `1px solid ${tokens.color.borderDefault}`,
+          padding: `0 ${tokens.spacing.spacingXSmall}`,
+          flexShrink: 0,
+          overflowX: 'auto',
+          // Hide scrollbar but keep scrollability for overflow
+          scrollbarWidth: 'none',
+        }}
+      >
+        {navItems.map((item) => {
+          const isActive = item.id === activeItemId;
+          const baseStyle: React.CSSProperties = {
+            display: 'flex',
+            alignItems: 'center',
+            padding: `0 ${tokens.spacing.spacingMedium}`,
+            height: '100%',
+            fontSize: tokens.typography.fontSizeMedium,
+            fontWeight: isActive ? tokens.typography.fontWeightMedium : tokens.typography.fontWeightRegular,
+            color: isActive ? tokens.color.brandPrimary : tokens.color.textLabel,
+            // Active indicator: thick bottom border flush with the nav bar bottom edge
+            borderBottom: isActive
+              ? `3px solid ${tokens.color.brandPrimary}`
+              : '3px solid transparent',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            transition: `color ${tokens.duration.durationQuickly} ease, border-color ${tokens.duration.durationQuickly} ease`,
+            boxSizing: 'border-box',
+            background: 'none',
+            border: 'none',
+            borderRadius: 0,
+            fontFamily: 'inherit',
+          };
+
+          if (item.href) {
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                style={baseStyle}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            );
+          }
+
+          return (
+            <button
+              key={item.id}
+              style={baseStyle}
+              onClick={item.onClick}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+    )}
+
+    {/* ── Page content ────────────────────────────────────────────── */}
+    <main
+      style={{
+        flex: 1,
+        overflow: 'auto',
+        padding: tokens.spacing.spacingLarge,
+        backgroundColor: tokens.color.neutral1,
+      }}
+    >
+      {children}
+    </main>
+  </div>
+);
