@@ -1,0 +1,62 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eds-g-spacing-1);
+}
+
+/* ---------- Label ---------- */
+.label {
+  font-size: var(--eds-g-font-scale-3);
+  font-weight: var(--eds-g-font-weight-6);
+  color: var(--eds-g-color-on-surface-2);
+  line-height: var(--eds-g-line-height-heading);
+}
+
+.required {
+  color: var(--eds-g-color-error-base-50);
+  text-decoration: none;
+}
+
+/* ---------- Input ---------- */
+.input {
+  width: 100%;
+  padding: var(--eds-g-spacing-2) var(--eds-g-spacing-3);
+  font-family: var(--eds-g-font-family);
+  font-size: var(--eds-g-font-scale-4);
+  line-height: var(--eds-g-line-height-text);
+  color: var(--eds-g-color-on-surface-3);
+  background-color: var(--eds-g-color-surface-1);
+  border: 1px solid var(--eds-g-color-border-input);
+  border-radius: var(--eds-g-radius-border-2);
+  transition: border-color var(--eds-g-duration-quickly),
+              box-shadow var(--eds-g-duration-quickly);
+}
+
+.input::placeholder {
+  color: var(--eds-g-color-on-surface-1);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--eds-g-color-border-focus);
+  box-shadow: 0 0 0 3px var(--eds-g-color-brand-base-10);
+}
+
+.inputError {
+  border-color: var(--eds-g-color-border-error);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px var(--eds-g-color-error-container);
+}
+
+/* ---------- Messages ---------- */
+.error {
+  font-size: var(--eds-g-font-scale-2);
+  color: var(--eds-g-color-error-base-50);
+}
+
+.help {
+  font-size: var(--eds-g-font-scale-2);
+  color: var(--eds-g-color-on-surface-1);
+}

@@ -41,6 +41,12 @@
 | [EDS-PHASE3-CORE-CRM-ACTIONS.md](EDS-PHASE3-CORE-CRM-ACTIONS.md) | Fase 3 | Ações CRM: FormElement, Combobox, ConfirmDialog, RecordForm, páginas de criação |
 | [EDS-PHASE4-NAVIGATION-PRODUCTIVITY.md](EDS-PHASE4-NAVIGATION-PRODUCTIVITY.md) | Fase 4 | Navegação e produtividade: CommandMenu, GlobalSearch, Kanban, Calendário, Notificações |
 
+## Aplicativos Públicos
+
+| Documento | Descrição |
+|-----------|-----------|
+| [SELECAO-CUIDADORES.md](SELECAO-CUIDADORES.md) | Pacote `twenty-selecao-cuidadores`: app público de cadastro de candidatos para seleção de cuidadores — arquitetura, passo a passo de criação e deploy |
+
 ## Pull Requests
 
 | Documento | Descrição |

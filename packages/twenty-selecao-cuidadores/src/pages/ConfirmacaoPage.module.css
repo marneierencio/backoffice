@@ -1,0 +1,55 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--eds-g-spacing-8);
+}
+
+.card {
+  max-width: 520px;
+  text-align: center;
+  background-color: var(--eds-g-color-surface-1);
+  border: 1px solid var(--eds-g-color-border-1);
+  border-radius: var(--eds-g-radius-border-4);
+  box-shadow: var(--eds-g-shadow-2);
+  padding: var(--eds-g-spacing-10) var(--eds-g-spacing-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--eds-g-spacing-4);
+}
+
+.iconCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--eds-g-color-success-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--eds-g-spacing-2);
+}
+
+.heading {
+  font-size: var(--eds-g-font-scale-8);
+  font-weight: var(--eds-g-font-weight-7);
+  color: var(--eds-g-color-on-surface-3);
+  line-height: var(--eds-g-line-height-heading);
+}
+
+.message {
+  font-size: var(--eds-g-font-scale-4);
+  color: var(--eds-g-color-on-surface-1);
+  line-height: var(--eds-g-line-height-text);
+  max-width: 400px;
+}
+
+.link {
+  margin-top: var(--eds-g-spacing-4);
+  font-size: var(--eds-g-font-scale-4);
+  font-weight: var(--eds-g-font-weight-6);
+  color: var(--eds-g-color-brand-base-50);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
