@@ -3,6 +3,7 @@ import { Shell } from '@eds/components/Layout';
 import { NotificationPanel } from '@eds/components/NotificationPanel';
 import { useAuth } from '@eds/hooks/useAuth';
 import { useNotifications } from '@eds/hooks/useNotifications';
+import { ActivitiesPage } from '@eds/pages/ActivitiesPage';
 import { CalendarPage } from '@eds/pages/CalendarPage';
 import { CompaniesListPage } from '@eds/pages/CompaniesListPage';
 import { CompanyDetailPage } from '@eds/pages/CompanyDetailPage';
@@ -16,13 +17,17 @@ import { DealDetailPage } from '@eds/pages/DealDetailPage';
 import { DealsListPage } from '@eds/pages/DealsListPage';
 import { KanbanDealsPage } from '@eds/pages/KanbanDealsPage';
 import { LoginPage } from '@eds/pages/LoginPage';
+import { NotFoundPage } from '@eds/pages/NotFoundPage';
 import { ProfileSettingsPage } from '@eds/pages/ProfileSettingsPage';
+import { SettingsAccountsPage } from '@eds/pages/settings/SettingsAccountsPage';
 import { SettingsApiKeysPage } from '@eds/pages/settings/SettingsApiKeysPage';
 import { SettingsBillingPage } from '@eds/pages/settings/SettingsBillingPage';
 import { SettingsDataModelPage } from '@eds/pages/settings/SettingsDataModelPage';
+import { SettingsDevelopersPage } from '@eds/pages/settings/SettingsDevelopersPage';
 import { SettingsMemberDetailPage } from '@eds/pages/settings/SettingsMemberDetailPage';
 import { SettingsMembersPage } from '@eds/pages/settings/SettingsMembersPage';
 import { SettingsRolesPage } from '@eds/pages/settings/SettingsRolesPage';
+import { SettingsSecurityPage } from '@eds/pages/settings/SettingsSecurityPage';
 import { SettingsWorkspacePage } from '@eds/pages/settings/SettingsWorkspacePage';
 import { tokens } from '@eds/tokens';
 import React from 'react';
@@ -61,6 +66,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         { id: 'companies', label: 'Companies', href: '#/companies', icon: '🏢' },
         { id: 'deals', label: 'Deals', href: '#/deals', icon: '💼' },
         { id: 'deals-kanban', label: 'Deals Pipeline', href: '#/deals/kanban', icon: '📊' },
+        { id: 'activities', label: 'Activities', href: '#/activities', icon: '✅' },
         { id: 'calendar', label: 'Calendar', href: '#/calendar', icon: '📅' },
       ],
     },
@@ -76,8 +82,11 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         { id: 'settings-workspace', label: 'Workspace', href: '#/settings/workspace', icon: '🏠' },
         { id: 'settings-members', label: 'Members', href: '#/settings/members', icon: '👥' },
         { id: 'settings-roles', label: 'Roles', href: '#/settings/roles', icon: '🛡️' },
+        { id: 'settings-accounts', label: 'Accounts', href: '#/settings/accounts', icon: '🔗' },
         { id: 'settings-data-model', label: 'Data Model', href: '#/settings/data-model', icon: '🗄️' },
+        { id: 'settings-developers', label: 'Developers', href: '#/settings/developers', icon: '⚙️' },
         { id: 'settings-api-keys', label: 'API Keys', href: '#/settings/api-keys', icon: '🔑' },
+        { id: 'settings-security', label: 'Security', href: '#/settings/security', icon: '🛡️' },
         { id: 'settings-billing', label: 'Billing', href: '#/settings/billing', icon: '💳' },
       ],
     },
@@ -223,6 +232,14 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/activities',
+    element: (
+      <ProtectedLayout>
+        <ActivitiesPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/calendar',
     element: (
       <ProtectedLayout>
@@ -295,6 +312,30 @@ const router = createHashRouter([
     ),
   },
   {
+    path: '/settings/accounts',
+    element: (
+      <ProtectedLayout>
+        <SettingsAccountsPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/developers',
+    element: (
+      <ProtectedLayout>
+        <SettingsDevelopersPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
+    path: '/settings/security',
+    element: (
+      <ProtectedLayout>
+        <SettingsSecurityPage />
+      </ProtectedLayout>
+    ),
+  },
+  {
     path: '/settings/billing',
     element: (
       <ProtectedLayout>
@@ -306,7 +347,7 @@ const router = createHashRouter([
     path: '*',
     element: (
       <ProtectedLayout>
-        <DashboardPage />
+        <NotFoundPage />
       </ProtectedLayout>
     ),
   },

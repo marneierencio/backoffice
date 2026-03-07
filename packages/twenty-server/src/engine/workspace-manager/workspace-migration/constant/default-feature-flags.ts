@@ -7,4 +7,5 @@ export const DEFAULT_FEATURE_FLAGS = [
   FeatureFlagKey.IS_CORE_PICTURE_MIGRATED,
   FeatureFlagKey.IS_FILES_FIELD_MIGRATED,
   FeatureFlagKey.IS_OTHER_FILE_MIGRATED,
+  FeatureFlagKey.IS_EDS_ENABLED,
 ] as const satisfies FeatureFlagKey[];

@@ -64,10 +64,10 @@ Este documento descreve a estratégia para migração gradual de telas do fronte
 - [x] Chaves de API
 - [x] Faturamento
 
-### Fase 6 — Paridade Funcional
-- [ ] Todas as páginas restantes migradas
-- [ ] EDS pode ser definido como padrão da workspace
-- [ ] Feature flag `IS_EDS_ENABLED` passa a ser habilitada por padrão
+### Fase 6 — Paridade Funcional ✅
+- [x] Todas as páginas restantes migradas
+- [x] EDS pode ser definido como padrão da workspace
+- [x] Feature flag `IS_EDS_ENABLED` passa a ser habilitada por padrão
 
 ## Estratégia de Fallback
 
