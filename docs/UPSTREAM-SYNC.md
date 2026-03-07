@@ -3,8 +3,7 @@
 ## Por que sincronizar?
 
 O [Twenty CRM](https://github.com/twentyhq/twenty) recebe atualizações frequentes
-(novas funcionalidades, correções de segurança, melhorias de performance). Manter
-nosso fork sincronizado garante que os clientes se beneficiem dessas melhorias.
+(novas funcionalidades, correções de segurança, melhorias de performance). Manter nosso fork sincronizado garante que os clientes se beneficiem dessas melhorias.
 
 ---
 

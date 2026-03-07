@@ -1,0 +1,55 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+.header {
+  background-color: var(--eds-g-color-brand-base-70);
+  color: var(--eds-g-color-on-surface-inverse);
+  padding: var(--eds-g-spacing-3) var(--eds-g-spacing-6);
+}
+
+.headerInner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--eds-g-spacing-3);
+}
+
+.logo {
+  font-size: var(--eds-g-font-scale-6);
+  font-weight: var(--eds-g-font-weight-7);
+  letter-spacing: -0.01em;
+}
+
+.separator {
+  opacity: 0.4;
+  font-weight: var(--eds-g-font-weight-3);
+}
+
+.title {
+  font-size: var(--eds-g-font-scale-5);
+  font-weight: var(--eds-g-font-weight-4);
+  opacity: 0.85;
+}
+
+/* ---------- Main ---------- */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--eds-g-spacing-8) var(--eds-g-spacing-6);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background-color: var(--eds-g-color-surface-3);
+  color: var(--eds-g-color-on-surface-1);
+  text-align: center;
+  padding: var(--eds-g-spacing-4) var(--eds-g-spacing-6);
+  font-size: var(--eds-g-font-scale-3);
+}

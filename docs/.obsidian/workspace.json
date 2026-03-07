@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "EDS-COMPONENTS.md",
+                "file": "DUAL-FRONTEND.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "EDS-COMPONENTS"
+              "title": "DUAL-FRONTEND"
             }
           }
         ]
@@ -185,6 +185,11 @@
   },
   "active": "b4a6af78279c8f27",
   "lastOpenFiles": [
+    "SELECAO-CUIDADORES.md",
+    "DEPLOYMENT.md",
+    "UPSTREAM-SYNC.md",
+    "ARCHITECTURE.md",
+    "EDS-COMPONENTS.md",
     "EDS-PHASE6-PARITY.md",
     "EDS-PHASE5-SETTINGS.md",
     "README.md",
@@ -194,8 +199,6 @@
     "_translate_phase1.py",
     "_translate_eds_components.py",
     "_translate.py",
-    "DUAL-FRONTEND.md",
-    "DEPLOYMENT.md",
-    "ARCHITECTURE.md"
+    "DUAL-FRONTEND.md"
   ]
 }

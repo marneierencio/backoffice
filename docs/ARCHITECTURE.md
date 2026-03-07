@@ -18,7 +18,7 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 │  ┌──────────────────────┐  ┌──────────────────────────┐ │
 │  │  backoffice          │  │  backoffice--dev         │ │
 │  │  192.168.1.90        │  │  192.168.1.92            │ │
-│  │  (Produção)          │  │  (Desenvolvimento)      │ │
+│  │  (Produção)          │  │  (Desenvolvimento)       │ │
 │  │  branch: main        │  │  branch: development     │ │
 │  │                      │  │                          │ │
 │  │  ┌────────────────┐  │  │  ┌────────────────────┐  │ │
@@ -48,9 +48,9 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 
 ```
 packages/
-├── twenty-front/     — Aplicação React (frontend)
-├── twenty-eds/      — EDS parallel frontend (Erencio Design System)
-├── twenty-server/    — API NestJS (backend + GraphQL)
+├── twenty-front/     — App Frontend Standard
+├── twenty-eds/       — App Frontend EDS (Erencio Design System)
+├── twenty-server/    — Backend + GraphQL (API NestJS)
 ├── twenty-ui/        — Componentes UI compartilhados
 ├── twenty-shared/    — Tipos e utilitários comuns
 ├── twenty-emails/    — Templates de e-mail (React Email)
@@ -71,16 +71,16 @@ Utilizamos o suporte nativo do Twenty a múltiplos workspaces:
 
 ```
 Cliente (Browser)
-      │
-      ▼
-twenty-front (Vite / React)
-      │  GraphQL / REST
-      ▼
-twenty-server (NestJS / Port 3000)
-      │
-      ├─── PostgreSQL (dados de workspace)
-      ├─── Redis (sessões / cache)
-      └─── twenty-worker (jobs em background via BullMQ)
+   │
+   ▼
+Frontend (Vite / React)
+   │   GraphQL / REST
+   ▼
+Backend (NestJS / Port 3000)
+   │
+   ├─── PostgreSQL (dados de workspace)
+   ├─── Redis (sessões / cache)
+   └─── twenty-worker (jobs em background via BullMQ)
 ```
 
 ## Imagens Docker
