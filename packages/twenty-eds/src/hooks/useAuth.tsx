@@ -1,4 +1,4 @@
-import { gql, setAuthToken } from '@eds/utils/api';
+import { gql, gqlWorkspace, setAuthToken } from '@eds/utils/api';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type AuthUser = {
@@ -7,6 +7,22 @@ export type AuthUser = {
   lastName: string;
   email: string;
   frontendPreference: 'TWENTY' | 'EDS';
+  workspaceMemberId: string | null;
+  locale: string | null;
+  colorScheme: string | null;
+};
+
+type RawCurrentUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  frontendPreference: 'TWENTY' | 'EDS';
+  workspaceMember?: {
+    id: string;
+    locale: string | null;
+    colorScheme: string | null;
+  } | null;
 };
 
 export type AuthContextValue = {
@@ -16,6 +32,7 @@ export type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateFrontendPreference: (preference: 'TWENTY' | 'EDS') => Promise<void>;
+  updateLocale: (locale: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -30,6 +47,20 @@ const CURRENT_USER_QUERY = `
       lastName
       email
       frontendPreference
+      workspaceMember {
+        id
+        locale
+        colorScheme
+      }
+    }
+  }
+`;
+
+const UPDATE_LOCALE_MUTATION = `
+  mutation UpdateWorkspaceMemberLocale($idToUpdate: UUID!, $data: WorkspaceMemberUpdateInput!) {
+    updateWorkspaceMember(id: $idToUpdate, data: $data) {
+      id
+      locale
     }
   }
 `;
@@ -89,13 +120,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchCurrentUser = useCallback(async (authToken: string) => {
     setAuthToken(authToken);
-    const result = await gql<{ currentUser: AuthUser }>(CURRENT_USER_QUERY);
+    const result = await gql<{ currentUser: RawCurrentUser }>(CURRENT_USER_QUERY);
 
     if (result.errors || !result.data?.currentUser) {
       throw new Error('Failed to fetch current user');
     }
 
-    return result.data.currentUser;
+    const raw = result.data.currentUser;
+    return {
+      id: raw.id,
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email,
+      frontendPreference: raw.frontendPreference,
+      workspaceMemberId: raw.workspaceMember?.id ?? null,
+      locale: raw.workspaceMember?.locale ?? null,
+      colorScheme: raw.workspaceMember?.colorScheme ?? null,
+    } satisfies AuthUser;
   }, []);
 
   useEffect(() => {
@@ -215,8 +256,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [],
   );
 
+  const updateLocale = useCallback(
+    async (locale: string) => {
+      const workspaceMemberId = user?.workspaceMemberId;
+
+      if (!workspaceMemberId) {
+        throw new Error('Workspace member not found');
+      }
+
+      const result = await gqlWorkspace<{
+        updateWorkspaceMember: { id: string; locale: string };
+      }>(UPDATE_LOCALE_MUTATION, { idToUpdate: workspaceMemberId, data: { locale } });
+
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message ?? 'Update failed');
+      }
+
+      setUser((prev) => (prev ? { ...prev, locale } : prev));
+    },
+    [user?.workspaceMemberId],
+  );
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateFrontendPreference }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateFrontendPreference, updateLocale }}>
       {children}
     </AuthContext.Provider>
   );
