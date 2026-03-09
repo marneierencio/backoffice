@@ -53,6 +53,12 @@
 |-----------|-----------|
 | [PULL-REQUESTS/PULL-REQUEST-000001.md](PULL-REQUESTS/PULL-REQUEST-000001.md) | PR #1 — Implementação inicial do EDS (Fases 0–4) |
 
+## Aplicativos Públicos
+
+| Documento | Descrição |
+|-----------|-----------|
+| [SELECAO-CUIDADORES.md](SELECAO-CUIDADORES.md) | Seleção de Cuidadores: pacote, deploy, API Key, guia passo-a-passo para novos apps públicos |
+
 ---
 
 ## Guia Rápido para Agentes de IA

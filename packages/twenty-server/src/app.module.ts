@@ -1,8 +1,8 @@
 import {
-  type DynamicModule,
-  type MiddlewareConsumer,
-  Module,
-  RequestMethod,
+    type DynamicModule,
+    type MiddlewareConsumer,
+    Module,
+    RequestMethod,
 } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -91,14 +91,25 @@ export class AppModule {
     } */
 
     const edsPath = join(__dirname, 'eds');
+    const selecaoCuidadoresPath = join(__dirname, 'selecaoCuidadores');
 
-    // Register EDS before the main front so its serveRoot takes precedence
+    // Register sub-apps before the main front so their serveRoot takes precedence
+    if (existsSync(selecaoCuidadoresPath)) {
+      modules.push(
+        ServeStaticModule.forRoot({
+          rootPath: selecaoCuidadoresPath,
+          serveRoot: '/selecaoCuidadores',
+          exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*', '/rest/*', '/graphql'],
+        }),
+      );
+    }
+
     if (existsSync(edsPath)) {
       modules.push(
         ServeStaticModule.forRoot({
           rootPath: edsPath,
           serveRoot: '/eds',
-          exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*'],
+          exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*', '/rest/*', '/graphql'],
         }),
       );
     }

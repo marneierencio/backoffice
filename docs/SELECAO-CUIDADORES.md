@@ -9,7 +9,8 @@ Pacote `twenty-selecao-cuidadores`: aplicativo público (sem login) que permite 
 | **Pacote** | `packages/twenty-selecao-cuidadores` |
 | **Porta dev** | 3003 |
 | **Base URL** | `/selecaoCuidadores/` |
-| **URL de produção** | `{workspace}.backoffice.erencio.com/selecaoCuidadores` |
+| **URL de produção** | `backoffice.erencio.com/selecaoCuidadores` |
+| **URL de desenvolvimento** | `backoffice--dev.erencio.com/selecaoCuidadores` |
 | **Autenticação** | Pública — usa API Key do workspace (sem login de visitante) |
 | **Identidade visual** | EDS 1.0 (mesmos tokens CSS do `twenty-eds`) |
 
@@ -17,7 +18,7 @@ Pacote `twenty-selecao-cuidadores`: aplicativo público (sem login) que permite 
 
 ```
 packages/twenty-selecao-cuidadores/
-├── index.html                       # Ponto de entrada HTML
+├── index.html                       # Ponto de entrada HTML (com runtime config)
 ├── package.json                     # Dependências
 ├── project.json                     # Configuração Nx
 ├── tsconfig.json                    # TypeScript (alias @selecao/*)
@@ -43,6 +44,38 @@ packages/twenty-selecao-cuidadores/
         └── api.ts                   # Cliente REST para criar registros People
 ```
 
+### Como o app é servido (produção e dev)
+
+O projeto **não usa nginx**. O NestJS serve todos os frontends via `@nestjs/serve-static`:
+
+```
+Internet (Cloudflare Tunnel)
+    ↓
+NestJS Backend (porta 3000)
+    ├─ /selecaoCuidadores/*  → dist/selecaoCuidadores/ (este app)
+    ├─ /eds/*                → dist/eds/               (twenty-eds)
+    ├─ /*                    → dist/front/             (twenty-front)
+    ├─ /graphql              → GraphQL API
+    ├─ /rest/*               → REST API
+    └─ /metadata             → Metadata API
+```
+
+Registro feito em `packages/twenty-server/src/app.module.ts`:
+
+```typescript
+const selecaoCuidadoresPath = join(__dirname, 'selecaoCuidadores');
+
+if (existsSync(selecaoCuidadoresPath)) {
+  modules.push(
+    ServeStaticModule.forRoot({
+      rootPath: selecaoCuidadoresPath,
+      serveRoot: '/selecaoCuidadores',
+      exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*', '/rest/*', '/graphql'],
+    }),
+  );
+}
+```
+
 ## Passo a Passo: Como o Pacote Foi Criado
 
 Este guia serve de referência para criar novos pacotes públicos no futuro.
@@ -54,42 +87,69 @@ Este guia serve de referência para criar novos pacotes públicos no futuro.
 3. Crie `project.json` registrando o projeto no Nx com targets `build` e `start` (porta 3003).
 4. Crie `tsconfig.json` com path alias `@selecao/*` → `src/*`.
 5. Crie `tsconfig.node.json` para o Vite.
-6. Crie `vite.config.ts` com `base: '/selecaoCuidadores/'` e proxy para `/api`, `/metadata` e `/graphql` apontando para o backend (porta 3000).
-7. Crie `index.html` com `lang="pt-BR"` e título em português.
+6. Crie `vite.config.ts` com `base: '/selecaoCuidadores/'` e proxy para `/rest`, `/metadata` e `/graphql` apontando para o backend (porta 3000).
+7. Crie `index.html` com `lang="pt-BR"`, título em português e bloco `<script>` para configuração em runtime.
 
-### 2. Registro no workspace
+### 2. Registro no workspace (Yarn)
 
-Adicione `"packages/twenty-selecao-cuidadores"` no array `workspaces.packages` do `package.json` raiz do monorepo.
+Adicione `"packages/twenty-selecao-cuidadores"` no array `workspaces.packages` do `package.json` raiz.
 
-### 3. Design System (identidade visual)
+### 3. Registro no NestJS (ServeStaticModule)
+
+Em `packages/twenty-server/src/app.module.ts`, no método `getConditionalModules()`, adicione um bloco `ServeStaticModule.forRoot()` com `serveRoot: '/selecaoCuidadores'` **antes** do registro do twenty-front (que é o fallback raiz).
+
+### 4. Registro no Dockerfile
+
+Em `packages/twenty-docker/twenty/Dockerfile`:
+
+1. **common-deps**: Adicione `COPY ./packages/twenty-selecao-cuidadores/package.json /app/packages/twenty-selecao-cuidadores/`
+2. **twenty-front-build**: Adicione `COPY ./packages/twenty-selecao-cuidadores /app/packages/twenty-selecao-cuidadores` e inclua `npx nx build twenty-selecao-cuidadores` no `RUN`
+3. **twenty (final)**: Adicione `COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-selecao-cuidadores/dist /app/packages/twenty-server/dist/selecaoCuidadores`
+
+### 5. Design System (identidade visual)
 
 O `global.css` replica os tokens CSS do `twenty-eds` (variáveis `--eds-g-*`). Isso garante que cores, tipografia, espaçamento, bordas e sombras sejam consistentes entre os dois aplicativos.
 
 Componentes usam **CSS Modules** (`.module.css`) para escopo local de estilos.
 
-### 4. Layout público (sem autenticação)
+### 6. Layout público (sem autenticação)
 
 Diferente do `twenty-eds`, este app **não requer login**:
 - Não há `AuthProvider`, `ProtectedLayout` nem qualquer verificação de sessão de usuário.
 - O `PublicLayout` fornece header e footer simples, envolvendo as páginas via `<Outlet />`.
 - O roteamento usa `createHashRouter` do React Router.
 
-### 5. Comunicação com o backend
+### 7. Comunicação com o backend
 
-O app usa a **REST API** do Twenty server com uma **API Key** para autenticação:
+O app usa a **REST API** do Twenty server com uma **API Key** para autenticação.
 
-- A API Key é configurada via variável de ambiente `VITE_API_KEY`.
-- Cada workspace possui sua própria API Key, que deve ser gerada em **Settings > Developers > API Keys** no Twenty/EDS.
-- A chamada `POST /api/rest/people` cria um registro People no workspace correspondente.
+A chamada `POST /rest/people` cria um registro People no workspace correspondente.
 
-**Variáveis de ambiente** (arquivo `.env` ou configuração de deploy):
+**Configuração da API Key** (duas opções, por prioridade):
 
-```env
-VITE_API_URL=https://{workspace}.backoffice.erencio.com
-VITE_API_KEY=eyJhbG...  # API Key do workspace
+#### Opção A: Runtime (recomendado para múltiplos ambientes)
+
+Edite o `window.__SELECAO_CONFIG__` no `index.html` do build:
+
+```html
+<script>
+  window.__SELECAO_CONFIG__ = {
+    apiKey: 'eyJhbG...',  // API Key do workspace
+  };
+</script>
 ```
 
-### 6. Formulário de candidatura
+Isso permite usar o **mesmo build** para prod e dev, apenas trocando a config.
+
+#### Opção B: Build time (via variáveis de ambiente)
+
+```env
+VITE_API_KEY=eyJhbG...  # Baked no JS bundle
+```
+
+> **Nota**: As chamadas REST usam URLs relativas (`/rest/people`), então funcionam em qualquer domínio (prod e dev) sem configuração adicional de URL.
+
+### 8. Formulário de candidatura
 
 A `CandidaturaPage` contém um formulário que captura:
 
@@ -104,19 +164,6 @@ A `CandidaturaPage` contém um formulário que captura:
 | Cidade | Não | `city` |
 
 Ao clicar em **"Submeter candidatura"**, os dados são validados localmente e enviados via REST API. Sucesso redireciona para `/confirmacao`.
-
-### 7. Deploy e proxy reverso
-
-Em produção, o Nginx (ou proxy reverso) deve rotear `{workspace}.backoffice.erencio.com/selecaoCuidadores` para o build estático deste pacote:
-
-```nginx
-location /selecaoCuidadores/ {
-    alias /app/packages/twenty-selecao-cuidadores/dist/;
-    try_files $uri $uri/ /selecaoCuidadores/index.html;
-}
-```
-
-O backend (`/api/rest/*`, `/metadata`, `/graphql`) já é servido pelo Twenty server na mesma origem.
 
 ## Comandos
 
@@ -137,9 +184,19 @@ cd packages/twenty-selecao-cuidadores && npx vite preview
 2. Vá em **Settings > Developers > API Keys**.
 3. Clique em **Create API Key**.
 4. Copie o token gerado.
-5. Configure `VITE_API_KEY` com esse token no ambiente de deploy do app público.
+5. Configure a API Key via `window.__SELECAO_CONFIG__` (runtime) ou `VITE_API_KEY` (build time).
 
 > **Segurança**: A API Key controla quais operações o app público pode fazer. Considere criar uma API Key com permissões restritas (somente escrita em People) quando o Twenty suportar permissões granulares por API Key.
+
+## Ambientes
+
+| Ambiente | Domínio | URL completa |
+|----------|---------|--------------|
+| Produção | `backoffice.erencio.com` | `backoffice.erencio.com/selecaoCuidadores` |
+| Desenvolvimento | `backoffice--dev.erencio.com` | `backoffice--dev.erencio.com/selecaoCuidadores` |
+| Local | `localhost:3003` | `localhost:3003/selecaoCuidadores/` |
+
+O mesmo build Docker serve ambos os ambientes (prod e dev). A diferença é a API Key configurada em cada workspace.
 
 ## Próximos Passos
 
