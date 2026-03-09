@@ -14580,3 +14580,33 @@ msgstr "Ihr Arbeitsbereich hat kein aktives Abonnement. Bitte kontaktieren Sie I
 #: src/modules/billing/components/SettingsBillingContent.tsx
 msgid "Your workspace will be disabled"
 msgstr "Ihr Arbeitsbereich wird deaktiviert"
+
+#. js-lingui-id: GfnKOF
+#: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
+msgid "Interface"
+msgstr "Oberfläche"
+
+#. js-lingui-id: gz9POV
+#: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
+msgid "Choose which frontend interface to use"
+msgstr "Wählen Sie die zu verwendende Frontend-Oberfläche"
+
+#. js-lingui-id: 9HtuFZ
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Frontend Interface"
+msgstr "Frontend-Oberfläche"
+
+#. js-lingui-id: QDr7KO
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Standard (Twenty)"
+msgstr "Standard (Twenty)"
+
+#. js-lingui-id: F9Wqjl
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "EDS — Erencio Design System"
+msgstr "EDS — Erencio Design System"
+
+#. js-lingui-id: y0CFFV
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Your workspace administrator has set a fixed frontend for all members. You cannot change this setting."
+msgstr "Ihr Workspace-Administrator hat eine feste Oberfläche für alle Mitglieder festgelegt. Sie können diese Einstellung nicht ändern."

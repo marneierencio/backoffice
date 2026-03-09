@@ -13,7 +13,9 @@ export type CurrentUser = Pick<
   | 'firstName'
   | 'lastName'
   | 'hasPassword'
->;
+> & {
+  frontendPreference?: string | null;
+};
 
 export const currentUserState = createStateV2<CurrentUser | null>({
   key: 'currentUserState',

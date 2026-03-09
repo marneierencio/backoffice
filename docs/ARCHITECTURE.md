@@ -5,30 +5,30 @@
 O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https://github.com/twentyhq/twenty), um projeto open-source.
 
 ```
-┌─────────────────────────────────────────────────┐
-│         Internet (Cloudflare Tunnel)             │
-│                                                  │
-│  backoffice.erencio.com                          │
-│  backoffice--dev.erencio.com                     │
-└──────────────────┬──────────────────────────────┘
-                   │
-┌──────────────────┴──────────────────────────────┐
-│                Proxmox (Self-Hosted)             │
-│                                                  │
-│  ┌──────────────────────┐  ┌──────────────────┐ │
-│  │  backoffice-main     │  │  backoffice-dev  │ │
-│  │  192.168.1.90        │  │  192.168.1.92    │ │
-│  │  (Produção)          │  │  (Desenvolv.)    │ │
-│  │  branch: main        │  │  branch: dev.    │ │
-│  │                      │  │                  │ │
-│  │  ┌────────────────┐  │  │  ┌────────────┐ │ │
-│  │  │  twenty-server │  │  │  │twenty-serv │ │ │
-│  │  │  twenty-worker │  │  │  │twenty-work │ │ │
-│  │  │  postgres      │  │  │  │postgres    │ │ │
-│  │  │  redis         │  │  │  │redis       │ │ │
-│  │  └────────────────┘  │  │  └────────────┘ │ │
-│  └──────────────────────┘  └──────────────────┘ │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│         Internet (Cloudflare Tunnel)                    │
+│                                                         │
+│  backoffice.erencio.com                                 │
+│  backoffice--dev.erencio.com                            │
+└──────────────────────────┬──────────────────────────────┘
+                           │
+┌──────────────────────────┴──────────────────────────────┐
+│                Proxmox (Self-Hosted)                    │
+│                                                         │
+│  ┌──────────────────────┐  ┌──────────────────────────┐ │
+│  │  backoffice          │  │  backoffice--dev         │ │
+│  │  192.168.1.90        │  │  192.168.1.92            │ │
+│  │  (Produção)          │  │  (Desenvolvimento)       │ │
+│  │  branch: main        │  │  branch: development     │ │
+│  │                      │  │                          │ │
+│  │  ┌────────────────┐  │  │  ┌────────────────────┐  │ │
+│  │  │  twenty-server │  │  │  │  twenty-server     │  │ │
+│  │  │  twenty-worker │  │  │  │  twenty-worker     │  │ │
+│  │  │  postgres      │  │  │  │  postgres          │  │ │
+│  │  │  redis         │  │  │  │  redis             │  │ │
+│  │  └────────────────┘  │  │  └────────────────────┘  │ │
+│  └──────────────────────┘  └──────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ## Stack Tecnológico
@@ -48,8 +48,9 @@ O Backoffice da Erencio.com é um CRM multi-tenant baseado no [Twenty CRM](https
 
 ```
 packages/
-├── twenty-front/     — Aplicação React (frontend)
-├── twenty-server/    — API NestJS (backend + GraphQL)
+├── twenty-front/     — App Frontend Standard
+├── twenty-eds/       — App Frontend EDS (Erencio Design System)
+├── twenty-server/    — Backend + GraphQL (API NestJS)
 ├── twenty-ui/        — Componentes UI compartilhados
 ├── twenty-shared/    — Tipos e utilitários comuns
 ├── twenty-emails/    — Templates de e-mail (React Email)
@@ -70,16 +71,16 @@ Utilizamos o suporte nativo do Twenty a múltiplos workspaces:
 
 ```
 Cliente (Browser)
-      │
-      ▼
-twenty-front (Vite / React)
-      │  GraphQL / REST
-      ▼
-twenty-server (NestJS / Port 3000)
-      │
-      ├─── PostgreSQL (dados de workspace)
-      ├─── Redis (sessões / cache)
-      └─── twenty-worker (jobs em background via BullMQ)
+   │
+   ▼
+Frontend (Vite / React)
+   │   GraphQL / REST
+   ▼
+Backend (NestJS / Port 3000)
+   │
+   ├─── PostgreSQL (dados de workspace)
+   ├─── Redis (sessões / cache)
+   └─── twenty-worker (jobs em background via BullMQ)
 ```
 
 ## Imagens Docker
@@ -104,3 +105,24 @@ controlado:
 4. Merges passam por `development` antes de chegar em `main`
 
 Ver [UPSTREAM-SYNC.md](./UPSTREAM-SYNC.md) para detalhes.
+
+
+## Dual-Frontend Architecture
+
+O Backoffice agora suporta dois frontends paralelos:
+
+| Frontend | Pacote | URL | Status |
+|---------|--------|-----|--------|
+| **Twenty** (padrão) | `packages/twenty-front` | `/` | Produção |
+| **EDS** | `packages/twenty-eds` | `/eds` | Beta |
+
+A seleção do frontend é determinada por:
+1. Política da workspace (`workspace.frontendPolicy`)
+2. Preferência do usuário (`user.frontendPreference`)
+3. Default do sistema (Twenty)
+
+**Documentação:**
+- [DUAL-FRONTEND.md](./DUAL-FRONTEND.md) — Visão geral da arquitetura dual-frontend
+- [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) — Guia de componentes EDS
+- [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) — Como contribuir para o EDS
+- [EDS-MIGRATION.md](./EDS-MIGRATION.md) — Plano de migração incremental

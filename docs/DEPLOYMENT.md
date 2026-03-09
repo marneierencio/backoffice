@@ -4,8 +4,8 @@
 
 | Ambiente | Container Proxmox | Branch | URL | IP (interno) |
 |----------|------------------|--------|-----|--------------|
-| Produção | `backoffice-main` | `main` | https://backoffice.erencio.com | `192.168.1.90` |
-| Desenvolvimento | `backoffice-dev` | `development` | https://backoffice--dev.erencio.com | `192.168.1.92` |
+| Produção | `backoffice` | `main` | https://backoffice.erencio.com | `192.168.1.90` |
+| Desenvolvimento | `backoffice--dev` | `development` | https://backoffice--dev.erencio.com | `192.168.1.92` |
 
 ---
 
@@ -34,12 +34,12 @@ Configure estes secrets em **Settings → Secrets and variables → Actions** no
 
 | Secret | Valor | Descrição |
 |--------|-------|-----------|
-| `PROD_SSH_HOST` | `backoffice.erencio.com/ssh` | Hostname do tunnel Cloudflare → produção |
-| `PROD_SSH_USER` | `root` | Usuário SSH no container `backoffice-main` |
-| `PROD_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice-main` |
-| `DEV_SSH_HOST` | `backoffice--dev.erencio.com/ssh` | Hostname do tunnel Cloudflare → desenvolvimento |
-| `DEV_SSH_USER` | `root` | Usuário SSH no container `backoffice-dev` |
-| `DEV_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice-dev` |
+| `PROD_SSH_HOST` | `backoffice-ssh.erencio.com` | Hostname do tunnel Cloudflare → produção |
+| `PROD_SSH_USER` | `root` | Usuário SSH no container `backoffice` |
+| `PROD_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice` |
+| `DEV_SSH_HOST` | `backoffice-ssh--dev.erencio.com` | Hostname do tunnel Cloudflare → desenvolvimento |
+| `DEV_SSH_USER` | `root` | Usuário SSH no container `backoffice--dev` |
+| `DEV_SSH_KEY` | _(chave ED25519 privada)_ | Chave privada correspondente a `~root/.ssh/authorized_keys` em `backoffice--dev` |
 
 > ⚠️ **As chaves SSH privadas nunca devem ser commitadas no repositório.** Elas existem
 > apenas como GitHub Secrets.
@@ -99,12 +99,12 @@ TAG=ghcr.io/marneierencio/backoffice:development
 
 ## Como Funciona o Deploy Automático
 
-### Deploy de Produção (`main` → `backoffice-main`)
+### Deploy de Produção (`main` → `backoffice`)
 
 1. **Trigger:** push na branch `main`
 2. **Build:** GitHub Actions constrói a imagem Docker
 3. **Publish:** Imagem publicada em `ghcr.io/marneierencio/backoffice:latest`
-4. **Deploy:** Via SSH no container `backoffice-main`:
+4. **Deploy:** Via SSH no container `backoffice`:
    ```bash
    docker pull ghcr.io/marneierencio/backoffice:latest
    docker compose up -d --no-deps server worker
@@ -112,9 +112,9 @@ TAG=ghcr.io/marneierencio/backoffice:development
 5. **Migrações:** Executadas automaticamente pelo `twenty-server` na inicialização
    (controlado por `DISABLE_DB_MIGRATIONS`)
 
-### Deploy de Desenvolvimento (`development` → `backoffice-dev`)
+### Deploy de Desenvolvimento (`development` → `backoffice--dev`)
 
-Mesmo fluxo, mas com a tag `development` e apontando para `backoffice-dev`.
+Mesmo fluxo, mas com a tag `development` e apontando para `backoffice--dev`.
 
 ---
 

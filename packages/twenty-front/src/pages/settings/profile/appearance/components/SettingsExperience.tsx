@@ -1,5 +1,6 @@
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { FormatPreferencesSettings } from '@/settings/experience/components/FormatPreferencesSettings';
+import { FrontendPreferenceSettings } from '@/settings/experience/components/FrontendPreferenceSettings';
 import { SubMenuTopBarContainer } from '@/ui/layout/page/components/SubMenuTopBarContainer';
 import { useColorScheme } from '@/ui/theme/hooks/useColorScheme';
 import { Trans, useLingui } from '@lingui/react/macro';
@@ -51,6 +52,14 @@ export const SettingsExperience = () => {
             description={t`Configure date, time, number, timezone, and calendar start day`}
           />
           <FormatPreferencesSettings />
+        </Section>
+
+        <Section>
+          <H2Title
+            title={t`Interface`}
+            description={t`Choose which frontend interface to use`}
+          />
+          <FrontendPreferenceSettings />
         </Section>
         {/* Unified into FormatPreferencesSettings */}
       </SettingsPageContainer>

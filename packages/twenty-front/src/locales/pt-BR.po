@@ -14580,3 +14580,33 @@ msgstr "Seu espaço de trabalho não possui uma assinatura ativa. Por favor, con
 #: src/modules/billing/components/SettingsBillingContent.tsx
 msgid "Your workspace will be disabled"
 msgstr "Seu workspace será desativado"
+
+#. js-lingui-id: GfnKOF
+#: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
+msgid "Interface"
+msgstr "Interface"
+
+#. js-lingui-id: gz9POV
+#: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
+msgid "Choose which frontend interface to use"
+msgstr "Escolha qual interface frontend utilizar"
+
+#. js-lingui-id: 9HtuFZ
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Frontend Interface"
+msgstr "Interface Frontend"
+
+#. js-lingui-id: QDr7KO
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Standard (Twenty)"
+msgstr "Padrão (Twenty)"
+
+#. js-lingui-id: F9Wqjl
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "EDS — Erencio Design System"
+msgstr "EDS — Erencio Design System"
+
+#. js-lingui-id: y0CFFV
+#: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
+msgid "Your workspace administrator has set a fixed frontend for all members. You cannot change this setting."
+msgstr "O administrador do seu workspace definiu um frontend fixo para todos os membros. Você não pode alterar esta configuração."

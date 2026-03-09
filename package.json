@@ -231,7 +231,9 @@
       "packages/twenty-apps",
       "packages/twenty-cli",
       "packages/create-twenty-app",
-      "packages/twenty-eslint-rules"
+      "packages/twenty-eslint-rules",
+      "packages/twenty-eds",
+      "packages/twenty-selecao-cuidadores"
     ]
   },
   "prettier": {

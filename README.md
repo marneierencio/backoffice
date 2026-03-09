@@ -28,6 +28,9 @@ See:
 🚀 [Self-hosting](https://docs.twenty.com/developers/self-hosting/docker-compose)
 🖥️ [Local Setup](https://docs.twenty.com/developers/local-setup)
 
+Backoffice-specific onboarding:
+📘 [Local Development Setup (Windows + VS Code)](docs/LOCAL-DEV-SETUP.md)
+
 # Why Twenty
 
 We built Twenty for three reasons:

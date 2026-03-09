@@ -1,8 +1,8 @@
 import { createStateV2 } from '@/ui/utilities/state/jotai/utils/createStateV2';
 import {
-  type Application,
-  type Role,
-  type Workspace,
+    type Application,
+    type Role,
+    type Workspace,
 } from '~/generated-metadata/graphql';
 
 export type CurrentWorkspace = Pick<
@@ -45,6 +45,7 @@ export type CurrentWorkspace = Pick<
 > & {
   defaultRole?: Omit<Role, 'workspaceMembers' | 'agents' | 'apiKeys'> | null;
   workspaceCustomApplication: Pick<Application, 'id'> | null;
+  frontendPolicy?: string | null;
 };
 
 export const currentWorkspaceState = createStateV2<CurrentWorkspace | null>({

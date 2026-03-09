@@ -7,6 +7,10 @@ const isExternal = (id: string): boolean => {
     return false;
   }
 
+  if (/^[a-zA-Z]:[\\/]/.test(id) || id.startsWith('\\\\')) {
+    return false;
+  }
+
   if (id.startsWith('src/') || id.startsWith('@/')) {
     return false;
   }

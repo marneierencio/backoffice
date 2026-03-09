@@ -1,6 +1,6 @@
 import {
-  AVAILABLE_WORKSPACE_FOR_AUTH_FRAGMENT,
-  AVAILABLE_WORKSPACES_FOR_AUTH_FRAGMENT,
+    AVAILABLE_WORKSPACE_FOR_AUTH_FRAGMENT,
+    AVAILABLE_WORKSPACES_FOR_AUTH_FRAGMENT,
 } from '@/auth/graphql/fragments/authFragments';
 import { OBJECT_PERMISSION_FRAGMENT } from '@/settings/roles/graphql/fragments/objectPermissionFragment';
 import { ROLE_FRAGMENT } from '@/settings/roles/graphql/fragments/roleFragment';
@@ -23,6 +23,7 @@ export const USER_QUERY_FRAGMENT = gql`
     canImpersonate
     supportUserHash
     onboardingStatus
+    frontendPreference
     workspaceMember {
       ...WorkspaceMemberQueryFragment
     }
@@ -98,6 +99,7 @@ export const USER_QUERY_FRAGMENT = gql`
       trashRetentionDays
       eventLogRetentionDays
       editableProfileFields
+      frontendPolicy
     }
     availableWorkspaces {
       ...AvailableWorkspacesFragment

@@ -7,5 +7,7 @@
  *                              |___/
  */
 
+export { FrontendPolicy } from './types/FrontendPolicy';
+export { FrontendPreference } from './types/FrontendPreference';
 export { WorkspaceActivationStatus } from './types/WorkspaceActivationStatus';
 export { isWorkspaceActiveOrSuspended } from './utils/isWorkspaceActiveOrSuspended';

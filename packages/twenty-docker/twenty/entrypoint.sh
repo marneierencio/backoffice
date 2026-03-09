@@ -38,8 +38,17 @@ register_background_jobs() {
     fi
 }
 
+inject_selecao_config() {
+    local config_file="/app/packages/twenty-server/dist/selecaoCuidadores/config.js"
+    if [ -f "$config_file" ] && [ -n "${SELECAO_CUIDADORES_API_KEY:-}" ]; then
+        echo "Injecting Seleção de Cuidadores API key..."
+        sed -i "s|__SELECAO_API_KEY__|${SELECAO_CUIDADORES_API_KEY}|g" "$config_file"
+    fi
+}
+
 setup_and_migrate_db
 register_background_jobs
+inject_selecao_config
 
 # Continue with the original Docker command
 exec "$@"
