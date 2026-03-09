@@ -44,6 +44,12 @@ export const createPerson = async (input: {
     const restApiUrl = getRestApiUrl();
     const apiKey = getApiKey();
 
+    if (!apiKey || apiKey === '__SELECAO_API_KEY__') {
+      return {
+        error: 'Configuração incompleta: API Key não definida. Contacte o administrador do sistema.',
+      };
+    }
+
     const response = await fetch(`${restApiUrl}/people`, {
       method: 'POST',
       headers: {
