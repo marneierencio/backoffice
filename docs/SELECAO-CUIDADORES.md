@@ -125,29 +125,23 @@ O app usa a **REST API** do Twenty server com uma **API Key** para autenticaçã
 
 A chamada `POST /rest/people` cria um registro People no workspace correspondente.
 
-**Configuração da API Key** (duas opções, por prioridade):
+**Configuração da API Key** — o mecanismo principal é via variável de ambiente Docker:
 
-#### Opção A: Runtime (recomendado para múltiplos ambientes)
+1. Crie uma API Key no workspace (Settings > Developers > API Keys)
+2. Adicione `SELECAO_CUIDADORES_API_KEY=eyJhbG...` no `.env` do Docker
+3. O `entrypoint.sh` injeta a key no `config.js` do build via `sed`
 
-Edite o `window.__SELECAO_CONFIG__` no `index.html` do build:
+**Como funciona**:
 
-```html
-<script>
-  window.__SELECAO_CONFIG__ = {
-    apiKey: 'eyJhbG...',  // API Key do workspace
-  };
-</script>
-```
+- O Vite copia `public/config.js` para `dist/config.js` durante o build
+- O arquivo contém o placeholder `__SELECAO_API_KEY__`
+- No startup do container, `entrypoint.sh` substitui o placeholder pelo valor de `SELECAO_CUIDADORES_API_KEY`
+- O `index.html` carrega `config.js` antes do app, definindo `window.__SELECAO_CONFIG__`
+- O `api.ts` lê `window.__SELECAO_CONFIG__.apiKey` em runtime
 
-Isso permite usar o **mesmo build** para prod e dev, apenas trocando a config.
+Isso permite usar o **mesmo build** para prod e dev — cada ambiente apenas define sua própria API Key no `.env`.
 
-#### Opção B: Build time (via variáveis de ambiente)
-
-```env
-VITE_API_KEY=eyJhbG...  # Baked no JS bundle
-```
-
-> **Nota**: As chamadas REST usam URLs relativas (`/rest/people`), então funcionam em qualquer domínio (prod e dev) sem configuração adicional de URL.
+> **Nota**: As chamadas REST usam URLs relativas (`/rest/people`), funcionam em qualquer domínio sem configuração de URL.
 
 ### 8. Formulário de candidatura
 
@@ -178,13 +172,40 @@ npx nx build twenty-selecao-cuidadores   # Gera dist/
 cd packages/twenty-selecao-cuidadores && npx vite preview
 ```
 
-## Criando uma API Key para o Workspace
+## Criando e Configurando a API Key
 
-1. Acesse o Twenty/EDS como administrador do workspace.
-2. Vá em **Settings > Developers > API Keys**.
-3. Clique em **Create API Key**.
-4. Copie o token gerado.
-5. Configure a API Key via `window.__SELECAO_CONFIG__` (runtime) ou `VITE_API_KEY` (build time).
+### 1. Criar a API Key no workspace
+
+1. Acesse o Twenty/EDS como administrador do workspace
+2. Vá em **Settings > Developers > API Keys**
+3. Clique em **Create API Key**
+4. Copie o token JWT gerado
+
+### 2. Configurar no ambiente Docker
+
+Adicione no arquivo `.env` do container Docker (ex: `/opt/backoffice/.env`):
+
+```env
+SELECAO_CUIDADORES_API_KEY=eyJhbGciOiJIUzI1NiIs...
+```
+
+Reinicie o container:
+
+```bash
+docker compose down && docker compose up -d
+```
+
+O entrypoint injeta automaticamente a key no `config.js` do app.
+
+### 3. Para desenvolvimento local
+
+Crie um `.env` na raiz do pacote `packages/twenty-selecao-cuidadores/`:
+
+```env
+VITE_API_KEY=eyJhbGciOiJIUzI1NiIs...
+```
+
+Ou edite `public/config.js` diretamente (não commitar o token!).
 
 > **Segurança**: A API Key controla quais operações o app público pode fazer. Considere criar uma API Key com permissões restritas (somente escrita em People) quando o Twenty suportar permissões granulares por API Key.
 
