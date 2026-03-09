@@ -1,13 +1,32 @@
 // API client for the Seleção de Cuidadores public app.
 // Uses the Twenty REST API with an API key for unauthenticated public access.
 // The API key is configured per workspace and grants permission to create People records.
+//
+// Configuration priority:
+//   1. window.__SELECAO_CONFIG__ (runtime, set via <script> in index.html or config.js)
+//   2. VITE_* environment variables (build time)
+//   3. Relative paths (same-origin fallback)
 
-const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
+type RuntimeConfig = {
+  apiUrl?: string;
+  apiKey?: string;
+};
 
-const REST_API_URL =
-  import.meta.env.VITE_REST_API_URL ?? `${apiBaseUrl}/api/rest`;
+const getRuntimeConfig = (): RuntimeConfig =>
+  (window as unknown as { __SELECAO_CONFIG__?: RuntimeConfig }).__SELECAO_CONFIG__ ?? {};
 
-const API_KEY = import.meta.env.VITE_API_KEY ?? '';
+const getApiBaseUrl = (): string => {
+  const runtime = getRuntimeConfig();
+  return (runtime.apiUrl ?? import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+};
+
+const getRestApiUrl = (): string =>
+  import.meta.env.VITE_REST_API_URL ?? `${getApiBaseUrl()}/rest`;
+
+const getApiKey = (): string => {
+  const runtime = getRuntimeConfig();
+  return runtime.apiKey ?? import.meta.env.VITE_API_KEY ?? '';
+};
 
 export type ApiResult<TData = unknown> = {
   data?: TData;
@@ -22,11 +41,14 @@ export const createPerson = async (input: {
   city: string;
 }): Promise<ApiResult<{ id: string }>> => {
   try {
-    const response = await fetch(`${REST_API_URL}/people`, {
+    const restApiUrl = getRestApiUrl();
+    const apiKey = getApiKey();
+
+    const response = await fetch(`${restApiUrl}/people`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify(input),
     });
