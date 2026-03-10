@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DEPLOYMENT.md",
+                "file": "LOCAL-DEV-SETUP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DEPLOYMENT"
+              "title": "LOCAL-DEV-SETUP"
             }
           }
         ]
@@ -185,13 +185,13 @@
   },
   "active": "b4a6af78279c8f27",
   "lastOpenFiles": [
+    "DEPLOYMENT.md",
+    "ARCHITECTURE.md",
     "EDS-PHASE1-RECORD-LISTING.md",
     "EDS-PHASE6-PARITY.md",
     "DUAL-FRONTEND.md",
     "SELECAO-CUIDADORES.md",
-    "DEPLOYMENT.md",
     "UPSTREAM-SYNC.md",
-    "ARCHITECTURE.md",
     "EDS-COMPONENTS.md",
     "EDS-PHASE5-SETTINGS.md",
     "README.md",

@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Instalar cloudflared
         run: |
           curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
@@ -81,6 +84,11 @@ jobs:
             IdentityFile ~/.ssh/id_ed25519
             StrictHostKeyChecking no
           EOF
+
+      - name: Sincronizar docker-compose.yml
+        run: |
+          scp packages/twenty-docker/docker-compose.yml \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}:/opt/backoffice/docker-compose.yml
 
       - name: Backup e Deploy via SSH
         env:
@@ -103,13 +111,6 @@ jobs:
               echo "APP_SECRET=\$(openssl rand -hex 32)" >> .env
               echo "PG_DATABASE_PASSWORD=postgres" >> .env
               echo ".env criado com valores padrão — revisar manualmente!"
-            fi
-
-            # Criar docker-compose.yml se ainda não existir
-            if [ ! -f docker-compose.yml ]; then
-              echo "ERRO: docker-compose.yml não encontrado em /opt/backoffice/"
-              echo "Copie o arquivo de packages/twenty-docker/docker-compose.yml — veja docs/DEPLOYMENT.md"
-              exit 1
             fi
 
             # Backup antes do deploy (apenas se twenty-db estiver rodando)
@@ -135,12 +136,6 @@ jobs:
             if [ -n "\${CONTAINER_ON_3000}" ]; then
               echo "Removendo container órfão na porta 3000: \${CONTAINER_ON_3000}"
               docker rm -f \${CONTAINER_ON_3000}
-            fi
-
-            # Garantir que docker-compose.yml usa ${TAG} e não imagem hardcoded
-            if grep -q 'twentycrm/twenty' docker-compose.yml; then
-              echo "Corrigindo imagem hardcoded no docker-compose.yml..."
-              sed -i 's|image: twentycrm/twenty:.*|image: ${TAG:-ghcr.io/marneierencio/backoffice:latest}|g' docker-compose.yml
             fi
 
             # Garantir ENVIRONMENT=production
