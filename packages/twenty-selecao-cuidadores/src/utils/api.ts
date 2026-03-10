@@ -27,7 +27,7 @@ const getRestApiUrl = (): string =>
 
 const getApiKey = (): string => {
   const runtime = getRuntimeConfig();
-  return runtime.apiKey ?? import.meta.env.VITE_API_KEY ?? '';
+  return (runtime.apiKey ?? import.meta.env.VITE_API_KEY ?? '').trim();
 };
 
 export type ApiResult<TData = unknown> = {
@@ -41,7 +41,7 @@ const authHeaders = (): Record<string, string> => {
     throw new Error(
       'API Key não configurada. Para desenvolvimento local, crie o arquivo ' +
       'packages/twenty-selecao-cuidadores/.env com VITE_API_KEY=<sua_api_key>. ' +
-      'A API Key é gerada em Settings → Developers → API Keys no workspace Twenty.',
+      'A API Key deve ser gerada em Configurações → APIs & Webhooks no workspace Twenty.',
     );
   }
   return {
@@ -58,8 +58,23 @@ const toUserFriendlyError = (status: number, body: string, context: string): str
       if (detail === 'WORKSPACE_NOT_FOUND') {
         return (
           'API Key inválida: o workspace não foi encontrado. ' +
-          'Gere uma nova API Key em Settings → Developers → API Keys e ' +
-          'atualize a variável SELECAO_CUIDADORES_API_KEY no container.'
+          'Possíveis causas: (1) a API Key foi gerada antes de um reset do banco de dados; ' +
+          '(2) a mesma chave foi usada em ambos os ambientes (prod e dev precisam de chaves diferentes); ' +
+          '(3) o container não foi reiniciado após atualizar SELECAO_CUIDADORES_API_KEY no .env. ' +
+          'Solução: gere uma nova API Key em Configurações → APIs & Webhooks, ' +
+          'salve o TOKEN (começa com eyJ) no .env e reinicie o container.'
+        );
+      }
+      if (detail === 'UNAUTHENTICATED') {
+        return (
+          'API Key inválida: token malformado. ' +
+          'Certifique-se de que copiou o token completo (começa com eyJ) de Configurações → APIs & Webhooks. ' +
+          'Verifique se não há espaços extras ou quebras de linha na variável SELECAO_CUIDADORES_API_KEY.'
+        );
+      }
+      if (detail === 'FORBIDDEN_EXCEPTION') {
+        return (
+          'API Key revogada. Gere uma nova chave em Configurações → APIs & Webhooks.'
         );
       }
       return 'API Key inválida ou expirada. Verifique a configuração da API Key.'
@@ -68,6 +83,28 @@ const toUserFriendlyError = (status: number, body: string, context: string): str
     return `${context} (${status}): ${msg}`;
   } catch {
     return `${context} (${status}): ${body}`;
+  }
+};
+
+// Pre-flight check: verifies the API key before form submission.
+// Returns null if OK, or an error string if auth fails.
+export const checkApiConnection = async (): Promise<string | null> => {
+  try {
+    const headers = authHeaders();
+    const response = await fetch(`${getRestApiUrl()}/people?limit=1`, {
+      method: 'GET',
+      headers,
+    });
+    if (response.status === 401) {
+      const body = await response.text();
+      return toUserFriendlyError(401, body, 'Verificação da API Key');
+    }
+    return null;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('API Key não configurada')) {
+      return err.message;
+    }
+    return null; // network errors are not auth errors
   }
 };
 
@@ -118,32 +155,61 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
 
     const { firstName, lastName } = splitFullName(formData.step1.nomeCompleto);
 
-    // Step A: Create or update the People record
+    const email = formData.step1.email.trim();
+
+    // Step A: Create the People record; if the email already exists, find the existing person.
     const personResponse = await fetch(`${restApiUrl}/people`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         name: { firstName, lastName },
         emails: {
-          primaryEmail: formData.step1.email.trim(),
+          primaryEmail: email,
           additionalEmails: [],
         },
         phones: {
           primaryPhoneNumber: formData.step1.celular.replace(/\D/g, ''),
-          primaryPhoneCountryCode: '+55',
+          primaryPhoneCountryCode: 'BR',
           additionalPhones: [],
         },
         city: formData.step1.municipio.trim(),
       }),
     });
 
-    if (!personResponse.ok) {
-      const body = await personResponse.text();
-      return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
-    }
+    let personId: string;
 
-    const personResult = await personResponse.json();
-    const personId: string = personResult?.data?.createPerson?.id ?? personResult?.id ?? '';
+    if (personResponse.ok) {
+      const personResult = await personResponse.json();
+      personId = personResult?.data?.createPerson?.id ?? personResult?.id ?? '';
+    } else {
+      const body = await personResponse.text();
+      const isDuplicate = body.includes('duplicate') || body.includes('Duplicate');
+      if (personResponse.status === 400 && isDuplicate) {
+        // Person already exists — look them up by email.
+        const encodedEmail = encodeURIComponent(`"${email}"`);
+        const searchResponse = await fetch(
+          `${restApiUrl}/people?filter=emails[primaryEmail][eq]:${encodedEmail}&limit=1`,
+          { method: 'GET', headers },
+        );
+        if (!searchResponse.ok) {
+          return { error: 'Erro ao localizar cadastro existente. Tente novamente.' };
+        }
+        const searchResult = await searchResponse.json();
+        // REST API returns { data: { people: { edges: [{ node: { id } }] } } }
+        const edges: Array<{ node: { id: string } }> =
+          searchResult?.data?.people?.edges ??
+          searchResult?.people?.edges ??
+          searchResult?.data?.edges ??
+          searchResult?.edges ??
+          [];
+        personId = edges[0]?.node?.id ?? '';
+        if (!personId) {
+          return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
+        }
+      } else {
+        return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
+      }
+    }
 
     // Step B: Create the CandidaturaCuidador record
     const candidaturaPayload = {
@@ -154,7 +220,7 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
       cpf: formData.step1.cpf,
       rg: formData.step1.rg.trim(),
       celular: formData.step1.celular,
-      email: formData.step1.email.trim(),
+      email: email,
       logradouro: formData.step1.logradouro.trim(),
       numero: formData.step1.numero.trim(),
       complemento: formData.step1.complemento.trim(),

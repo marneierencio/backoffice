@@ -276,3 +276,84 @@ docker compose exec twenty-db pg_dump -U twenty twenty_db > backup-$(date +%Y%m%
 Consulte `packages/twenty-docker/docker-compose.yml` para a lista completa
 de variáveis de ambiente suportadas, incluindo integrações com Google, Microsoft,
 e serviços de e-mail.
+
+---
+
+## Diagnóstico: Erro WORKSPACE_NOT_FOUND no Formulário de Cuidadores
+
+Se o formulário `/selecaoCuidadores` retorna erro **401 WORKSPACE_NOT_FOUND**, siga
+os passos abaixo para identificar a causa. O erro significa que o token JWT é
+válido (assinatura correta), mas o workspace ao qual ele pertence não existe no
+banco de dados daquele ambiente.
+
+### Causas mais comuns (em ordem de probabilidade)
+
+| # | Causa | Como identificar |
+|---|-------|-----------------|
+| 1 | Banco de dados foi resetado após a criação da API Key | A chave foi criada em workspace que não existe mais |
+| 2 | API Key de prod usada no dev (ou vice-versa) | Cada ambiente tem seu próprio banco — a chave só funciona onde foi criada |
+| 3 | Container não foi reiniciado após atualizar o `.env` | `config.js` ainda contém o placeholder `__SELECAO_API_KEY__` ou chave antiga |
+| 4 | Espaço em branco no valor da chave no `.env` | Raro, mas acontece ao colar o token |
+
+### Passo 1 — Verificar se a chave está sendo injetada corretamente
+
+```bash
+# Acessar o container (produção)
+ssh root@192.168.1.90
+
+# Ver o config.js gerado — deve mostrar o token JWT real, NÃO o placeholder
+docker exec twenty-app cat /app/packages/twenty-server/dist/selecaoCuidadores/config.js
+```
+
+Se a saída contiver `__SELECAO_API_KEY__`, o container não foi reiniciado após
+configurar o `.env` ou a variável está ausente/vazia.
+
+### Passo 2 — Verificar a variável no container em execução
+
+```bash
+# Confirmar que o container recebeu a variável de ambiente
+docker exec twenty-app env | grep SELECAO
+
+# Deve mostrar:
+# SELECAO_CUIDADORES_API_KEY=eyJhbGci...
+```
+
+### Passo 3 — Criar uma nova API Key no ambiente correto
+
+> **IMPORTANTE**: Cada ambiente (prod e dev) precisa de uma API Key própria.
+> Uma chave criada no workspace de produção NÃO funciona no banco do ambiente
+> de desenvolvimento, e vice-versa.
+
+1. Acesse o backoffice do ambiente com o problema (prod ou dev)
+2. Vá em **Configurações → APIs & Webhooks → Chaves de API**
+3. Crie uma nova chave (ex: `selecao-cuidadores-prod`)
+4. Copie o token gerado **sem espaços**
+5. Atualize o `.env` do container correspondente:
+
+```bash
+# No container de produção
+nano /opt/backoffice/.env
+# Atualizar: SELECAO_CUIDADORES_API_KEY=<nova_chave>
+
+# Reiniciar para aplicar
+cd /opt/backoffice && docker compose up -d --no-deps twenty-app
+```
+
+### Passo 4 — Verificar após reinicialização
+
+```bash
+# Confirmar que o config.js foi atualizado com a nova chave
+docker exec twenty-app cat /app/packages/twenty-server/dist/selecaoCuidadores/config.js
+
+# Testar a API diretamente (substituir <TOKEN> pelo token da chave)
+curl -H "Authorization: Bearer <TOKEN>" https://backoffice.erencio.com/rest/people?limit=1
+# Resposta esperada: JSON com lista de pessoas (pode ser vazia), status 200
+```
+
+### Como o token é injetado no frontend
+
+O `entrypoint.sh` do container executa `inject_selecao_config()` na inicialização,
+que faz `sed -i "s|__SELECAO_API_KEY__|${SELECAO_CUIDADORES_API_KEY}|g"` no arquivo
+`config.js` servido estaticamente. Por isso é essencial reiniciar o container após
+alterar a variável no `.env`.
+

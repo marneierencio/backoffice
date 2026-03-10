@@ -53,6 +53,19 @@
   gap: var(--eds-g-spacing-3);
 }
 
+.authErrorBanner {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto var(--eds-g-spacing-5);
+  padding: var(--eds-g-spacing-4) var(--eds-g-spacing-5);
+  background-color: var(--eds-g-color-error-container);
+  color: var(--eds-g-color-error-base-50);
+  border-radius: var(--eds-g-radius-border-2);
+  font-size: var(--eds-g-font-scale-3);
+  line-height: var(--eds-g-line-height-text);
+  border-left: 4px solid var(--eds-g-color-error-base-50);
+}
+
 .submitError {
   padding: var(--eds-g-spacing-3) var(--eds-g-spacing-4);
   background-color: var(--eds-g-color-error-container);
