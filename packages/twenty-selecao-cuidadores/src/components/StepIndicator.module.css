@@ -1,0 +1,91 @@
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  list-style: none;
+  padding: var(--eds-g-spacing-4) 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Connector line between steps */
+.connector {
+  position: absolute;
+  top: 14px;
+  left: calc(50% + 14px);
+  right: calc(-50% + 14px);
+  height: 2px;
+  background-color: var(--eds-g-color-border-2);
+  z-index: 0;
+}
+
+.step.completed .connector {
+  background-color: var(--eds-g-color-brand-base-50);
+}
+
+/* Circle */
+.circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--eds-g-color-border-2);
+  background-color: var(--eds-g-color-surface-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--eds-g-font-scale-3);
+  font-weight: var(--eds-g-font-weight-6);
+  color: var(--eds-g-color-on-surface-1);
+  z-index: 1;
+  position: relative;
+  transition: background-color var(--eds-g-duration-quickly),
+              border-color var(--eds-g-duration-quickly),
+              color var(--eds-g-duration-quickly);
+}
+
+.step.current .circle {
+  border-color: var(--eds-g-color-brand-base-50);
+  background-color: var(--eds-g-color-brand-base-50);
+  color: var(--eds-g-color-on-surface-inverse);
+}
+
+.step.completed .circle {
+  border-color: var(--eds-g-color-brand-base-50);
+  background-color: var(--eds-g-color-brand-base-50);
+  color: var(--eds-g-color-on-surface-inverse);
+}
+
+/* Label */
+.label {
+  margin-top: var(--eds-g-spacing-2);
+  font-size: var(--eds-g-font-scale-2);
+  font-weight: var(--eds-g-font-weight-4);
+  color: var(--eds-g-color-on-surface-1);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.step.current .label {
+  font-weight: var(--eds-g-font-weight-6);
+  color: var(--eds-g-color-brand-base-50);
+}
+
+.step.completed .label {
+  color: var(--eds-g-color-brand-base-50);
+}
+
+@media (max-width: 480px) {
+  .label {
+    display: none;
+  }
+}

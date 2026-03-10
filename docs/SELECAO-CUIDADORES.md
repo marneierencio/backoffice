@@ -18,31 +18,45 @@ Pacote `twenty-selecao-cuidadores`: aplicativo público (sem login) que permite 
 
 ```
 packages/twenty-selecao-cuidadores/
-├── index.html                       # Ponto de entrada HTML (com runtime config)
-├── package.json                     # Dependências
-├── project.json                     # Configuração Nx
-├── tsconfig.json                    # TypeScript (alias @selecao/*)
-├── tsconfig.node.json               # TypeScript para Vite
-├── vite.config.ts                   # Build e dev server (porta 3003)
+├── index.html                             # Ponto de entrada HTML (com runtime config)
+├── package.json                           # Dependências
+├── project.json                           # Configuração Nx
+├── tsconfig.json                          # TypeScript (alias @selecao/*)
+├── tsconfig.node.json                     # TypeScript para Vite
+├── vite.config.ts                         # Build e dev server (porta 3003)
 └── src/
-    ├── main.tsx                     # Bootstrap React
-    ├── App.tsx                      # Router (hash-based)
-    ├── global.css                   # Tokens EDS (CSS custom properties)
-    ├── css-modules.d.ts             # Tipos para CSS modules
-    ├── vite-env.d.ts                # Tipos Vite
+    ├── main.tsx                           # Bootstrap React
+    ├── App.tsx                            # Router (hash-based)
+    ├── global.css                         # Tokens EDS + utilitários globais
+    ├── css-modules.d.ts                   # Tipos para CSS modules
+    ├── vite-env.d.ts                      # Tipos Vite
+    ├── types/
+    │   └── candidatura.ts                 # Tipos e valores iniciais do formulário
     ├── components/
-    │   ├── PublicLayout.tsx          # Shell: header + footer público
+    │   ├── PublicLayout.tsx               # Shell: header + footer público
     │   ├── PublicLayout.module.css
-    │   ├── FormField.tsx            # Campo de formulário reutilizável
-    │   └── FormField.module.css
+    │   ├── FormField.tsx                  # Campo reutilizável (input, textarea, select via children)
+    │   ├── FormField.module.css
+    │   ├── StepIndicator.tsx              # Indicador de progresso (4 etapas)
+    │   └── StepIndicator.module.css
+    ├── steps/
+    │   ├── Step1Identificacao.tsx         # Etapa 1: dados pessoais + endereço com CEP auto-fill
+    │   ├── Step1Identificacao.module.css
+    │   ├── Step2Experiencia.tsx           # Etapa 2: experiência, disponibilidade, curso
+    │   ├── Step2Experiencia.module.css
+    │   ├── Step3Questionario.tsx          # Etapa 3: 10 Q&A + 3 questões dissertativas
+    │   ├── Step3Questionario.module.css
+    │   ├── Step4Finalizacao.tsx           # Etapa 4: declarações e botão de envio
+    │   └── Step4Finalizacao.module.css
     ├── pages/
-    │   ├── CandidaturaPage.tsx      # Formulário de cadastro (People)
-    │   ├── CandidaturaPage.module.css
-    │   ├── ConfirmacaoPage.tsx      # Tela de confirmação pós-envio
+    │   ├── ProcessoSeletivoPage.tsx       # Orquestrador do formulário multietapa (rota /)
+    │   ├── ProcessoSeletivoPage.module.css
+    │   ├── ConfirmacaoPage.tsx            # Confirmação pós-envio
     │   └── ConfirmacaoPage.module.css
     └── utils/
-        └── api.ts                   # Cliente REST para criar registros People
-```
+        ├── api.ts                         # createCandidatura() → People + CandidaturaCuidador
+        ├── masks.ts                       # Máscaras CPF, CEP, telefone
+        └── cep.ts                         # Lookup viaCEP
 
 ### Como o app é servido (produção e dev)
 
@@ -143,21 +157,96 @@ Isso permite usar o **mesmo build** para prod e dev — cada ambiente apenas def
 
 > **Nota**: As chamadas REST usam URLs relativas (`/rest/people`), funcionam em qualquer domínio sem configuração de URL.
 
-### 8. Formulário de candidatura
+### 8. Formulário de candidatura multietapa
 
-A `CandidaturaPage` contém um formulário que captura:
+O `ProcessoSeletivoPage` exibe um formulário com 4 etapas:
 
-| Campo | Obrigatório | Campo no People |
-|-------|:-----------:|-----------------|
-| Nome | Sim | `name.firstName` |
-| Sobrenome | Sim | `name.lastName` |
-| E-mail | Sim | `emails.primaryEmail` |
-| DDI | Não | `phones.primaryPhoneCountryCode` |
-| Telefone | Sim | `phones.primaryPhoneNumber` |
-| Cargo/Função | Não | `jobTitle` |
-| Cidade | Não | `city` |
+| Etapa | Título | Descrição |
+|-------|--------|-----------|
+| 1 | Identificação | Nome, nascimento, gênero, CPF, RG, celular, e-mail, endereço completo com CEP auto-fill via viaCEP |
+| 2 | Experiência | Descrição de experiência, disponibilidade (dias+turnos), referências, curso com certificado (campos condicionais) |
+| 3 | Questionário | 10 questões de múltipla escolha + 3 questões dissertativas |
+| 4 | Finalização | Declaração de veracidade + aceite de comunicações |
 
-Ao clicar em **"Submeter candidatura"**, os dados são validados localmente e enviados via REST API. Sucesso redireciona para `/confirmacao`.
+Ao finalizar, são criados dois registros:
+
+**People** (identificação básica):
+
+| Campo do formulário | Campo no People |
+|---------------------|-----------------|
+| Nome completo | `name.firstName` + `name.lastName` (split automático) |
+| E-mail | `emails.primaryEmail` |
+| Celular | `phones.primaryPhoneNumber` (DDI +55) |
+| Município | `city` |
+
+**CandidaturaCuidador** (todos os dados da candidatura — precisa ser criado no workspace, veja seção abaixo):
+
+Campos: `nomeCompleto`, `dataNascimento`, `genero`, `cpf`, `rg`, `celular`, `email`, `logradouro`, `numero`, `complemento`, `cep`, `bairro`, `municipio`, `estado`, `experiencia`, `disponibilidadeDias`, `disponibilidadeTurnos`, `referencias`, `possuiCurso`, `instituicaoCurso`, `cargaHoraria`, `conclusaoCurso`, `respostaQ1`–`respostaQ10`, `questaoAberta11`, `questaoAberta12`, `questaoAberta13`, `aceitaComunicacoes`, `status`, relação `pessoas` → People.
+
+## Configuração do Objeto CandidaturaCuidador no Workspace
+
+O objeto customizado `CandidaturaCuidador` precisa ser criado **uma única vez** em cada workspace onde o formulário for usado.
+
+### 1. Via Settings do Twenty
+
+1. Acesse o Twenty como **administrador do workspace**
+2. Vá em **Settings → Data Model → Objects**
+3. Clique em **+ Add Custom Object**
+4. Configure:
+   - **Singular**: `Candidatura Cuidador`
+   - **Plural**: `Candidaturas Cuidadores`
+5. Adicione os campos abaixo:
+
+### 2. Campos a criar
+
+| Campo (API name) | Tipo | Obrigatório |
+|------------------|------|-------------|
+| `nomeCompleto` | TEXT | Sim |
+| `dataNascimento` | DATE | Não |
+| `genero` | TEXT | Não |
+| `cpf` | TEXT | Não |
+| `rg` | TEXT | Não |
+| `celular` | TEXT | Não |
+| `email` | TEXT | Não |
+| `logradouro` | TEXT | Não |
+| `numero` | TEXT | Não |
+| `complemento` | TEXT | Não |
+| `cep` | TEXT | Não |
+| `bairro` | TEXT | Não |
+| `municipio` | TEXT | Não |
+| `estado` | TEXT | Não |
+| `experiencia` | TEXT | Não |
+| `disponibilidadeDias` | TEXT | Não |
+| `disponibilidadeTurnos` | TEXT | Não |
+| `referencias` | TEXT | Não |
+| `possuiCurso` | BOOLEAN | Não |
+| `instituicaoCurso` | TEXT | Não |
+| `cargaHoraria` | NUMBER | Não |
+| `conclusaoCurso` | DATE | Não |
+| `respostaQ1` – `respostaQ10` | TEXT (10 campos) | Não |
+| `questaoAberta11` | TEXT | Não |
+| `questaoAberta12` | TEXT | Não |
+| `questaoAberta13` | TEXT | Não |
+| `aceitaComunicacoes` | BOOLEAN | Não |
+| `status` | SELECT | Sim |
+| `pessoas` | RELATION → People | Não |
+
+### 3. Status (campo SELECT)
+
+Valores a configurar no campo `status`:
+
+| Valor (API) | Rótulo | Cor sugerida |
+|-------------|--------|--------------|
+| `AGUARDANDO_ANALISE` | Aguardando análise | 🟡 Amarelo |
+| `AGUARDANDO_ENTREVISTA` | Aguardando entrevista | 🔵 Azul |
+| `AGUARDANDO_DOCUMENTOS` | Aguardando documentos | 🟠 Laranja |
+| `ATIVO` | Ativo | 🟢 Verde |
+| `INATIVO` | Inativo | ⚫ Cinza |
+| `INAPTO` | Inapto | 🔴 Vermelho |
+
+### 4. Degradação graciosa
+
+Se o objeto `candidaturasCuidadores` não existir no workspace (endpoint retorna 404), o sistema **ainda cria o registro People** e navega para a confirmação. Um aviso é registrado no console. Isso garante que o formulário funcione mesmo antes de o objeto ser criado.
 
 ## Comandos
 
@@ -221,8 +310,12 @@ O mesmo build Docker serve ambos os ambientes (prod e dev). A diferença é a AP
 
 ## Próximos Passos
 
-- [ ] Adicionar campos adicionais ao formulário conforme necessidade do processo seletivo
-- [ ] Implementar upload de currículo (campo `attachments` do People)
+- [x] Formulário multietapa completo (4 etapas)
+- [x] Auto-fill de endereço via viaCEP
+- [x] Criação de People + CandidaturaCuidador via REST API
+- [x] Indicador de progresso (StepIndicator)
+- [ ] Criar objeto `CandidaturaCuidador` no workspace (ver seção acima)
+- [ ] Implementar upload de currículo / foto
 - [ ] Adicionar CAPTCHA ou rate limiting para prevenir abuso
-- [ ] Criar página de acompanhamento do status da candidatura
-- [ ] Internacionalização (i18n) se necessário para outros idiomas
+- [ ] Página de acompanhamento do status da candidatura
+- [ ] Internacionalização (i18n) se necessário
