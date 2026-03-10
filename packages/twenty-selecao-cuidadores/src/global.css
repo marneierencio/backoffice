@@ -177,3 +177,128 @@ button {
   from { opacity: 0; transform: translateY(16px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ==========================================================================
+   Shared form controls (input, select, textarea)
+   Used across multi-step form steps
+   ========================================================================== */
+
+.selecao-control {
+  width: 100%;
+  padding: var(--eds-g-spacing-2) var(--eds-g-spacing-3);
+  font-family: var(--eds-g-font-family);
+  font-size: var(--eds-g-font-scale-4);
+  line-height: var(--eds-g-line-height-text);
+  color: var(--eds-g-color-on-surface-3);
+  background-color: var(--eds-g-color-surface-1);
+  border: 1px solid var(--eds-g-color-border-input);
+  border-radius: var(--eds-g-radius-border-2);
+  transition: border-color var(--eds-g-duration-quickly),
+              box-shadow var(--eds-g-duration-quickly);
+  box-sizing: border-box;
+}
+
+.selecao-control::placeholder {
+  color: var(--eds-g-color-on-surface-1);
+}
+
+.selecao-control:focus {
+  outline: none;
+  border-color: var(--eds-g-color-border-focus);
+  box-shadow: 0 0 0 3px var(--eds-g-color-brand-base-10);
+}
+
+.selecao-control.selecao-control--error {
+  border-color: var(--eds-g-color-border-error);
+}
+
+.selecao-control.selecao-control--error:focus {
+  box-shadow: 0 0 0 3px var(--eds-g-color-error-container);
+}
+
+.selecao-control-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23706e6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  padding-right: 2.25rem;
+}
+
+.selecao-control-textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+/* ==========================================================================
+   Shared button styles
+   ========================================================================== */
+
+.selecao-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--eds-g-spacing-2);
+  padding: var(--eds-g-spacing-2) var(--eds-g-spacing-6);
+  font-family: var(--eds-g-font-family);
+  font-size: var(--eds-g-font-scale-4);
+  font-weight: var(--eds-g-font-weight-6);
+  line-height: var(--eds-g-line-height-heading);
+  border-radius: var(--eds-g-radius-border-2);
+  border: 1px solid transparent;
+  transition: background-color var(--eds-g-duration-quickly),
+              border-color var(--eds-g-duration-quickly),
+              color var(--eds-g-duration-quickly);
+  cursor: pointer;
+  min-height: 2.25rem;
+}
+
+.selecao-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selecao-btn-primary {
+  background-color: var(--eds-g-color-brand-base-50);
+  border-color: var(--eds-g-color-brand-base-50);
+  color: var(--eds-g-color-on-surface-inverse);
+}
+
+.selecao-btn-primary:hover:not(:disabled) {
+  background-color: var(--eds-g-color-brand-base-60);
+  border-color: var(--eds-g-color-brand-base-60);
+}
+
+.selecao-btn-secondary {
+  background-color: transparent;
+  border-color: var(--eds-g-color-border-input);
+  color: var(--eds-g-color-on-surface-2);
+}
+
+.selecao-btn-secondary:hover:not(:disabled) {
+  background-color: var(--eds-g-color-surface-2);
+  border-color: var(--eds-g-color-on-surface-2);
+}
+
+/* ==========================================================================
+   Shared checkbox / radio styles
+   ========================================================================== */
+
+.selecao-checkbox-label,
+.selecao-radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--eds-g-spacing-2);
+  font-size: var(--eds-g-font-scale-4);
+  color: var(--eds-g-color-on-surface-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.selecao-checkbox-label input[type="checkbox"],
+.selecao-radio-label input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--eds-g-color-brand-base-50);
+  cursor: pointer;
+  flex-shrink: 0;
+}

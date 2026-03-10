@@ -1,0 +1,94 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--eds-g-spacing-10);
+}
+
+/* ─── Card ─────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--eds-g-color-surface-1);
+  border: 1px solid var(--eds-g-color-border-1);
+  border-radius: var(--eds-g-radius-border-4);
+  box-shadow: var(--eds-g-shadow-3);
+  overflow: hidden;
+}
+
+/* ─── Header ────────────────────────────────────────────── */
+.cardHeader {
+  background-color: var(--eds-g-color-brand-base-10);
+  border-bottom: 1px solid var(--eds-g-color-border-1);
+  padding: var(--eds-g-spacing-6) var(--eds-g-spacing-8);
+}
+
+.heading {
+  font-size: var(--eds-g-font-scale-8);
+  font-weight: var(--eds-g-font-weight-7);
+  color: var(--eds-g-color-brand-base-70);
+  line-height: var(--eds-g-line-height-heading);
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: var(--eds-g-spacing-2);
+  margin-bottom: var(--eds-g-spacing-5);
+  font-size: var(--eds-g-font-scale-4);
+  color: var(--eds-g-color-on-surface-1);
+  line-height: var(--eds-g-line-height-text);
+}
+
+/* ─── Body ──────────────────────────────────────────────── */
+.cardBody {
+  padding: var(--eds-g-spacing-7) var(--eds-g-spacing-8);
+  animation: eds-fade-in var(--eds-g-duration-promptly) ease-out;
+}
+
+/* ─── Footer ────────────────────────────────────────────── */
+.cardFooter {
+  padding: var(--eds-g-spacing-5) var(--eds-g-spacing-8) var(--eds-g-spacing-7);
+  border-top: 1px solid var(--eds-g-color-border-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--eds-g-spacing-3);
+}
+
+.submitError {
+  padding: var(--eds-g-spacing-3) var(--eds-g-spacing-4);
+  background-color: var(--eds-g-color-error-container);
+  color: var(--eds-g-color-error-base-50);
+  border-radius: var(--eds-g-radius-border-2);
+  font-size: var(--eds-g-font-scale-3);
+  line-height: var(--eds-g-line-height-text);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--eds-g-spacing-3);
+}
+
+/* When there's no back button, push submit/next to the right */
+.actions > :only-child {
+  margin-left: auto;
+}
+
+.submitBtn {
+  padding-left: var(--eds-g-spacing-8);
+  padding-right: var(--eds-g-spacing-8);
+  min-width: 180px;
+}
+
+@media (max-width: 600px) {
+  .cardHeader,
+  .cardBody,
+  .cardFooter {
+    padding-left: var(--eds-g-spacing-5);
+    padding-right: var(--eds-g-spacing-5);
+  }
+
+  .heading {
+    font-size: var(--eds-g-font-scale-7);
+  }
+}

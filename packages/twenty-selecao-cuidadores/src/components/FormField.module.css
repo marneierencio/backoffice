@@ -50,6 +50,12 @@
   box-shadow: 0 0 0 3px var(--eds-g-color-error-container);
 }
 
+/* Textarea specific */
+textarea.input {
+  resize: vertical;
+  min-height: 5rem;
+}
+
 /* ---------- Messages ---------- */
 .error {
   font-size: var(--eds-g-font-scale-2);

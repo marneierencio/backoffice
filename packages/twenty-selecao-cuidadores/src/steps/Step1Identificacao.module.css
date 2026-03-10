@@ -1,0 +1,58 @@
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eds-g-spacing-8);
+}
+
+.section {
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--eds-g-spacing-4);
+}
+
+.sectionTitle {
+  font-size: var(--eds-g-font-scale-5);
+  font-weight: var(--eds-g-font-weight-6);
+  color: var(--eds-g-color-on-surface-3);
+  padding-bottom: var(--eds-g-spacing-2);
+  border-bottom: 1px solid var(--eds-g-color-border-1);
+  margin-bottom: var(--eds-g-spacing-2);
+  width: 100%;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--eds-g-spacing-4);
+}
+
+.rowCep {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--eds-g-spacing-4);
+}
+
+.cepField {
+  min-width: 0;
+}
+
+.logradouroField {
+  min-width: 0;
+}
+
+.estadoRow {
+  max-width: 260px;
+}
+
+@media (max-width: 600px) {
+  .row,
+  .rowCep {
+    grid-template-columns: 1fr;
+  }
+
+  .estadoRow {
+    max-width: 100%;
+  }
+}

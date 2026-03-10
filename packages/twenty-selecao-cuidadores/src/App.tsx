@@ -1,6 +1,6 @@
 import { PublicLayout } from '@selecao/components/PublicLayout';
-import { CandidaturaPage } from '@selecao/pages/CandidaturaPage';
 import { ConfirmacaoPage } from '@selecao/pages/ConfirmacaoPage';
+import { ProcessoSeletivoPage } from '@selecao/pages/ProcessoSeletivoPage';
 import { createHashRouter, RouterProvider } from 'react-router-dom';
 
 const router = createHashRouter([
@@ -9,7 +9,7 @@ const router = createHashRouter([
     children: [
       {
         path: '/',
-        element: <CandidaturaPage />,
+        element: <ProcessoSeletivoPage />,
       },
       {
         path: '/confirmacao',
