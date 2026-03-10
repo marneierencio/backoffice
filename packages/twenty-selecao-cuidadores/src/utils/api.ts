@@ -38,12 +38,37 @@ export type ApiResult<TData = unknown> = {
 const authHeaders = (): Record<string, string> => {
   const apiKey = getApiKey();
   if (!apiKey || apiKey === '__SELECAO_API_KEY__') {
-    throw new Error('Configuração incompleta: API Key não definida. Contacte o administrador do sistema.');
+    throw new Error(
+      'API Key não configurada. Para desenvolvimento local, crie o arquivo ' +
+      'packages/twenty-selecao-cuidadores/.env com VITE_API_KEY=<sua_api_key>. ' +
+      'A API Key é gerada em Settings → Developers → API Keys no workspace Twenty.',
+    );
   }
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${apiKey}`,
   };
+};
+
+const toUserFriendlyError = (status: number, body: string, context: string): string => {
+  try {
+    const json = JSON.parse(body) as { error?: string; messages?: string[] };
+    if (status === 401) {
+      const detail = json.error ?? '';
+      if (detail === 'WORKSPACE_NOT_FOUND') {
+        return (
+          'API Key inválida: o workspace não foi encontrado. ' +
+          'Gere uma nova API Key em Settings → Developers → API Keys e ' +
+          'atualize a variável SELECAO_CUIDADORES_API_KEY no container.'
+        );
+      }
+      return 'API Key inválida ou expirada. Verifique a configuração da API Key.'
+    }
+    const msg = json.messages?.join(', ') ?? body;
+    return `${context} (${status}): ${msg}`;
+  } catch {
+    return `${context} (${status}): ${body}`;
+  }
 };
 
 export const createPerson = async (input: {
@@ -114,7 +139,7 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
 
     if (!personResponse.ok) {
       const body = await personResponse.text();
-      return { error: `Erro ao registrar dados de identificação (${personResponse.status}): ${body}` };
+      return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
     }
 
     const personResult = await personResponse.json();
