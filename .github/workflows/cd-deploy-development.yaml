@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Instalar cloudflared
         run: |
           curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
@@ -82,6 +85,11 @@ jobs:
             StrictHostKeyChecking no
           EOF
 
+      - name: Sincronizar docker-compose.yml
+        run: |
+          scp packages/twenty-docker/docker-compose.yml \
+            ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }}:/opt/backoffice/docker-compose.yml
+
       - name: Deploy via SSH
         env:
           IMAGE_TAG: ghcr.io/${{ github.repository }}:development
@@ -92,11 +100,6 @@ jobs:
             set -e
             mkdir -p /opt/backoffice /opt/backoffice/backups
             cd /opt/backoffice
-
-            if [ ! -f docker-compose.yml ]; then
-              echo "ERRO: docker-compose.yml não encontrado em /opt/backoffice/"
-              exit 1
-            fi
 
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${ACTOR} --password-stdin
             docker pull ${IMAGE_TAG}
@@ -111,12 +114,6 @@ jobs:
             if [ -n "\${CONTAINER_ON_3000}" ]; then
               echo "Removendo container órfão na porta 3000: \${CONTAINER_ON_3000}"
               docker rm -f \${CONTAINER_ON_3000}
-            fi
-
-            # Garantir que docker-compose.yml usa ${TAG} e não imagem hardcoded
-            if grep -q 'twentycrm/twenty' docker-compose.yml; then
-              echo "Corrigindo imagem hardcoded no docker-compose.yml..."
-              sed -i 's|image: twentycrm/twenty:.*|image: ${TAG:-ghcr.io/marneierencio/backoffice:development}|g' docker-compose.yml
             fi
 
             # Garantir ENVIRONMENT=production
