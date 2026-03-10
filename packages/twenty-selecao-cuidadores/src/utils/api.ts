@@ -155,14 +155,16 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
 
     const { firstName, lastName } = splitFullName(formData.step1.nomeCompleto);
 
-    // Step A: Create or update the People record
+    const email = formData.step1.email.trim();
+
+    // Step A: Create the People record; if the email already exists, find the existing person.
     const personResponse = await fetch(`${restApiUrl}/people`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         name: { firstName, lastName },
         emails: {
-          primaryEmail: formData.step1.email.trim(),
+          primaryEmail: email,
           additionalEmails: [],
         },
         phones: {
@@ -174,13 +176,40 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
       }),
     });
 
-    if (!personResponse.ok) {
-      const body = await personResponse.text();
-      return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
-    }
+    let personId: string;
 
-    const personResult = await personResponse.json();
-    const personId: string = personResult?.data?.createPerson?.id ?? personResult?.id ?? '';
+    if (personResponse.ok) {
+      const personResult = await personResponse.json();
+      personId = personResult?.data?.createPerson?.id ?? personResult?.id ?? '';
+    } else {
+      const body = await personResponse.text();
+      const isDuplicate = body.includes('duplicate') || body.includes('Duplicate');
+      if (personResponse.status === 400 && isDuplicate) {
+        // Person already exists — look them up by email.
+        const encodedEmail = encodeURIComponent(`"${email}"`);
+        const searchResponse = await fetch(
+          `${restApiUrl}/people?filter=emails[primaryEmail][eq]:${encodedEmail}&limit=1`,
+          { method: 'GET', headers },
+        );
+        if (!searchResponse.ok) {
+          return { error: 'Erro ao localizar cadastro existente. Tente novamente.' };
+        }
+        const searchResult = await searchResponse.json();
+        // REST API returns { data: { people: { edges: [{ node: { id } }] } } }
+        const edges: Array<{ node: { id: string } }> =
+          searchResult?.data?.people?.edges ??
+          searchResult?.people?.edges ??
+          searchResult?.data?.edges ??
+          searchResult?.edges ??
+          [];
+        personId = edges[0]?.node?.id ?? '';
+        if (!personId) {
+          return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
+        }
+      } else {
+        return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
+      }
+    }
 
     // Step B: Create the CandidaturaCuidador record
     const candidaturaPayload = {
@@ -191,7 +220,7 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
       cpf: formData.step1.cpf,
       rg: formData.step1.rg.trim(),
       celular: formData.step1.celular,
-      email: formData.step1.email.trim(),
+      email: email,
       logradouro: formData.step1.logradouro.trim(),
       numero: formData.step1.numero.trim(),
       complemento: formData.step1.complemento.trim(),
