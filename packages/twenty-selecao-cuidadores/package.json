@@ -2,7 +2,7 @@
   "name": "twenty-selecao-cuidadores",
   "version": "1.0.0",
   "private": true,
-  "description": "Aplicativo público para cadastro de cuidadores em processos de seleção — Erencio Backoffice",
+  "description": "Aplicativo público para cadastro de cuidadores em processos de seleção — Amei Care - Backoffice Erencio.com",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

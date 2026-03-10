@@ -4,14 +4,14 @@ import { type Step2Errors, Step2Experiencia, validateStep2 } from '@selecao/step
 import { type Step3Errors, Step3Questionario, validateStep3 } from '@selecao/steps/Step3Questionario';
 import { type Step4Errors, Step4Finalizacao, validateStep4 } from '@selecao/steps/Step4Finalizacao';
 import {
-    INITIAL_FORM,
-    type Step1Data,
-    type Step2Data,
-    type Step3Data,
-    type Step4Data,
+  INITIAL_FORM,
+  type Step1Data,
+  type Step2Data,
+  type Step3Data,
+  type Step4Data,
 } from '@selecao/types/candidatura';
-import { createCandidatura } from '@selecao/utils/api';
-import { useCallback, useState } from 'react';
+import { checkApiConnection, createCandidatura } from '@selecao/utils/api';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProcessoSeletivoPage.module.css';
 
@@ -46,6 +46,11 @@ export const ProcessoSeletivoPage = () => {
   const [errors, setErrors] = useState<AllErrors>(EMPTY_ERRORS);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkApiConnection().then(setAuthError);
+  }, []);
 
   const handleStep1Change = useCallback((updates: Partial<Step1Data>) => {
     setFormData((prev) => ({ ...prev, step1: { ...prev.step1, ...updates } }));
@@ -123,6 +128,11 @@ export const ProcessoSeletivoPage = () => {
 
   return (
     <div className={styles.page}>
+      {authError && (
+        <div className={styles.authErrorBanner} role="alert">
+          <strong>Erro de configuração:</strong> {authError}
+        </div>
+      )}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h1 className={styles.heading}>Processo Seletivo de Cuidadores — Amei Care</h1>
