@@ -1,6 +1,6 @@
 // API client for the Seleção de Cuidadores public app.
 // Uses the Twenty REST API with an API key for unauthenticated public access.
-// The API key is configured per workspace and grants permission to create People records.
+// The API key is configured per workspace and grants permission to create Contato records.
 //
 // Configuration priority:
 //   1. window.__SELECAO_CONFIG__ (runtime, set via <script> in index.html or config.js)
@@ -91,7 +91,7 @@ const toUserFriendlyError = (status: number, body: string, context: string): str
 export const checkApiConnection = async (): Promise<string | null> => {
   try {
     const headers = authHeaders();
-    const response = await fetch(`${getRestApiUrl()}/people?limit=1`, {
+    const response = await fetch(`${getRestApiUrl()}/contatos?limit=1`, {
       method: 'GET',
       headers,
     });
@@ -138,84 +138,20 @@ export const createPerson = async (input: {
   }
 };
 
-const splitFullName = (fullName: string): { firstName: string; lastName: string } => {
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return { firstName: parts[0], lastName: '' };
-  return {
-    firstName: parts.slice(0, Math.ceil(parts.length / 2)).join(' '),
-    lastName: parts.slice(Math.ceil(parts.length / 2)).join(' '),
-  };
-};
-
-// Submits a complete candidatura: creates People record + CandidaturaCuidador record.
-export const createCandidatura = async (formData: AllFormData): Promise<ApiResult<{ personId: string; candidaturaId?: string }>> => {
+// Submits a complete candidatura: creates Contato record + CandidaturaCuidador record.
+// Personal data (identity, address, contact, communications consent) → Contato.
+// Professional data (availability, course, questionnaire, status) → CandidaturaCuidador.
+export const createCandidatura = async (formData: AllFormData): Promise<ApiResult<{ contatoId: string; candidaturaId?: string }>> => {
   try {
     const restApiUrl = getRestApiUrl();
     const headers = authHeaders();
 
-    const { firstName, lastName } = splitFullName(formData.step1.nomeCompleto);
-
     const email = formData.step1.email.trim();
 
-    // Step A: Create the People record; if the email already exists, find the existing person.
-    const personResponse = await fetch(`${restApiUrl}/people`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        name: { firstName, lastName },
-        emails: {
-          primaryEmail: email,
-          additionalEmails: [],
-        },
-        phones: {
-          primaryPhoneNumber: formData.step1.celular.replace(/\D/g, ''),
-          primaryPhoneCountryCode: 'BR',
-          additionalPhones: [],
-        },
-        city: formData.step1.municipio.trim(),
-      }),
-    });
-
-    let personId: string;
-
-    if (personResponse.ok) {
-      const personResult = await personResponse.json();
-      personId = personResult?.data?.createPerson?.id ?? personResult?.id ?? '';
-    } else {
-      const body = await personResponse.text();
-      const isDuplicate = body.includes('duplicate') || body.includes('Duplicate');
-      if (personResponse.status === 400 && isDuplicate) {
-        // Person already exists — look them up by email.
-        const encodedEmail = encodeURIComponent(`"${email}"`);
-        const searchResponse = await fetch(
-          `${restApiUrl}/people?filter=emails[primaryEmail][eq]:${encodedEmail}&limit=1`,
-          { method: 'GET', headers },
-        );
-        if (!searchResponse.ok) {
-          return { error: 'Erro ao localizar cadastro existente. Tente novamente.' };
-        }
-        const searchResult = await searchResponse.json();
-        // REST API returns { data: { people: { edges: [{ node: { id } }] } } }
-        const edges: Array<{ node: { id: string } }> =
-          searchResult?.data?.people?.edges ??
-          searchResult?.people?.edges ??
-          searchResult?.data?.edges ??
-          searchResult?.edges ??
-          [];
-        personId = edges[0]?.node?.id ?? '';
-        if (!personId) {
-          return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
-        }
-      } else {
-        return { error: toUserFriendlyError(personResponse.status, body, 'Erro ao registrar dados de identificação') };
-      }
-    }
-
-    // Step B: Create the CandidaturaCuidador record
-    const candidaturaPayload = {
-      // Identification (duplicated for standalone access in CRM)
+    // Step A: Create the Contato record; if the email already exists, find the existing contato.
+    const contatoPayload = {
       nomeCompleto: formData.step1.nomeCompleto.trim(),
-      dataNascimento: formData.step1.dataNascimento,
+      dataNascimento: formData.step1.dataNascimento || null,
       genero: formData.step1.genero,
       cpf: formData.step1.cpf,
       rg: formData.step1.rg.trim(),
@@ -228,6 +164,52 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
       bairro: formData.step1.bairro.trim(),
       municipio: formData.step1.municipio.trim(),
       estado: formData.step1.estado,
+      aceitaComunicacoes: formData.step4.aceitaComunicacoes,
+    };
+
+    const contatoResponse = await fetch(`${restApiUrl}/contatos`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(contatoPayload),
+    });
+
+    let contatoId: string;
+
+    if (contatoResponse.ok) {
+      const contatoResult = await contatoResponse.json();
+      contatoId = contatoResult?.data?.createContato?.id ?? contatoResult?.id ?? '';
+    } else {
+      const body = await contatoResponse.text();
+      const isDuplicate = body.includes('duplicate') || body.includes('Duplicate');
+      if (contatoResponse.status === 400 && isDuplicate) {
+        // Contato already exists — look them up by email.
+        const encodedEmail = encodeURIComponent(`"${email}"`);
+        const searchResponse = await fetch(
+          `${restApiUrl}/contatos?filter=email[eq]:${encodedEmail}&limit=1`,
+          { method: 'GET', headers },
+        );
+        if (!searchResponse.ok) {
+          return { error: 'Erro ao localizar cadastro existente. Tente novamente.' };
+        }
+        const searchResult = await searchResponse.json();
+        // REST API returns { data: { contatos: { edges: [{ node: { id } }] } } }
+        const edges: Array<{ node: { id: string } }> =
+          searchResult?.data?.contatos?.edges ??
+          searchResult?.contatos?.edges ??
+          searchResult?.data?.edges ??
+          searchResult?.edges ??
+          [];
+        contatoId = edges[0]?.node?.id ?? '';
+        if (!contatoId) {
+          return { error: toUserFriendlyError(contatoResponse.status, body, 'Erro ao registrar dados de identificação') };
+        }
+      } else {
+        return { error: toUserFriendlyError(contatoResponse.status, body, 'Erro ao registrar dados de identificação') };
+      }
+    }
+
+    // Step B: Create the CandidaturaCuidador record
+    const candidaturaPayload = {
       // Experience
       experiencia: formData.step2.experiencia.trim(),
       disponibilidadeDias: formData.step2.disponibilidadeDias.join(','),
@@ -255,12 +237,10 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
       questaoAberta11: formData.step3.q11.trim(),
       questaoAberta12: formData.step3.q12.trim(),
       questaoAberta13: formData.step3.q13.trim(),
-      // Finalization
-      aceitaComunicacoes: formData.step4.aceitaComunicacoes,
       // Status (default: awaiting analysis)
       status: 'AGUARDANDO_ANALISE',
-      // Relation to People
-      ...(personId ? { pessoas: { id: personId } } : {}),
+      // Relation to Contato
+      ...(contatoId ? { contato: { id: contatoId } } : {}),
     };
 
     const candidaturaResponse = await fetch(`${restApiUrl}/candidaturasCuidadores`, {
@@ -270,12 +250,16 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
     });
 
     if (!candidaturaResponse.ok) {
-      // Candidatura creation failed, but Person was created — return partial success
+      // Candidatura creation failed, but Contato was created — return partial success
       const body = await candidaturaResponse.text();
-      if (candidaturaResponse.status === 404) {
-        // Object not yet created in workspace — graceful degradation
-        console.warn('CandidaturaCuidador object not found in workspace. Only People record was created.');
-        return { data: { personId } };
+      // Twenty returns 404 or 400 with "object not found" when the custom object
+      // hasn't been created in the workspace yet — degrade gracefully.
+      const isObjectNotFound =
+        candidaturaResponse.status === 404 ||
+        (candidaturaResponse.status === 400 && body.includes('not found'));
+      if (isObjectNotFound) {
+        console.warn('CandidaturaCuidador object not found in workspace. Only Contato record was created.');
+        return { data: { contatoId } };
       }
       return { error: `Erro ao registrar candidatura (${candidaturaResponse.status}): ${body}` };
     }
@@ -283,7 +267,7 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
     const candidaturaResult = await candidaturaResponse.json();
     const candidaturaId: string = candidaturaResult?.data?.createCandidaturaCuidador?.id ?? candidaturaResult?.id ?? '';
 
-    return { data: { personId, candidaturaId } };
+    return { data: { contatoId, candidaturaId } };
   } catch (err) {
     return {
       error: err instanceof Error ? err.message : 'Erro desconhecido ao enviar candidatura',
