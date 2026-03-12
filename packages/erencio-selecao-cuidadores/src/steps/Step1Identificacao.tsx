@@ -36,10 +36,10 @@ const ESTADOS = [
 ];
 
 const GENEROS = [
-  { value: 'feminino_cis', label: 'Feminino (Cisgênero)' },
-  { value: 'masculino_cis', label: 'Masculino (Cisgênero)' },
-  { value: 'feminino_trans', label: 'Feminino (Transgênero)' },
-  { value: 'masculino_trans', label: 'Masculino (Transgênero)' },
+  { value: 'FEMININO_CIS', label: 'Feminino (Cisgênero)' },
+  { value: 'MASCULINO_CIS', label: 'Masculino (Cisgênero)' },
+  { value: 'FEMININO_TRANS', label: 'Feminino (Transgênero)' },
+  { value: 'MASCULINO_TRANS', label: 'Masculino (Transgênero)' },
 ];
 
 export type Step1Errors = Partial<Record<keyof Step1Data, string>>;
