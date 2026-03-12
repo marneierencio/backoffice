@@ -28,8 +28,8 @@ export const WorkspaceFrontendPolicySettings = () => {
       label: t`Force Standard interface (Twenty) for all members`,
     },
     {
-      value: 'FORCE_EDS' as const,
-      label: t`Force EDS interface for all members`,
+      value: 'FORCE_BACKOFFICE' as const,
+      label: t`Force Erencio.com Backoffice interface for all members`,
     },
   ];
 

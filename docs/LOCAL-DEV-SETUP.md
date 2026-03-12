@@ -121,7 +121,7 @@ npx nx start twenty-server
 npx nx run twenty-server:worker
 ```
 
-### Fluxos de inicialização rápida (validação de login EDS)
+### Fluxos de inicialização rápida (validação de login Erencio.com Backoffice)
 
 Antes de rodar os comandos abaixo, certifique-se que o **Docker Desktop está aberto**.
 
@@ -130,7 +130,7 @@ Antes de rodar os comandos abaixo, certifique-se que o **Docker Desktop está ab
 Execute em um terminal WSL:
 
 ```bash
-set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start twenty-eds
+set -e && cd /mnt/d/src/Erencio.com/backoffice && nvm use 24 && corepack enable && corepack prepare yarn@4.9.2 --activate && docker compose -f packages/twenty-docker/docker-compose.yml up -d db redis && bash packages/twenty-utils/setup-dev-env.sh && (npx nx start twenty-server &) && npx nx start erencio-front
 ```
 
 #### Opção B — Git Bash no Windows
@@ -155,13 +155,13 @@ Se preferir o backend via Docker (em vez de Nest local):
 cd /d/src/Erencio.com/backoffice && SERVER_URL=http://127.0.0.1:3000 STORAGE_TYPE=local docker compose -f packages/twenty-docker/docker-compose.yml up -d server
 ```
 
-Terminal 2 (frontend EDS):
+Terminal 2 (frontend Erencio.com Backoffice):
 
 ```bash
-cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start twenty-eds
+cd /d/src/Erencio.com/backoffice && ./.tools/node-v24.5.0-win-x64/corepack yarn nx start erencio-front
 ```
 
-Use este login no EDS:
+Use este login no Erencio.com Backoffice:
 
 - Email: `tim@apple.dev`
 - Senha: `tim@apple.dev`
@@ -195,16 +195,16 @@ Ao alterar entidades/migrações:
 npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/<nome-da-migracao> -d src/database/typeorm/core/core.datasource.ts
 ```
 
-## 9) Verificação específica do EDS
+## 9) Verificação específica do Erencio.com Backoffice
 
-Se suas mudanças tocam o EDS, valide ambos os frontends:
+Se suas mudanças tocam o Erencio.com Backoffice, valide ambos os frontends:
 
 ```bash
 npx nx build twenty-front
-npx nx build twenty-eds
+npx nx build erencio-front
 ```
 
-O `twenty-eds` usa Vite. Certifique-se que `packages/twenty-eds/src/vite-env.d.ts` existe com:
+O `erencio-front` usa Vite. Certifique-se que `packages/erencio-front/src/vite-env.d.ts` existe com:
 
 ```ts
 /// <reference types="vite/client" />

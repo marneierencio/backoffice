@@ -1,0 +1,55 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+.header {
+  background-color: var(--backoffice-g-color-brand-base-70);
+  color: var(--backoffice-g-color-on-surface-inverse);
+  padding: var(--backoffice-g-spacing-3) var(--backoffice-g-spacing-6);
+}
+
+.headerInner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+.logo {
+  font-size: var(--backoffice-g-font-scale-6);
+  font-weight: var(--backoffice-g-font-weight-7);
+  letter-spacing: -0.01em;
+}
+
+.separator {
+  opacity: 0.4;
+  font-weight: var(--backoffice-g-font-weight-3);
+}
+
+.title {
+  font-size: var(--backoffice-g-font-scale-5);
+  font-weight: var(--backoffice-g-font-weight-4);
+  opacity: 0.85;
+}
+
+/* ---------- Main ---------- */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--backoffice-g-spacing-8) var(--backoffice-g-spacing-6);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background-color: var(--backoffice-g-color-surface-3);
+  color: var(--backoffice-g-color-on-surface-1);
+  text-align: center;
+  padding: var(--backoffice-g-spacing-4) var(--backoffice-g-spacing-6);
+  font-size: var(--backoffice-g-font-scale-3);
+}

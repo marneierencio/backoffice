@@ -1,23 +1,23 @@
 # Seleção de Cuidadores — Guia do Pacote
 
-Pacote `twenty-selecao-cuidadores`: aplicativo público (sem login) que permite a candidatos cadastrarem seus dados para processos de seleção de cuidadores.
+Pacote `erencio-selecao-cuidadores`: aplicativo público (sem login) que permite a candidatos cadastrarem seus dados para processos de seleção de cuidadores.
 
 ## Visão Geral
 
 | Item | Valor |
 |------|-------|
-| **Pacote** | `packages/twenty-selecao-cuidadores` |
+| **Pacote** | `packages/erencio-selecao-cuidadores` |
 | **Porta dev** | 3003 |
 | **Base URL** | `/selecaoCuidadores/` |
 | **URL de produção** | `backoffice.erencio.com/selecaoCuidadores` |
 | **URL de desenvolvimento** | `backoffice--dev.erencio.com/selecaoCuidadores` |
 | **Autenticação** | Pública — usa API Key do workspace (sem login de visitante) |
-| **Identidade visual** | EDS 1.0 (mesmos tokens CSS do `twenty-eds`) |
+| **Identidade visual** | Erencio.com Backoffice (mesmos tokens CSS do `erencio-front`) |
 
 ## Arquitetura
 
 ```
-packages/twenty-selecao-cuidadores/
+packages/erencio-selecao-cuidadores/
 ├── index.html                             # Ponto de entrada HTML (com runtime config)
 ├── package.json                           # Dependências
 ├── project.json                           # Configuração Nx
@@ -27,7 +27,7 @@ packages/twenty-selecao-cuidadores/
 └── src/
     ├── main.tsx                           # Bootstrap React
     ├── App.tsx                            # Router (hash-based)
-    ├── global.css                         # Tokens EDS + utilitários globais
+    ├── global.css                         # Tokens Backoffice + utilitários globais
     ├── css-modules.d.ts                   # Tipos para CSS modules
     ├── vite-env.d.ts                      # Tipos Vite
     ├── types/
@@ -67,7 +67,7 @@ Internet (Cloudflare Tunnel)
     ↓
 NestJS Backend (porta 3000)
     ├─ /selecaoCuidadores/*  → dist/selecaoCuidadores/ (este app)
-    ├─ /eds/*                → dist/eds/               (twenty-eds)
+    ├─ /backoffice/*                → dist/backoffice/               (erencio-front)
     ├─ /*                    → dist/front/             (twenty-front)
     ├─ /graphql              → GraphQL API
     ├─ /rest/*               → REST API
@@ -96,7 +96,7 @@ Este guia serve de referência para criar novos pacotes públicos no futuro.
 
 ### 1. Estrutura do pacote
 
-1. Crie a pasta `packages/twenty-selecao-cuidadores/`.
+1. Crie a pasta `packages/erencio-selecao-cuidadores/`.
 2. Crie `package.json` com `react`, `react-dom`, `react-router-dom` como dependências e `vite`, `typescript`, `@vitejs/plugin-react` como devDependencies.
 3. Crie `project.json` registrando o projeto no Nx com targets `build` e `start` (porta 3003).
 4. Crie `tsconfig.json` com path alias `@selecao/*` → `src/*`.
@@ -106,7 +106,7 @@ Este guia serve de referência para criar novos pacotes públicos no futuro.
 
 ### 2. Registro no workspace (Yarn)
 
-Adicione `"packages/twenty-selecao-cuidadores"` no array `workspaces.packages` do `package.json` raiz.
+Adicione `"packages/erencio-selecao-cuidadores"` no array `workspaces.packages` do `package.json` raiz.
 
 ### 3. Registro no NestJS (ServeStaticModule)
 
@@ -116,19 +116,19 @@ Em `packages/twenty-server/src/app.module.ts`, no método `getConditionalModules
 
 Em `packages/twenty-docker/twenty/Dockerfile`:
 
-1. **common-deps**: Adicione `COPY ./packages/twenty-selecao-cuidadores/package.json /app/packages/twenty-selecao-cuidadores/`
-2. **twenty-front-build**: Adicione `COPY ./packages/twenty-selecao-cuidadores /app/packages/twenty-selecao-cuidadores` e inclua `npx nx build twenty-selecao-cuidadores` no `RUN`
-3. **twenty (final)**: Adicione `COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-selecao-cuidadores/dist /app/packages/twenty-server/dist/selecaoCuidadores`
+1. **common-deps**: Adicione `COPY ./packages/erencio-selecao-cuidadores/package.json /app/packages/erencio-selecao-cuidadores/`
+2. **twenty-front-build**: Adicione `COPY ./packages/erencio-selecao-cuidadores /app/packages/erencio-selecao-cuidadores` e inclua `npx nx build erencio-selecao-cuidadores` no `RUN`
+3. **twenty (final)**: Adicione `COPY --chown=1000 --from=twenty-front-build /app/packages/erencio-selecao-cuidadores/dist /app/packages/twenty-server/dist/selecaoCuidadores`
 
 ### 5. Design System (identidade visual)
 
-O `global.css` replica os tokens CSS do `twenty-eds` (variáveis `--eds-g-*`). Isso garante que cores, tipografia, espaçamento, bordas e sombras sejam consistentes entre os dois aplicativos.
+O `global.css` replica os tokens CSS do `erencio-front` (variáveis `--backoffice-g-*`). Isso garante que cores, tipografia, espaçamento, bordas e sombras sejam consistentes entre os dois aplicativos.
 
 Componentes usam **CSS Modules** (`.module.css`) para escopo local de estilos.
 
 ### 6. Layout público (sem autenticação)
 
-Diferente do `twenty-eds`, este app **não requer login**:
+Diferente do `erencio-front`, este app **não requer login**:
 - Não há `AuthProvider`, `ProtectedLayout` nem qualquer verificação de sessão de usuário.
 - O `PublicLayout` fornece header e footer simples, envolvendo as páginas via `<Outlet />`.
 - O roteamento usa `createHashRouter` do React Router.
@@ -252,20 +252,20 @@ Se o objeto `candidaturasCuidadores` não existir no workspace (endpoint retorna
 
 ```bash
 # Desenvolvimento
-npx nx start twenty-selecao-cuidadores   # Dev server na porta 3003
+npx nx start erencio-selecao-cuidadores   # Dev server na porta 3003
 
 # Build
-npx nx build twenty-selecao-cuidadores   # Gera dist/
+npx nx build erencio-selecao-cuidadores   # Gera dist/
 
 # Preview
-cd packages/twenty-selecao-cuidadores && npx vite preview
+cd packages/erencio-selecao-cuidadores && npx vite preview
 ```
 
 ## Criando e Configurando a API Key
 
 ### 1. Criar a API Key no workspace
 
-1. Acesse o Twenty/EDS como administrador do workspace
+1. Acesse o Twenty/Erencio.com Backoffice como administrador do workspace
 2. Vá em **Settings > Developers > API Keys**
 3. Clique em **Create API Key**
 4. Copie o token JWT gerado
@@ -288,7 +288,7 @@ O entrypoint injeta automaticamente a key no `config.js` do app.
 
 ### 3. Para desenvolvimento local
 
-Crie um `.env` na raiz do pacote `packages/twenty-selecao-cuidadores/`:
+Crie um `.env` na raiz do pacote `packages/erencio-selecao-cuidadores/`:
 
 ```env
 VITE_API_KEY=eyJhbGciOiJIUzI1NiIs...

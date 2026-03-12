@@ -1,4 +1,4 @@
 export enum FrontendPreference {
   TWENTY = 'TWENTY',
-  EDS = 'EDS',
+  BACKOFFICE = 'BACKOFFICE',
 }

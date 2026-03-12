@@ -59336,9 +59336,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"twenty-eds@workspace:packages/twenty-eds":
+"erencio-front@workspace:packages/erencio-front":
   version: 0.0.0-use.local
-  resolution: "twenty-eds@workspace:packages/twenty-eds"
+  resolution: "erencio-front@workspace:packages/erencio-front"
   dependencies:
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
