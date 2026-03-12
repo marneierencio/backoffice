@@ -1,0 +1,55 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--backoffice-g-spacing-8);
+}
+
+.card {
+  max-width: 520px;
+  text-align: center;
+  background-color: var(--backoffice-g-color-surface-1);
+  border: 1px solid var(--backoffice-g-color-border-1);
+  border-radius: var(--backoffice-g-radius-border-4);
+  box-shadow: var(--backoffice-g-shadow-2);
+  padding: var(--backoffice-g-spacing-10) var(--backoffice-g-spacing-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-4);
+}
+
+.iconCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--backoffice-g-color-success-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--backoffice-g-spacing-2);
+}
+
+.heading {
+  font-size: var(--backoffice-g-font-scale-8);
+  font-weight: var(--backoffice-g-font-weight-7);
+  color: var(--backoffice-g-color-on-surface-3);
+  line-height: var(--backoffice-g-line-height-heading);
+}
+
+.message {
+  font-size: var(--backoffice-g-font-scale-4);
+  color: var(--backoffice-g-color-on-surface-1);
+  line-height: var(--backoffice-g-line-height-text);
+  max-width: 400px;
+}
+
+.link {
+  margin-top: var(--backoffice-g-spacing-4);
+  font-size: var(--backoffice-g-font-scale-4);
+  font-weight: var(--backoffice-g-font-weight-6);
+  color: var(--backoffice-g-color-brand-base-50);
+}
+
+.link:hover {
+  text-decoration: underline;
+}

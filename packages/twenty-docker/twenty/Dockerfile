@@ -15,8 +15,8 @@ COPY ./packages/twenty-ui/package.json /app/packages/twenty-ui/
 COPY ./packages/twenty-shared/package.json /app/packages/twenty-shared/
 COPY ./packages/twenty-front/package.json /app/packages/twenty-front/
 COPY ./packages/twenty-sdk/package.json /app/packages/twenty-sdk/
-COPY ./packages/twenty-eds/package.json /app/packages/twenty-eds/
-COPY ./packages/twenty-selecao-cuidadores/package.json /app/packages/twenty-selecao-cuidadores/
+COPY ./packages/erencio-front/package.json /app/packages/erencio-front/
+COPY ./packages/erencio-selecao-cuidadores/package.json /app/packages/erencio-selecao-cuidadores/
 
 # Install all dependencies
 RUN yarn && yarn cache clean && npx nx reset
@@ -43,9 +43,9 @@ COPY ./packages/twenty-front /app/packages/twenty-front
 COPY ./packages/twenty-ui /app/packages/twenty-ui
 COPY ./packages/twenty-shared /app/packages/twenty-shared
 COPY ./packages/twenty-sdk /app/packages/twenty-sdk
-COPY ./packages/twenty-eds /app/packages/twenty-eds
-COPY ./packages/twenty-selecao-cuidadores /app/packages/twenty-selecao-cuidadores
-RUN npx nx build twenty-front && npx nx build twenty-eds && npx nx build twenty-selecao-cuidadores
+COPY ./packages/erencio-front /app/packages/erencio-front
+COPY ./packages/erencio-selecao-cuidadores /app/packages/erencio-selecao-cuidadores
+RUN npx nx build twenty-front && npx nx build erencio-front && npx nx build erencio-selecao-cuidadores
 
 
 # Final stage: Run the application
@@ -72,8 +72,8 @@ ENV APP_VERSION=$APP_VERSION
 COPY --chown=1000 --from=twenty-server-build /app /app
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server /app/packages/twenty-server
 COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-front/build /app/packages/twenty-server/dist/front
-COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-eds/dist /app/packages/twenty-server/dist/eds
-COPY --chown=1000 --from=twenty-front-build /app/packages/twenty-selecao-cuidadores/dist /app/packages/twenty-server/dist/selecaoCuidadores
+COPY --chown=1000 --from=twenty-front-build /app/packages/erencio-front/dist /app/packages/twenty-server/dist/backoffice
+COPY --chown=1000 --from=twenty-front-build /app/packages/erencio-selecao-cuidadores/dist /app/packages/twenty-server/dist/selecaoCuidadores
 
 # Set metadata and labels
 LABEL org.opencontainers.image.source=https://github.com/twentyhq/twenty

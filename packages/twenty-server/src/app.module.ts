@@ -90,7 +90,7 @@ export class AppModule {
       );
     } */
 
-    const edsPath = join(__dirname, 'eds');
+    const backofficeAppPath = join(__dirname, 'backoffice');
     const selecaoCuidadoresPath = join(__dirname, 'selecaoCuidadores');
 
     // Register sub-apps before the main front so their serveRoot takes precedence
@@ -104,11 +104,11 @@ export class AppModule {
       );
     }
 
-    if (existsSync(edsPath)) {
+    if (existsSync(backofficeAppPath)) {
       modules.push(
         ServeStaticModule.forRoot({
-          rootPath: edsPath,
-          serveRoot: '/eds',
+          rootPath: backofficeAppPath,
+          serveRoot: '/backoffice',
           exclude: ['/api/*', '/auth/*', '/metadata/*', '/files/*', '/rest/*', '/graphql'],
         }),
       );

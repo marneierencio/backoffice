@@ -5,7 +5,7 @@ import { t } from '@lingui/core/macro';
 import { UPDATE_USER_FRONTEND_PREFERENCE } from '@/settings/profile/graphql/mutations/updateUserFrontendPreference';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 
-export type FrontendPreference = 'TWENTY' | 'EDS';
+export type FrontendPreference = 'TWENTY' | 'BACKOFFICE';
 
 export const useUpdateFrontendPreference = () => {
   const { enqueueSuccessSnackBar, enqueueErrorSnackBar } = useSnackBar();

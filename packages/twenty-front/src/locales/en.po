@@ -14600,8 +14600,8 @@ msgstr "Standard (Twenty)"
 
 #. js-lingui-id: F9Wqjl
 #: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx
-msgid "EDS — Erencio Design System"
-msgstr "EDS — Erencio Design System"
+msgid "Erencio.com Backoffice"
+msgstr "Erencio.com Backoffice"
 
 #. js-lingui-id: y0CFFV
 #: src/modules/settings/experience/components/FrontendPreferenceSettings.tsx

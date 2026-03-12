@@ -152,9 +152,9 @@ EMAIL_SMTP_PASSWORD=<resend_api_key>
 
 > **Variáveis que NÃO existem no Twenty** (não usar — ignoradas silenciosamente):
 > `POSTGRES_PASSWORD`, `FRONT_URL`, `EMAIL_SMTP_TLS_ENABLED`, `EMAIL_SMTP_SECURE`,
-> `GRAPHQL_PLAYGROUND`, `IS_EDS_ENABLED`\*, `DEBUG_MODE`, `CORS_ALLOWED_ORIGINS`.
+> `GRAPHQL_PLAYGROUND`, `IS_BACKOFFICE_ENABLED`\*, `DEBUG_MODE`, `CORS_ALLOWED_ORIGINS`.
 >
-> \*`IS_EDS_ENABLED` é feature flag de banco de dados — ative em Settings → Feature Flags dentro do workspace.
+> \*`IS_BACKOFFICE_ENABLED` é feature flag de banco de dados — ative em Settings → Feature Flags dentro do workspace.
 
 ---
 

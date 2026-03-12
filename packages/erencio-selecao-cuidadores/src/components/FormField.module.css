@@ -1,0 +1,68 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-1);
+}
+
+/* ---------- Label ---------- */
+.label {
+  font-size: var(--backoffice-g-font-scale-3);
+  font-weight: var(--backoffice-g-font-weight-6);
+  color: var(--backoffice-g-color-on-surface-2);
+  line-height: var(--backoffice-g-line-height-heading);
+}
+
+.required {
+  color: var(--backoffice-g-color-error-base-50);
+  text-decoration: none;
+}
+
+/* ---------- Input ---------- */
+.input {
+  width: 100%;
+  padding: var(--backoffice-g-spacing-2) var(--backoffice-g-spacing-3);
+  font-family: var(--backoffice-g-font-family);
+  font-size: var(--backoffice-g-font-scale-4);
+  line-height: var(--backoffice-g-line-height-text);
+  color: var(--backoffice-g-color-on-surface-3);
+  background-color: var(--backoffice-g-color-surface-1);
+  border: 1px solid var(--backoffice-g-color-border-input);
+  border-radius: var(--backoffice-g-radius-border-2);
+  transition: border-color var(--backoffice-g-duration-quickly),
+              box-shadow var(--backoffice-g-duration-quickly);
+}
+
+.input::placeholder {
+  color: var(--backoffice-g-color-on-surface-1);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--backoffice-g-color-border-focus);
+  box-shadow: 0 0 0 3px var(--backoffice-g-color-brand-base-10);
+}
+
+.inputError {
+  border-color: var(--backoffice-g-color-border-error);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px var(--backoffice-g-color-error-container);
+}
+
+/* Textarea specific */
+textarea.input {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+/* ---------- Messages ---------- */
+.error {
+  font-size: var(--backoffice-g-font-scale-2);
+  color: var(--backoffice-g-color-error-base-50);
+}
+
+.help {
+  font-size: var(--backoffice-g-font-scale-2);
+  color: var(--backoffice-g-color-on-surface-1);
+}

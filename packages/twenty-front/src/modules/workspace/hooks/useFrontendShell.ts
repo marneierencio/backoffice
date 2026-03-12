@@ -3,10 +3,10 @@ import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useRecoilValueV2 } from '@/ui/utilities/state/jotai/hooks/useRecoilValueV2';
 
 // Frontend shells available in this application
-export type FrontendShell = 'TWENTY' | 'EDS';
+export type FrontendShell = 'TWENTY' | 'BACKOFFICE';
 
-// URL path prefix for the EDS frontend
-const EDS_PATH = '/eds';
+// URL path prefix for the Erencio.com Backoffice frontend
+const BACKOFFICE_PATH = '/backoffice';
 
 // Resolve the effective frontend shell based on:
 // 1. Workspace policy (if forced, overrides user preference)
@@ -22,11 +22,12 @@ export const useFrontendShell = (): {
   const currentWorkspace = useRecoilValueV2(currentWorkspaceState);
 
   const workspacePolicy = currentWorkspace?.frontendPolicy ?? null;
-  const userPreference = (currentUser?.frontendPreference as FrontendShell | undefined) ?? 'TWENTY';
+  const userPreference =
+    (currentUser?.frontendPreference as FrontendShell | undefined) ?? 'TWENTY';
 
-  if (workspacePolicy === 'FORCE_EDS') {
+  if (workspacePolicy === 'FORCE_BACKOFFICE') {
     return {
-      effectiveFrontend: 'EDS',
+      effectiveFrontend: 'BACKOFFICE',
       isForcedByWorkspace: true,
       userPreference,
       workspacePolicy,
@@ -51,14 +52,16 @@ export const useFrontendShell = (): {
   };
 };
 
-// Redirect to EDS frontend if needed.
+// Redirect to Erencio.com Backoffice frontend if needed.
 // Returns true if a redirect was triggered (caller should stop rendering).
-export const redirectToEdsIfNeeded = (effectiveFrontend: FrontendShell): boolean => {
+export const redirectToBackofficeIfNeeded = (
+  effectiveFrontend: FrontendShell,
+): boolean => {
   if (
-    effectiveFrontend === 'EDS' &&
-    !window.location.pathname.startsWith(EDS_PATH)
+    effectiveFrontend === 'BACKOFFICE' &&
+    !window.location.pathname.startsWith(BACKOFFICE_PATH)
   ) {
-    window.location.href = EDS_PATH;
+    window.location.href = BACKOFFICE_PATH;
     return true;
   }
 

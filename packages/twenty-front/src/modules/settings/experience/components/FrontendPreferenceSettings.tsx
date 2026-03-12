@@ -17,13 +17,13 @@ export const FrontendPreferenceSettings = () => {
 
   const workspacePolicy = currentWorkspace?.frontendPolicy;
   const isForcedByWorkspace =
-    workspacePolicy === 'FORCE_TWENTY' || workspacePolicy === 'FORCE_EDS';
+    workspacePolicy === 'FORCE_TWENTY' || workspacePolicy === 'FORCE_BACKOFFICE';
 
-  const currentValue: 'TWENTY' | 'EDS' = isForcedByWorkspace
-    ? workspacePolicy === 'FORCE_EDS'
-      ? 'EDS'
+  const currentValue: 'TWENTY' | 'BACKOFFICE' = isForcedByWorkspace
+    ? workspacePolicy === 'FORCE_BACKOFFICE'
+      ? 'BACKOFFICE'
       : 'TWENTY'
-    : (currentUser.frontendPreference === 'EDS' ? 'EDS' : 'TWENTY');
+    : (currentUser.frontendPreference === 'BACKOFFICE' ?'BACKOFFICE': 'TWENTY');
 
   const options = [
     {
@@ -31,17 +31,17 @@ export const FrontendPreferenceSettings = () => {
       label: t`Standard (Twenty)`,
     },
     {
-      value: 'EDS' as const,
-      label: t`EDS — Erencio Design System`,
+      value: 'BACKOFFICE' as const,
+      label: t`Erencio.com Backoffice`,
     },
   ];
 
-  const handleChange = async (value: 'TWENTY' | 'EDS') => {
+  const handleChange = async (value: 'TWENTY' | 'BACKOFFICE') => {
     if (isForcedByWorkspace) return;
 
     await updateFrontendPreference(value);
 
-    if (value === 'EDS') {
+    if (value === 'BACKOFFICE') {
       window.location.href = '/eds';
     }
   };

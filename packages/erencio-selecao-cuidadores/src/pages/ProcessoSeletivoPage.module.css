@@ -1,0 +1,107 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--backoffice-g-spacing-10);
+}
+
+/* ─── Card ─────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--backoffice-g-color-surface-1);
+  border: 1px solid var(--backoffice-g-color-border-1);
+  border-radius: var(--backoffice-g-radius-border-4);
+  box-shadow: var(--backoffice-g-shadow-3);
+  overflow: hidden;
+}
+
+/* ─── Header ────────────────────────────────────────────── */
+.cardHeader {
+  background-color: var(--backoffice-g-color-brand-base-10);
+  border-bottom: 1px solid var(--backoffice-g-color-border-1);
+  padding: var(--backoffice-g-spacing-6) var(--backoffice-g-spacing-8);
+}
+
+.heading {
+  font-size: var(--backoffice-g-font-scale-8);
+  font-weight: var(--backoffice-g-font-weight-7);
+  color: var(--backoffice-g-color-brand-base-70);
+  line-height: var(--backoffice-g-line-height-heading);
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: var(--backoffice-g-spacing-2);
+  margin-bottom: var(--backoffice-g-spacing-5);
+  font-size: var(--backoffice-g-font-scale-4);
+  color: var(--backoffice-g-color-on-surface-1);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+/* ─── Body ──────────────────────────────────────────────── */
+.cardBody {
+  padding: var(--backoffice-g-spacing-7) var(--backoffice-g-spacing-8);
+  animation: backoffice-fade-in var(--backoffice-g-duration-promptly) ease-out;
+}
+
+/* ─── Footer ────────────────────────────────────────────── */
+.cardFooter {
+  padding: var(--backoffice-g-spacing-5) var(--backoffice-g-spacing-8) var(--backoffice-g-spacing-7);
+  border-top: 1px solid var(--backoffice-g-color-border-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+.authErrorBanner {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto var(--backoffice-g-spacing-5);
+  padding: var(--backoffice-g-spacing-4) var(--backoffice-g-spacing-5);
+  background-color: var(--backoffice-g-color-error-container);
+  color: var(--backoffice-g-color-error-base-50);
+  border-radius: var(--backoffice-g-radius-border-2);
+  font-size: var(--backoffice-g-font-scale-3);
+  line-height: var(--backoffice-g-line-height-text);
+  border-left: 4px solid var(--backoffice-g-color-error-base-50);
+}
+
+.submitError {
+  padding: var(--backoffice-g-spacing-3) var(--backoffice-g-spacing-4);
+  background-color: var(--backoffice-g-color-error-container);
+  color: var(--backoffice-g-color-error-base-50);
+  border-radius: var(--backoffice-g-radius-border-2);
+  font-size: var(--backoffice-g-font-scale-3);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+/* When there's no back button, push submit/next to the right */
+.actions > :only-child {
+  margin-left: auto;
+}
+
+.submitBtn {
+  padding-left: var(--backoffice-g-spacing-8);
+  padding-right: var(--backoffice-g-spacing-8);
+  min-width: 180px;
+}
+
+@media (max-width: 600px) {
+  .cardHeader,
+  .cardBody,
+  .cardFooter {
+    padding-left: var(--backoffice-g-spacing-5);
+    padding-right: var(--backoffice-g-spacing-5);
+  }
+
+  .heading {
+    font-size: var(--backoffice-g-font-scale-7);
+  }
+}

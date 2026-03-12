@@ -1,0 +1,88 @@
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-8);
+}
+
+.section {
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-4);
+}
+
+.sectionTitle {
+  font-size: var(--backoffice-g-font-scale-5);
+  font-weight: var(--backoffice-g-font-weight-6);
+  color: var(--backoffice-g-color-on-surface-3);
+  padding-bottom: var(--backoffice-g-spacing-2);
+  border-bottom: 1px solid var(--backoffice-g-color-border-1);
+  margin-bottom: var(--backoffice-g-spacing-2);
+  width: 100%;
+}
+
+.groupError {
+  font-size: var(--backoffice-g-font-scale-2);
+  color: var(--backoffice-g-color-error-base-50);
+  margin-top: calc(var(--backoffice-g-spacing-1) * -1);
+}
+
+.availabilityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--backoffice-g-spacing-6);
+}
+
+.availabilityGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-2);
+}
+
+.groupLabel {
+  font-size: var(--backoffice-g-font-scale-3);
+  font-weight: var(--backoffice-g-font-weight-6);
+  color: var(--backoffice-g-color-on-surface-2);
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-2);
+}
+
+.cursoCheck {
+  font-weight: var(--backoffice-g-font-weight-4);
+}
+
+.cursoFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-4);
+  padding: var(--backoffice-g-spacing-4);
+  background-color: var(--backoffice-g-color-surface-2);
+  border-radius: var(--backoffice-g-radius-border-3);
+  border: 1px solid var(--backoffice-g-color-border-1);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--backoffice-g-spacing-4);
+}
+
+.conclusaoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--backoffice-g-spacing-3);
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  .availabilityGrid,
+  .row,
+  .conclusaoRow {
+    grid-template-columns: 1fr;
+  }
+}

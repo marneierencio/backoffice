@@ -113,7 +113,7 @@ O Backoffice agora suporta dois frontends paralelos:
 | Frontend | Pacote | URL | Status |
 |---------|--------|-----|--------|
 | **Twenty** (padrão) | `packages/twenty-front` | `/` | Produção |
-| **EDS** | `packages/twenty-eds` | `/eds` | Beta |
+| **Erencio.com Backoffice** | `packages/erencio-front` | `/eds` | Beta |
 
 A seleção do frontend é determinada por:
 1. Política da workspace (`workspace.frontendPolicy`)
@@ -122,6 +122,6 @@ A seleção do frontend é determinada por:
 
 **Documentação:**
 - [DUAL-FRONTEND.md](./DUAL-FRONTEND.md) — Visão geral da arquitetura dual-frontend
-- [EDS-COMPONENTS.md](./EDS-COMPONENTS.md) — Guia de componentes EDS
-- [EDS-CONTRIBUTING.md](./EDS-CONTRIBUTING.md) — Como contribuir para o EDS
-- [EDS-MIGRATION.md](./EDS-MIGRATION.md) — Plano de migração incremental
+- [BACKOFFICE-COMPONENTS.md](./BACKOFFICE-COMPONENTS.md) — Guia de componentes Erencio.com Backoffice
+- [BACKOFFICE-CONTRIBUTING.md](./BACKOFFICE-CONTRIBUTING.md) — Como contribuir para o Erencio.com Backoffice
+- [BACKOFFICE-MIGRATION.md](./BACKOFFICE-MIGRATION.md) — Plano de migração incremental

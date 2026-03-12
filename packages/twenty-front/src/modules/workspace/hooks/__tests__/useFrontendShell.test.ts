@@ -62,7 +62,7 @@ describe('useFrontendShell', () => {
     expect(result.current.frontendShell.isForcedByWorkspace).toBe(false);
   });
 
-  it('should return EDS when user preference is EDS and policy allows choice', () => {
+  it('should return BACKOFFICE when user preference is BACKOFFICE and policy allows choice', () => {
     const { result } = renderHooks();
 
     act(() => {
@@ -72,11 +72,11 @@ describe('useFrontendShell', () => {
       });
       result.current.setCurrentUser({
         ...baseUser,
-        frontendPreference: 'EDS',
+        frontendPreference: 'BACKOFFICE',
       });
     });
 
-    expect(result.current.frontendShell.effectiveFrontend).toBe('EDS');
+    expect(result.current.frontendShell.effectiveFrontend).toBe('BACKOFFICE');
     expect(result.current.frontendShell.isForcedByWorkspace).toBe(false);
   });
 
@@ -90,7 +90,7 @@ describe('useFrontendShell', () => {
       });
       result.current.setCurrentUser({
         ...baseUser,
-        frontendPreference: 'EDS',
+        frontendPreference: 'BACKOFFICE',
       });
     });
 
@@ -98,13 +98,13 @@ describe('useFrontendShell', () => {
     expect(result.current.frontendShell.isForcedByWorkspace).toBe(true);
   });
 
-  it('should force EDS when workspace policy is FORCE_EDS regardless of user preference', () => {
+  it('should force BACKOFFICE when workspace policy is FORCE_BACKOFFICE regardless of user preference', () => {
     const { result } = renderHooks();
 
     act(() => {
       result.current.setCurrentWorkspace({
         ...baseWorkspace,
-        frontendPolicy: 'FORCE_EDS',
+        frontendPolicy: 'FORCE_BACKOFFICE',
       });
       result.current.setCurrentUser({
         ...baseUser,
@@ -112,7 +112,7 @@ describe('useFrontendShell', () => {
       });
     });
 
-    expect(result.current.frontendShell.effectiveFrontend).toBe('EDS');
+    expect(result.current.frontendShell.effectiveFrontend).toBe('BACKOFFICE');
     expect(result.current.frontendShell.isForcedByWorkspace).toBe(true);
   });
 
@@ -140,7 +140,7 @@ describe('useFrontendShell', () => {
     act(() => {
       result.current.setCurrentWorkspace({
         ...baseWorkspace,
-        frontendPolicy: 'FORCE_EDS',
+        frontendPolicy: 'FORCE_BACKOFFICE',
       });
       result.current.setCurrentUser({
         ...baseUser,
@@ -151,8 +151,8 @@ describe('useFrontendShell', () => {
     const { effectiveFrontend, isForcedByWorkspace, userPreference } =
       result.current.frontendShell;
 
-    // Workspace forces EDS but user wants TWENTY
-    expect(effectiveFrontend).toBe('EDS');
+    // Workspace forces Backoffice but user wants TWENTY
+    expect(effectiveFrontend).toBe('BACKOFFICE');
     expect(isForcedByWorkspace).toBe(true);
     expect(userPreference).toBe('TWENTY');
   });

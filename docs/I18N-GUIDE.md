@@ -91,7 +91,7 @@ export const MeuComponente = () => {
         label={t`Frontend Interface`}
         options={[
           { value: 'A', label: t`Standard (Twenty)` },
-          { value: 'B', label: t`EDS — Erencio Design System` },
+          { value: 'B', label: t`Erencio.com Backoffice` },
         ]}
       />
 
