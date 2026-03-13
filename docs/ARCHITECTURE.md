@@ -109,7 +109,7 @@ Ver [UPSTREAM-SYNC.md](./UPSTREAM-SYNC.md) para detalhes.
 
 ## Dual-Frontend Architecture
 
-O Backoffice agora suporta dois frontends paralelos:
+O Backoffice suporta dois frontends paralelos:
 
 | Frontend | Pacote | URL | Status |
 |---------|--------|-----|--------|
@@ -126,3 +126,72 @@ A seleção do frontend é determinada por:
 - [BACKOFFICE-COMPONENTS.md](./BACKOFFICE-COMPONENTS.md) — Guia de componentes Erencio.com Backoffice
 - [BACKOFFICE-CONTRIBUTING.md](./BACKOFFICE-CONTRIBUTING.md) — Como contribuir para o Erencio.com Backoffice
 - [BACKOFFICE-MIGRATION.md](./BACKOFFICE-MIGRATION.md) — Plano de migração incremental
+
+## Erencio Design Framework (EDF)
+
+O EDF é a camada de personalização visual e comportamental do `erencio-front`. Permite que cada cliente (workspace) tenha uma identidade visual, terminologia e comportamento de componentes próprios — sem rebuilds ou deploys separados.
+
+**Conceitos centrais:**
+
+| Conceito | O que é |
+|---|---|
+| **Perfil** (`EdfProfile`) | Conjunto completo de tokens + nomenclaturas + overrides de componentes |
+| **Slot** | Ponto nomeado de substituição de componente (ex: `'shell.layout'`, `'record.list.row'`) |
+| **Token** | Valor visual primitivo (cor, espaçamento, tipografia) tipado pelo contrato `EdfTokens` |
+| **Nomenclatura** | Mapa de labels por contexto (ex: "Contatos" → "Cuidadores" para a Amei Care) |
+
+**Herança entre perfis:** um perfil cliente pode herdar de `erencio-default` e sobrescrever apenas o que precisa.
+
+**Resolução do perfil ativo:**
+
+```
+workspace.edfProfilePolicy === FORCE_WORKSPACE
+  → usa workspace.edfProfileId
+
+workspace.edfProfilePolicy === ALLOW_USER_CHOICE
+  → usa user.edfProfileId ?? workspace.edfProfileId
+```
+
+**Colunas no banco de dados:**
+- `core.workspace.edfProfileId` — varchar, default `'eds-v1'`
+- `core.workspace.edfProfilePolicy` — enum `ALLOW_USER_CHOICE | FORCE_WORKSPACE`
+- `core.user.edfProfileId` — varchar nullable, default `null` (herda do workspace)
+
+Migração: `1772300000000-add-edf-profile-columns.ts`
+
+See [EDF.md](./EDF.md) para documentação completa.
+
+## Pacotes Erencio
+
+Além dos pacotes `twenty-*` (originais ou minimamente alterados), o projeto possui:
+
+```
+packages/
+├── erencio-front/              — App CRM alternativo (porta 3002, base /eds)
+├── erencio-selecao-cuidadores/ — App público de cadastro (porta 3003)
+```
+
+**Filosofia:**
+- Pacotes `twenty-*` seguem o upstream com mínimas alterações — preservam retrocompatibilidade
+- Pacotes `erencio-*` entregam valor adicional sem afetar o upstream
+- Atualizações do Twenty upstream podem ser aplicadas com baixo custo de manutenção
+
+## Armadilhas Conhecidas
+
+### twenty-shared requer rebuild após mudanças
+
+O pacote `twenty-shared` é consumido pelo `twenty-server` via arquivos **compilados** em `dist/`, não diretamente do `src/`. O TypeScript e o NestJS leem:
+- Tipos: `dist/workspace/index.d.ts`
+- Runtime: `dist/workspace.cjs`
+
+Sempre que adicionar ou alterar tipos em `twenty-shared`, executar:
+
+```bash
+npx nx build twenty-shared
+```
+
+Sem isso, o servidor falha ao carregar entidades que dependem dos novos tipos, enquanto apps Vite (como `erencio-selecao-cuidadores`) continuam funcionando — o que pode parecer um problema parcial de autenticação.
+
+### erencio-selecao-cuidadores com nome incorreto no project.json
+
+O `buildTarget` em `packages/erencio-selecao-cuidadores/project.json` ainda referencia `twenty-selecao-cuidadores:build` — nome desatualizado. Esse bug não impede o build direto mas quebra integrações Nx que dependem do target.

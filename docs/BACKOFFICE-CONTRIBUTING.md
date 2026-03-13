@@ -87,17 +87,37 @@ export const MeuComponente = ({ label }: MeuComponenteProps) => {
 
 ## Uso de Design Tokens
 
-Sempre use tokens para valores visuais — nunca codifique cores ou espaçamentos diretamente:
+Sempre use tokens via `useTheme()` (quando o `erencio-edf` estiver integrado) ou pelas CSS custom properties `--edf-*` — nunca valores hárdcoded:
 
 ```tsx
-// ✅ Correto
+// ✅ Correto (CSS custom property do perfil ativo)
+backgroundColor: 'var(--edf-color-brand-primary)'
+
+// ✅ Correto (tokens diretos, enquanto erencio-edf ainda não está integrado)
+import { tokens } from '@backoffice/tokens';
 backgroundColor: tokens.color.brandPrimary
 
 // ❌ Errado
 backgroundColor: '#0176d3'
 ```
 
-Veja `src/tokens/tokens.ts` para todos os tokens disponíveis.
+## Slots EDF e useComponent()
+
+Componentes que devem ser substituíveis por perfis EDF não devem ser instanciados diretamente. Use `useComponent()` com o nome do slot:
+
+```tsx
+import { useComponent } from 'erencio-edf/core/registry';
+
+export const RecordListPage = () => {
+  const RecordList    = useComponent('record.list.container');
+  const RecordListRow = useComponent('record.list.row');
+  return <RecordList rowComponent={RecordListRow} />;
+};
+```
+
+Se o perfil ativo não implementar o slot, o componente padrão do `erencio-default` é usado automaticamente.
+
+Veja [EDF.md](./EDF.md) para a lista completa de slots e como criar componentes de perfil.
 
 ## Chamadas de API
 

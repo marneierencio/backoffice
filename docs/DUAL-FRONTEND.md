@@ -91,6 +91,12 @@ Veja [BACKOFFICE-COMPONENTS.md](./BACKOFFICE-COMPONENTS.md) para documentação 
 
 Veja [BACKOFFICE-MIGRATION.md](./BACKOFFICE-MIGRATION.md) para o plano de migração incremental.
 
+## EDF — Erencio Design Framework
+
+A camada de personalização visual do `erencio-front` evoluiu para uma arquitetura de **Component Registry com Perfis**. Cada workspace pode usar um perfil EDF diferente, que define tokens visuais, nomenclaturas e substituições de componentes — tudo em runtime, sem rebuild.
+
+Veja [EDF.md](./EDF.md) para documentação completa.
+
 ## Contribuindo
 
 Veja [BACKOFFICE-CONTRIBUTING.md](./BACKOFFICE-CONTRIBUTING.md) para guia de contribuição.
