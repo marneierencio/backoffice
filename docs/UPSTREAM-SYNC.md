@@ -77,14 +77,14 @@ git push origin upstream-sync/twenty-v1.X.Y
 
 Os conflitos mais comuns ocorrem em:
 
-| Arquivo | Estratégia |
-|---------|-----------|
-| `package.json` / `yarn.lock` | Manter versões do upstream; reverter apenas dependências que adicionamos |
-| `packages/twenty-server/src/` | Analisar caso a caso — priorizar upstream para fixes de segurança |
-| `.github/workflows/` | **Sempre manter NOSSOS workflows** (cd-deploy-*.yaml, upstream-sync.yaml) |
-| `CLAUDE.md` | **Sempre manter NOSSA versão** |
-| `docs/` | **Sempre manter NOSSA versão** |
-| Arquivos de configuração raiz | Manter upstream, aplicar nossas exceções se necessário |
+| Arquivo                       | Estratégia                                                                |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| `package.json` / `yarn.lock`  | Manter versões do upstream; reverter apenas dependências que adicionamos  |
+| `packages/twenty-server/src/` | Analisar caso a caso — priorizar upstream para fixes de segurança         |
+| `.github/workflows/`          | **Sempre manter NOSSOS workflows** (cd-deploy-*.yaml, upstream-sync.yaml) |
+| `CLAUDE.md`                   | **Sempre manter NOSSA versão**                                            |
+| `docs/`                       | **Sempre manter NOSSA versão**                                            |
+| Arquivos de configuração raiz | Manter upstream, aplicar nossas exceções se necessário                    |
 
 ### Regra de ouro
 
