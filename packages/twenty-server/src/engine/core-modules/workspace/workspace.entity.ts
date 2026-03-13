@@ -2,7 +2,7 @@ import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 import { IDField } from '@ptc-org/nestjs-query-graphql';
 import { type Application } from 'cloudflare/resources/zero-trust/access/applications/applications';
-import { FrontendPolicy, WorkspaceActivationStatus } from 'twenty-shared/workspace';
+import { EdfProfilePolicy, FrontendPolicy, WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
     Check,
     Column,
@@ -61,6 +61,11 @@ registerEnumType(WorkspaceActivationStatus, {
 registerEnumType(FrontendPolicy, {
   name: 'FrontendPolicy',
   description: 'Workspace frontend policy',
+});
+
+registerEnumType(EdfProfilePolicy, {
+  name: 'EdfProfilePolicy',
+  description: 'Controls whether users can override the workspace EDF profile',
 });
 
 @Check(
@@ -136,6 +141,22 @@ export class WorkspaceEntity {
     default: FrontendPolicy.ALLOW_USER_CHOICE,
   })
   frontendPolicy: FrontendPolicy;
+
+  // Which EDF profile this workspace uses (e.g. 'eds-v1', 'amei-care', 'salesforce-lightning')
+  @Field(() => String, { nullable: false })
+  @Column({ type: 'varchar', nullable: false, default: 'eds-v1' })
+  edfProfileId: string;
+
+  // Controls whether users can choose their own EDF profile or must use the workspace one
+  @Field(() => EdfProfilePolicy, { nullable: false })
+  @Column({
+    type: 'enum',
+    enumName: 'workspace_edfProfilePolicy_enum',
+    enum: EdfProfilePolicy,
+    nullable: false,
+    default: EdfProfilePolicy.ALLOW_USER_CHOICE,
+  })
+  edfProfilePolicy: EdfProfilePolicy;
 
   // Relations
   @OneToMany(() => AppTokenEntity, (appToken) => appToken.workspace, {

@@ -113,6 +113,12 @@ export class UserEntity {
   })
   frontendPreference: FrontendPreference;
 
+  // User's personal EDF profile override. null = inherit from workspace edfProfileId.
+  // Only respected when workspace.edfProfilePolicy = ALLOW_USER_CHOICE.
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', nullable: true, default: null })
+  edfProfileId: string | null;
+
   @OneToMany(() => AppTokenEntity, (appToken) => appToken.user, {
     cascade: true,
   })
