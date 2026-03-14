@@ -28,6 +28,8 @@ type FieldMetadataNumberSettings = {
 
 type FieldMetadataTextSettings = {
   displayedMaxRows?: number;
+  // Internal field names (not labels) whose values are concatenated to form the name/label
+  formulaFieldNames?: string[];
 };
 
 type FieldMetadataDateSettings = {

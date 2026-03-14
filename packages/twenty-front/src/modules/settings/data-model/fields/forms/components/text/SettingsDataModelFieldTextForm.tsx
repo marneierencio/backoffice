@@ -15,6 +15,7 @@ type SettingsDataModelFieldTextFormProps = {
 
 const textFieldDefaultValueSchema = z.object({
   displayedMaxRows: z.number().nullable(),
+  formulaFieldNames: z.array(z.string()).optional(),
 });
 
 export const settingsDataModelFieldTextFormSchema = z.object({
@@ -41,6 +42,8 @@ export const SettingsDataModelFieldTextForm = ({
       defaultValue={{
         displayedMaxRows:
           existingFieldMetadataItem?.settings?.displayedMaxRows || 0,
+        formulaFieldNames:
+          existingFieldMetadataItem?.settings?.formulaFieldNames ?? [],
       }}
       control={control}
       render={({ field: { onChange, value } }) => {
@@ -55,7 +58,9 @@ export const SettingsDataModelFieldTextForm = ({
             <Select<number>
               dropdownId="text-wrap"
               value={displayedMaxRows}
-              onChange={(value) => onChange({ displayedMaxRows: value })}
+              onChange={(newDisplayedMaxRows) =>
+                onChange({ ...value, displayedMaxRows: newDisplayedMaxRows })
+              }
               disabled={disabled}
               options={TEXT_DATA_MODEL_SELECT_OPTIONS.map((option) => ({
                 ...option,

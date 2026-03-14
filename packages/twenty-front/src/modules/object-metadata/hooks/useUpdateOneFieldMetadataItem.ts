@@ -1,6 +1,6 @@
 import {
-  type UpdateOneFieldMetadataItemMutationVariables,
-  useUpdateOneFieldMetadataItemMutation,
+    type UpdateOneFieldMetadataItemMutationVariables,
+    useUpdateOneFieldMetadataItemMutation,
 } from '~/generated-metadata/graphql';
 
 import { useMetadataErrorHandler } from '@/metadata-error-handler/hooks/useMetadataErrorHandler';
@@ -8,8 +8,8 @@ import { useRefreshObjectMetadataItems } from '@/object-metadata/hooks/useRefres
 import { lastFieldMetadataItemUpdateState } from '@/object-metadata/states/lastFieldMetadataItemUpdateState';
 import { type MetadataRequestResult } from '@/object-metadata/types/MetadataRequestResult.type';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
-import { useRefreshCoreViewsByObjectMetadataId } from '@/views/hooks/useRefreshCoreViewsByObjectMetadataId';
 import { useSetRecoilStateV2 } from '@/ui/utilities/state/jotai/hooks/useSetRecoilStateV2';
+import { useRefreshCoreViewsByObjectMetadataId } from '@/views/hooks/useRefreshCoreViewsByObjectMetadataId';
 import { ApolloError } from '@apollo/client';
 import { t } from '@lingui/core/macro';
 import { CrudOperationType } from 'twenty-shared/types';
@@ -50,6 +50,7 @@ export const useUpdateOneFieldMetadataItem = () => {
       | 'defaultValue'
       | 'options'
       | 'isLabelSyncedWithName'
+      | 'settings'
     >;
   }): Promise<
     MetadataRequestResult<
