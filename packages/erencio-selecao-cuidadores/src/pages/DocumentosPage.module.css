@@ -1,0 +1,317 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--backoffice-g-spacing-10);
+}
+
+/* ─── Card ─────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--backoffice-g-color-surface-1);
+  border: 1px solid var(--backoffice-g-color-border-1);
+  border-radius: var(--backoffice-g-radius-border-4);
+  box-shadow: var(--backoffice-g-shadow-3);
+  overflow: hidden;
+}
+
+/* ─── Header ────────────────────────────────────────────── */
+.cardHeader {
+  background-color: var(--backoffice-g-color-brand-base-10);
+  border-bottom: 1px solid var(--backoffice-g-color-border-1);
+  padding: var(--backoffice-g-spacing-6) var(--backoffice-g-spacing-8);
+}
+
+.heading {
+  font-size: var(--backoffice-g-font-scale-8);
+  font-weight: var(--backoffice-g-font-weight-7);
+  color: var(--backoffice-g-color-brand-base-70);
+  line-height: var(--backoffice-g-line-height-heading);
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: var(--backoffice-g-spacing-2);
+  margin-bottom: 0;
+  font-size: var(--backoffice-g-font-scale-4);
+  color: var(--backoffice-g-color-on-surface-1);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+/* ─── Body ──────────────────────────────────────────────── */
+.cardBody {
+  padding: var(--backoffice-g-spacing-7) var(--backoffice-g-spacing-8);
+  animation: backoffice-fade-in var(--backoffice-g-duration-promptly) ease-out;
+}
+
+/* ─── Footer ────────────────────────────────────────────── */
+.cardFooter {
+  padding: var(--backoffice-g-spacing-5) var(--backoffice-g-spacing-8) var(--backoffice-g-spacing-7);
+  border-top: 1px solid var(--backoffice-g-color-border-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.submitBtn {
+  padding: var(--backoffice-g-spacing-3) var(--backoffice-g-spacing-8);
+  min-width: 200px;
+  background-color: var(--backoffice-g-color-brand-base-50);
+  color: var(--backoffice-g-color-brand-base-100);
+  border: none;
+  border-radius: var(--backoffice-g-radius-border-2);
+  font-size: var(--backoffice-g-font-scale-4);
+  font-weight: var(--backoffice-g-font-weight-6);
+  cursor: pointer;
+  transition: background-color var(--backoffice-g-duration-promptly);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: var(--backoffice-g-color-brand-base-60);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Sections ──────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+.sectionTitle {
+  font-size: var(--backoffice-g-font-scale-5);
+  font-weight: var(--backoffice-g-font-weight-7);
+  color: var(--backoffice-g-color-on-surface-1);
+  margin: 0;
+}
+
+.sectionDesc {
+  font-size: var(--backoffice-g-font-scale-3);
+  color: var(--backoffice-g-color-on-surface-2);
+  margin: 0;
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--backoffice-g-color-border-1);
+  margin: var(--backoffice-g-spacing-6) 0;
+}
+
+/* ─── File Fields ───────────────────────────────────────── */
+.fileField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-2);
+}
+
+.fileLabel {
+  font-size: var(--backoffice-g-font-scale-3);
+  font-weight: var(--backoffice-g-font-weight-6);
+  color: var(--backoffice-g-color-on-surface-1);
+}
+
+.required {
+  color: var(--backoffice-g-color-error-base-50);
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-2);
+  padding: var(--backoffice-g-spacing-6);
+  border: 2px dashed var(--backoffice-g-color-border-2);
+  border-radius: var(--backoffice-g-radius-border-2);
+  cursor: pointer;
+  color: var(--backoffice-g-color-on-surface-2);
+  font-size: var(--backoffice-g-font-scale-3);
+  background-color: var(--backoffice-g-color-surface-2);
+  transition: border-color var(--backoffice-g-duration-promptly), background-color var(--backoffice-g-duration-promptly);
+}
+
+.dropZone:hover {
+  border-color: var(--backoffice-g-color-brand-base-50);
+  background-color: var(--backoffice-g-color-brand-base-10);
+  color: var(--backoffice-g-color-brand-base-70);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* ─── File Preview ──────────────────────────────────────── */
+.filePreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-3);
+  padding: var(--backoffice-g-spacing-4);
+  border: 1px solid var(--backoffice-g-color-border-1);
+  border-radius: var(--backoffice-g-radius-border-2);
+  background-color: var(--backoffice-g-color-surface-2);
+}
+
+.previewImage {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: var(--backoffice-g-radius-border-2);
+  object-fit: cover;
+}
+
+.previewImageSmall {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--backoffice-g-radius-border-1);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.previewDoc {
+  display: flex;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-3);
+}
+
+.previewDocName {
+  font-size: var(--backoffice-g-font-scale-3);
+  color: var(--backoffice-g-color-on-surface-1);
+  word-break: break-all;
+}
+
+/* ─── Multi-file list ───────────────────────────────────── */
+.multiFileList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--backoffice-g-spacing-2);
+}
+
+.multiFileItem {
+  display: flex;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-3);
+  padding: var(--backoffice-g-spacing-2) var(--backoffice-g-spacing-3);
+  border: 1px solid var(--backoffice-g-color-border-1);
+  border-radius: var(--backoffice-g-radius-border-2);
+  background-color: var(--backoffice-g-color-surface-2);
+}
+
+.multiFileName {
+  flex: 1;
+  font-size: var(--backoffice-g-font-scale-3);
+  color: var(--backoffice-g-color-on-surface-1);
+  word-break: break-all;
+}
+
+/* ─── Buttons ───────────────────────────────────────────── */
+.removeBtn {
+  padding: var(--backoffice-g-spacing-1) var(--backoffice-g-spacing-3);
+  background: none;
+  border: 1px solid var(--backoffice-g-color-border-2);
+  border-radius: var(--backoffice-g-radius-border-1);
+  color: var(--backoffice-g-color-on-surface-2);
+  font-size: var(--backoffice-g-font-scale-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.removeBtn:hover {
+  border-color: var(--backoffice-g-color-error-base-50);
+  color: var(--backoffice-g-color-error-base-50);
+}
+
+/* ─── Errors / Feedback ─────────────────────────────────── */
+.fieldError {
+  font-size: var(--backoffice-g-font-scale-2);
+  color: var(--backoffice-g-color-error-base-50);
+  margin: 0;
+}
+
+.submitError {
+  margin-top: var(--backoffice-g-spacing-5);
+  padding: var(--backoffice-g-spacing-3) var(--backoffice-g-spacing-4);
+  background-color: var(--backoffice-g-color-error-container);
+  color: var(--backoffice-g-color-error-base-50);
+  border-radius: var(--backoffice-g-radius-border-2);
+  font-size: var(--backoffice-g-font-scale-3);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+.progressText {
+  font-size: var(--backoffice-g-font-scale-3);
+  color: var(--backoffice-g-color-on-surface-2);
+  margin: 0;
+  text-align: right;
+}
+
+/* ─── Loading / Status messages ─────────────────────────── */
+.loadingText {
+  text-align: center;
+  color: var(--backoffice-g-color-on-surface-2);
+  font-size: var(--backoffice-g-font-scale-4);
+  padding: var(--backoffice-g-spacing-8) 0;
+}
+
+.invalidMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-4);
+  padding: var(--backoffice-g-spacing-8) 0;
+  text-align: center;
+  color: var(--backoffice-g-color-error-base-50);
+  font-size: var(--backoffice-g-font-scale-4);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+.invalidMessage p {
+  margin: 0;
+  max-width: 420px;
+}
+
+.successMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--backoffice-g-spacing-4);
+  padding: var(--backoffice-g-spacing-8) 0;
+  text-align: center;
+  color: var(--backoffice-g-color-success-base-50);
+  font-size: var(--backoffice-g-font-scale-4);
+  line-height: var(--backoffice-g-line-height-text);
+}
+
+.successMessage p {
+  margin: 0;
+  max-width: 420px;
+  color: var(--backoffice-g-color-on-surface-1);
+}
+
+@media (max-width: 600px) {
+  .cardHeader,
+  .cardBody,
+  .cardFooter {
+    padding-left: var(--backoffice-g-spacing-5);
+    padding-right: var(--backoffice-g-spacing-5);
+  }
+
+  .heading {
+    font-size: var(--backoffice-g-font-scale-7);
+  }
+
+  .submitBtn {
+    width: 100%;
+  }
+}

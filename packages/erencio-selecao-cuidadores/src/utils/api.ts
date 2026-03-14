@@ -274,3 +274,125 @@ export const createCandidatura = async (formData: AllFormData): Promise<ApiResul
     };
   }
 };
+
+export type CandidaturaCuidador = {
+  id: string;
+  status: string;
+};
+
+// Fetches a CandidaturaCuidador record by ID.
+export const getCandidaturaCuidador = async (id: string): Promise<ApiResult<CandidaturaCuidador>> => {
+  try {
+    const response = await fetch(`${getRestApiUrl()}/candidaturasCuidadores/${id}`, {
+      method: 'GET',
+      headers: authHeaders(),
+    });
+    if (!response.ok) {
+      const body = await response.text();
+      return { error: toUserFriendlyError(response.status, body, 'Erro ao buscar candidatura') };
+    }
+    const result = await response.json();
+    const record: CandidaturaCuidador =
+      result?.data?.candidaturaCuidador ?? result?.data ?? result;
+    return { data: record };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Erro ao buscar candidatura' };
+  }
+};
+
+// Uploads a file via GraphQL multipart upload (graphql-upload protocol).
+// Returns the file path (used to create attachment records).
+export const uploadArquivo = async (file: File): Promise<ApiResult<{ path: string; token: string }>> => {
+  try {
+    const apiKey = getApiKey();
+    const query = `
+      mutation UploadFile($file: Upload!, $fileFolder: FileFolder) {
+        uploadFile(file: $file, fileFolder: $fileFolder) {
+          path
+          token
+        }
+      }
+    `;
+    const formData = new FormData();
+    formData.append(
+      'operations',
+      JSON.stringify({ query, variables: { file: null, fileFolder: 'Attachment' } }),
+    );
+    formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
+    formData.append('0', file, file.name);
+
+    const response = await fetch(`${getApiBaseUrl()}/graphql`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      return { error: toUserFriendlyError(response.status, body, 'Erro ao enviar arquivo') };
+    }
+
+    const result = await response.json() as { data?: { uploadFile?: { path: string; token: string } }; errors?: Array<{ message: string }> };
+    if (result.errors?.length) {
+      return { error: result.errors[0].message };
+    }
+    const uploaded = result?.data?.uploadFile;
+    if (!uploaded?.path) {
+      return { error: 'Resposta inesperada do servidor ao enviar arquivo.' };
+    }
+    return { data: uploaded };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Erro ao enviar arquivo' };
+  }
+};
+
+// Creates an attachment record linked to a CandidaturaCuidador custom object.
+export const criarAnexo = async (params: {
+  candidaturaId: string;
+  filePath: string;
+  name: string;
+  fileType: 'Image' | 'File';
+}): Promise<ApiResult<{ id: string }>> => {
+  try {
+    const response = await fetch(`${getRestApiUrl()}/attachments`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        name: params.name,
+        fullPath: params.filePath,
+        type: params.fileType,
+        custom: { id: params.candidaturaId },
+      }),
+    });
+    if (!response.ok) {
+      const body = await response.text();
+      return { error: toUserFriendlyError(response.status, body, 'Erro ao registrar anexo') };
+    }
+    const result = await response.json();
+    const record = result?.data?.createAttachment ?? result?.data ?? result;
+    return { data: { id: record?.id ?? '' } };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Erro ao registrar anexo' };
+  }
+};
+
+// Updates the status field of a CandidaturaCuidador record.
+export const atualizarStatusCandidatura = async (
+  id: string,
+  status: string,
+): Promise<ApiResult<void>> => {
+  try {
+    const response = await fetch(`${getRestApiUrl()}/candidaturasCuidadores/${id}`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) {
+      const body = await response.text();
+      return { error: toUserFriendlyError(response.status, body, 'Erro ao atualizar candidatura') };
+    }
+    return { data: undefined };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Erro ao atualizar candidatura' };
+  }
+};
