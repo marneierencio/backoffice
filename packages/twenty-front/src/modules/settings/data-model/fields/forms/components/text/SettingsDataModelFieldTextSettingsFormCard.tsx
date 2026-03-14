@@ -2,7 +2,7 @@ import { Separator } from '@/settings/components/Separator';
 import { SettingsDataModelPreviewFormCard } from '@/settings/data-model/components/SettingsDataModelPreviewFormCard';
 
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
-import { isLabelIdentifierField } from '@/object-metadata/utils/isLabelIdentifierField.util';
+import { isLabelIdentifierField } from '@/object-metadata/utils/isLabelIdentifierField';
 import { SettingsDataModelFieldIsUniqueForm } from '@/settings/data-model/fields/forms/components/SettingsDataModelFieldIsUniqueForm';
 import { SettingsDataModelFieldTextForm } from '@/settings/data-model/fields/forms/components/text/SettingsDataModelFieldTextForm';
 import { SettingsDataModelFieldTextFormulaForm } from '@/settings/data-model/fields/forms/components/text/SettingsDataModelFieldTextFormulaForm';
